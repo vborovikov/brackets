@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
     using System.Text;
 
     public enum ElementLevel
@@ -15,7 +16,7 @@
     [DebuggerDisplay("{" + nameof(ToDebugString) + "(),nq}")]
     public abstract class Element
     {
-        private Tag parent;
+        private Tag? parent;
         private Element prev;
         private Element next;
 
@@ -35,7 +36,7 @@
             {
                 var level = 0;
 
-                for (Element ancestor = this.parent; ancestor is not null; ancestor = ancestor.parent)
+                for (Element? ancestor = this.parent; ancestor is not null; ancestor = ancestor.parent)
                 {
                     ++level;
                 }
@@ -85,10 +86,15 @@
             }
         }
 
-        public virtual bool TryGetValue<T>(out T value) => TryGetValue(ToString(), out value);
+        public virtual bool TryGetValue<T>([MaybeNullWhen(false)] out T value) => TryGetValue(ToString(), out value);
 
-        protected static bool TryGetValue<T>(object original, out T value)
+        protected static bool TryGetValue<T>(object? original, [MaybeNullWhen(false)] out T value)
         {
+            if (original is null)
+            {
+                value = default;
+                return false;
+            }
             if (original is T variable)
             {
                 value = variable;
@@ -98,25 +104,32 @@
             try
             {
                 //Handling Nullable types i.e, int?, double?, bool? .. etc
-                if (Nullable.GetUnderlyingType(typeof(T)) != null)
+                if (Nullable.GetUnderlyingType(typeof(T)) is not null)
                 {
-                    value = (T)TypeDescriptor.GetConverter(typeof(T)).ConvertFrom(original);
+                    var obj = TypeDescriptor.GetConverter(typeof(T)).ConvertFrom(original);
+                    if (obj is T convertedValue)
+                    {
+                        value = convertedValue;
+                        return true;
+                    }
+                }
+                else
+                {
+                    value = (T)Convert.ChangeType(original, typeof(T));
                     return true;
                 }
-
-                value = (T)Convert.ChangeType(original, typeof(T));
-                return true;
             }
-            catch (Exception)
+            catch
             {
-                value = default;
-                return false;
             }
+
+            value = default;
+            return false;
         }
 
         public abstract string ToDebugString();
 
-        protected static Element Link(Element element, Tag parent, Element sibling)
+        protected static Element? Link(Element element, Tag parent, Element? sibling)
         {
             if (element.parent is not null)
                 throw new InvalidOperationException();
@@ -138,7 +151,7 @@
             return sibling;
         }
 
-        protected static Element Unlink(Element element, Tag parent, Element sibling)
+        protected static Element? Unlink(Element element, Tag parent, Element? sibling)
         {
             if (element.parent is null || element.parent != parent)
                 throw new InvalidOperationException();
@@ -170,7 +183,7 @@
             return sibling;
         }
 
-        protected internal Tag Parent => this.parent;
+        protected internal Tag? Parent => this.parent;
 
         protected internal Element Next => this.next;
 

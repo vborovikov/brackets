@@ -97,7 +97,7 @@
                     tree.Pop();
                 }
 
-                return tree.Pop() as Root;
+                return (Root)tree.Pop();
             }
 
             private void ParseContent(TagSpan tagSpan, ParentTag parent)

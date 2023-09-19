@@ -3,6 +3,7 @@ namespace Brackets;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
 using System.Text.Json;
@@ -35,14 +36,14 @@ public partial class Document
 
         public object Value { get; }
 
-        public override bool TryGetValue<T>(out T value) => TryGetValue(this.Value, out value);
+        public override bool TryGetValue<T>([MaybeNullWhen(false)] out T value) => TryGetValue(this.Value, out value);
 
         public override string ToText()
         {
-            return this.Value.ToString();
+            return this.Value.ToString() ?? string.Empty;
         }
 
-        public override string ToString() => ToText();
+        public override string? ToString() => ToText();
 
         public override string ToDebugString() => ToText();
 
@@ -55,7 +56,7 @@ public partial class Document
     {
         private sealed class PathQueryEmptyContext : PathQueryContext
         {
-            public override Element GetSingleElement() => null;
+            public override Element? GetSingleElement() => null;
 
             public override IEnumerator<Element> GetEnumerator() => Enumerable.Empty<Element>().GetEnumerator();
         }
@@ -66,7 +67,7 @@ public partial class Document
         {
         }
 
-        public abstract Element GetSingleElement();
+        public abstract Element? GetSingleElement();
 
         public PathQuerySelectionContext.Selector GetSelector() => new(this);
 
@@ -84,7 +85,7 @@ public partial class Document
 
         public Element Element { get; protected set; }
 
-        public override Element GetSingleElement() => this.Element;
+        public override Element? GetSingleElement() => this.Element;
 
         public override IEnumerator<Element> GetEnumerator()
         {
@@ -101,7 +102,7 @@ public partial class Document
             this.elements = elements;
         }
 
-        public override Element GetSingleElement()
+        public override Element? GetSingleElement()
         {
             var element = default(Element);
             using var enumerator = this.elements.GetEnumerator();
@@ -191,13 +192,13 @@ public partial class Document
             return RunOverride(context);
         }
 
-        protected internal Element RunScalar(PathQueryContext context)
+        protected internal Element? RunScalar(PathQueryContext context)
         {
             var result = Run(context);
             return result.GetSingleElement();
         }
 
-        protected internal bool TryEvaluate<TResult>(PathQueryContext context, out TResult result)
+        protected internal bool TryEvaluate<TResult>(PathQueryContext context, [MaybeNullWhen(false)] out TResult result)
         {
             var resultElement = RunScalar(context);
             if (resultElement is null)
@@ -806,7 +807,7 @@ public partial class Document
             return PathQueryContext.Empty;
         }
 
-        private bool TryRunStringFunction(PathQueryContext context, out string text)
+        private bool TryRunStringFunction(PathQueryContext context, [MaybeNullWhen(false)] out string text)
         {
             if (knownStringFunctions.TryGetValue(this.Name, out var func))
             {
@@ -1005,7 +1006,7 @@ public partial class Document
                     var json = JsonDocument.Parse(text);
                     var token = json.SelectToken(path);
 
-                    return token?.GetString();
+                    return token?.GetString() ?? string.Empty;
                 }
                 catch (Exception ex)
                 {
@@ -1034,7 +1035,7 @@ public partial class Document
             if (what.TryEvaluate<string>(context, out var whatStr) && that.TryEvaluate<string>(context, out var thatStr))
             {
                 var textElement = text.Run(context).GetSingleElement();
-                if (textElement is not null && textElement.TryGetValue(out string textStr))
+                if (textElement is not null && textElement.TryGetValue<string>(out var textStr))
                 {
                     return textStr.Replace(whatStr, thatStr, StringComparison.CurrentCultureIgnoreCase);
                 }

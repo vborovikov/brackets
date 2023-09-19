@@ -2,6 +2,7 @@ namespace Brackets
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using Primitives;
 
@@ -46,7 +47,7 @@ namespace Brackets
             return valueSpan.ToString();
         }
 
-        public override bool TryGetValue<T>(out T value)
+        public override bool TryGetValue<T>([MaybeNullWhen(false)] out T value)
         {
             if (!this.HasValue)
             {

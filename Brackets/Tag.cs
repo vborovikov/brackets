@@ -10,7 +10,7 @@
         private class AttributeCollection : IAttributeCollection
         {
             private readonly Tag owner;
-            private Attribute attribute;
+            private Attribute? attribute;
             private int attributeCount;
 
             public AttributeCollection(Tag owner)
@@ -27,14 +27,14 @@
 
             public void Add(Attribute attribute)
             {
-                this.attribute = (Attribute)Link(attribute, this.owner, this.attribute);
+                this.attribute = (Attribute?)Link(attribute, this.owner, this.attribute);
                 ++this.attributeCount;
             }
 
             public void Remove(Attribute attribute)
             {
                 --this.attributeCount;
-                this.attribute = (Attribute)Unlink(attribute, this.owner, this.attribute);
+                this.attribute = (Attribute?)Unlink(attribute, this.owner, this.attribute);
             }
 
             public IEnumerator<Attribute> GetEnumerator()
@@ -99,13 +99,13 @@
 
     public class ParentTag : Tag, IEnumerable<Element>
     {
-        private Element child;
+        private Element? child;
 
         public ParentTag(TagReference reference, int index) : base(reference, index)
         {
         }
 
-        protected internal Element Child => this.child;
+        protected internal Element? Child => this.child;
 
         public void Add(Element element)
         {
@@ -143,7 +143,7 @@
             this.child = Unlink(element, this, this.child);
         }
 
-        public Element Find(Predicate<Element> match)
+        public Element? Find(Predicate<Element> match)
         {
             foreach (var element in FindAll(match))
                 return element;
@@ -178,11 +178,11 @@
 
                 // go next or up
                 for (element = element.Next;
-                     elementParent != this && element == elementParent.child;
+                     elementParent != this && element == elementParent?.child;
                      element = element.Next)
                 {
                     element = elementParent;
-                    elementParent = (ParentTag)element.Parent;
+                    elementParent = (ParentTag?)element.Parent;
                 }
             } while (elementParent != this || element != this.child);
         }

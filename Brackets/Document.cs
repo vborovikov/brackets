@@ -3,6 +3,7 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using Html;
     using XPath;
@@ -27,12 +28,12 @@
             return this.root.ToString();
         }
 
-        public Element Find(Predicate<Element> match)
+        public Element? Find(Predicate<Element> match)
         {
             return this.root.Find(match);
         }
 
-        public TElement Find<TElement>(Func<TElement, bool> match)
+        public TElement? Find<TElement>(Func<TElement, bool> match)
             where TElement : Element
         {
             return this.root.Find(el => el is TElement element && match(element)) as TElement;
@@ -66,7 +67,7 @@
 
     public static class DocumentExtensions
     {
-        public static bool TryFindString(this Document document, string path, out string str)
+        public static bool TryFindString(this Document document, string path, [MaybeNullWhen(false)] out string str)
         {
             str = default;
             if (String.IsNullOrWhiteSpace(path))
@@ -87,7 +88,7 @@
             return elements
                 .Select(el => el.TryGetValue<string>(out var str) ? str : null)
                 .Where(str => str is not null)
-                .ToArray();
+                .ToArray()!;
         }
     }
 }
