@@ -81,7 +81,7 @@ public partial class Document
             this.Element = element;
         }
 
-        public Element Element { get; protected set; }
+        public Element Element { get; }
 
         public override Element? GetSingleElement() => this.Element;
 
@@ -121,7 +121,7 @@ public partial class Document
 
     private class PathQuerySelectionContext : PathQueryElementContext
     {
-        public struct Selector
+        public struct Selector : IDisposable
         {
             private readonly PathQueryContext context;
             private readonly IEnumerator<Element> elementEnumerator;
@@ -132,36 +132,29 @@ public partial class Document
                 this.context = context;
                 this.elementEnumerator = this.context.GetEnumerator();
                 this.index = -1;
-                this.Current = new PathQuerySelectionContext(this.context, null, this.index);
+                this.Current = default!;
             }
 
-            public PathQuerySelectionContext Current { get; }
+            public PathQuerySelectionContext Current { get; private set; }
 
-            public void Reset()
+            public readonly Selector GetEnumerator() => this;
+
+            public readonly void Dispose()
             {
-                this.elementEnumerator.Reset();
-                this.index = -1;
+                this.elementEnumerator.Dispose();
             }
 
+            [MemberNotNullWhen(true, nameof(Current))]
             public bool MoveNext()
             {
                 if (this.elementEnumerator.MoveNext())
                 {
-                    this.Current.Element = this.elementEnumerator.Current;
-                    this.Current.Index = ++this.index;
+                    this.Current = new(this.context, this.elementEnumerator.Current, ++this.index);
                     return true;
                 }
 
                 return false;
             }
-
-            public void Dispose()
-            {
-                this.elementEnumerator.Dispose();
-            }
-
-            public Selector GetEnumerator() => this;
-
         }
 
         private PathQuerySelectionContext(PathQueryContext group, Element element, int index)
@@ -173,7 +166,7 @@ public partial class Document
 
         public PathQueryContext Group { get; }
 
-        public int Index { get; private set; }
+        public int Index { get; }
     }
 
     private abstract class PathQuery
@@ -215,12 +208,18 @@ public partial class Document
             return element as IEnumerable<Element> ?? Nothing();
         }
 
-        protected static IEnumerable<Element> AsSelf(Element element)
+        protected static IEnumerable<Element> AsSelf(Element? element)
         {
-            return Enumerable.Repeat(element, 1);
+            if (element is null)
+                yield break;
+
+            yield return element;
         }
 
-        protected static IEnumerable<Element> Nothing() => Array.Empty<Element>();
+        protected static IEnumerable<Element> Nothing()
+        {
+            yield break;
+        }
     }
 
     private class PathConst : PathQuery
@@ -237,7 +236,7 @@ public partial class Document
 
         public PathQueryContext Result { get; }
 
-        public override string ToString()
+        public override string? ToString()
         {
             return this.ResultType == DataType.Text ? $"'{this.Value}'" : this.Value.ToString();
         }
@@ -267,7 +266,7 @@ public partial class Document
 
         public override DataType ResultType => DataType.Query;
 
-        public override string ToString()
+        public override string? ToString()
         {
             return this.nodeType switch
             {
@@ -390,7 +389,7 @@ public partial class Document
                     element = element.Parent;
                 }
             }
-            
+
             return AsSelf(element);
         }
 
@@ -408,7 +407,7 @@ public partial class Document
 
         private IEnumerable<Element> EnumeratePrecedingSiblings(Element element)
         {
-            var lastSibling = ((ParentTag)element.Parent).Child.Prev;
+            var lastSibling = ((ParentTag?)element.Parent)?.Child?.Prev;
 
             while (element.Prev != lastSibling)
             {
@@ -431,7 +430,7 @@ public partial class Document
 
         private IEnumerable<Element> EnumerateFollowingSiblings(Element element)
         {
-            var firstSibling = ((ParentTag)element.Parent).Child;
+            var firstSibling = ((ParentTag?)element.Parent)?.Child;
 
             while (element.Next != firstSibling)
             {
@@ -476,7 +475,7 @@ public partial class Document
         public PathQuery Left { get; }
         public PathQuery Right { get; }
 
-        public override string ToString()
+        public override string? ToString()
         {
             return $"{this.Left}/{this.Right}";
         }
@@ -501,7 +500,7 @@ public partial class Document
         public PathQuery Left { get; }
         public PathQuery Right { get; }
 
-        public override string ToString()
+        public override string? ToString()
         {
             return $"{this.Left}|{this.Right}";
         }
@@ -529,7 +528,7 @@ public partial class Document
         public PathQuery Query { get; }
         public PathQuery Condition { get; }
 
-        public override string ToString()
+        public override string? ToString()
         {
             return $"{this.Query}[{this.Condition}]";
         }
@@ -624,7 +623,7 @@ public partial class Document
         public PathQuery Left { get; }
         public PathQuery Right { get; }
 
-        public override string ToString()
+        public override string? ToString()
         {
             var opStr = this.Operator switch
             {
@@ -784,7 +783,7 @@ public partial class Document
         public string Name { get; }
         public IEnumerable<PathQuery> Arguments { get; }
 
-        public override string ToString()
+        public override string? ToString()
         {
             return $"{this.Name}({String.Join(',', this.Arguments)})";
         }
@@ -1006,9 +1005,8 @@ public partial class Document
 
                     return token?.GetString() ?? string.Empty;
                 }
-                catch (Exception ex)
+                catch
                 {
-                    //System.Diagnostics.Debug.WriteLine(ex);
                 }
             }
 

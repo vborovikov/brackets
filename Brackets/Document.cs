@@ -23,7 +23,7 @@
         internal Root Root => this.root;
 #endif
 
-        public override string ToString()
+        public override string? ToString()
         {
             return this.root.ToString();
         }
