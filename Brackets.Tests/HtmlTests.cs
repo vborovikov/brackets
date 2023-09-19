@@ -116,7 +116,7 @@
                 "1 lb. (3 1/2 c.) powdered sugar<br/>" +
                 "1 large pkg. chocolate chips<br/></p>";
             var doc = Document.Html.Parse(markup);
-            var text = doc.First().ToText();
+            var text = doc.First().ToString();
 
             Assert.AreEqual(
                 "1 c. peanut butter" + Environment.NewLine +

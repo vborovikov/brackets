@@ -47,9 +47,7 @@
 
         protected virtual ReadOnlySpan<char> Source => this.parent is null ? ReadOnlySpan<char>.Empty : this.parent.Source;
 
-        public abstract string ToText();
-
-        public static string ToText(IEnumerable<Element> elements)
+        public static string ToString(IEnumerable<Element> elements)
         {
             var text = new StringBuilder();
             var lineBreakPos = 0;
@@ -67,7 +65,7 @@
                 {
                     BreakLine();
                 }
-                text.Append(element.ToText());
+                text.Append(element.ToString());
                 if (element.Level == ElementLevel.Block)
                 {
                     BreakLine();
@@ -127,7 +125,7 @@
             return false;
         }
 
-        public abstract string ToDebugString();
+        protected internal abstract string ToDebugString();
 
         protected static Element? Link(Element element, Tag parent, Element? sibling)
         {

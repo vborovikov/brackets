@@ -20,7 +20,7 @@
 
             public int Count => this.attributeCount;
 
-            public override string ToString()
+            public override string? ToString()
             {
                 return String.Join(' ', this);
             }
@@ -69,11 +69,11 @@
 
         public IAttributeCollection Attributes { get; }
 
-        public override string ToText() => this.reference.ToText(this);
+        public override string? ToString() => this.reference.ToString(this);
 
-        public override string ToString()
+        protected internal override string ToDebugString()
         {
-            return $"<{String.Join(' ', this.Name, this.Attributes)} />";
+            return $"<{this.Name}/>";
         }
 
         public bool IsClosedBy(ReadOnlySpan<char> other)
@@ -89,11 +89,6 @@
 
             var nameIdx = other.IndexOf(this.reference.Name, StringComparison.OrdinalIgnoreCase);
             return nameIdx == 0 || (nameIdx == 2 && other[0] == Tags.Opener && other[1] == Tags.Slash);
-        }
-
-        public override string ToDebugString()
-        {
-            return $"<{this.Name}/>";
         }
     }
 
@@ -187,20 +182,15 @@
             } while (elementParent != this || element != this.child);
         }
 
-        public override string ToText()
+        public override string? ToString()
         {
             if (this.child is null)
                 return String.Empty;
 
-            return ToText(this);
+            return ToString(this);
         }
 
-        public override string ToString()
-        {
-            return String.Concat($"<{String.Join(' ', this.Name, this.Attributes)}>", String.Concat(this), $"</{this.Name}>");
-        }
-
-        public override string ToDebugString()
+        protected internal override string ToDebugString()
         {
             return $"<{this.Name}>\u2026</{this.Name}>";
         }

@@ -9,6 +9,6 @@ namespace Brackets.Html
             this.IsParent = false;
         }
 
-        public override string ToText(Tag tag) => HorizontalLine;
+        public override string ToString(Tag tag) => HorizontalLine;
     }
 }

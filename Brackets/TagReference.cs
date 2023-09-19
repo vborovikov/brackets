@@ -21,12 +21,12 @@
 
         public virtual bool IsRoot => false;
 
-        public virtual string ToText(Tag tag) => String.Empty;
+        public virtual string ToString(Tag tag) => String.Empty;
     }
 
     public sealed class RootReference : TagReference
     {
-        public static readonly RootReference Default = new RootReference();
+        public static readonly RootReference Default = new();
 
         private RootReference()
             : base(String.Empty)

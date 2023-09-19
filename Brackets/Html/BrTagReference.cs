@@ -10,6 +10,6 @@ namespace Brackets.Html
             this.Level = ElementLevel.Inline;
         }
 
-        public override string ToText(Tag tag) => Environment.NewLine;
+        public override string ToString(Tag tag) => Environment.NewLine;
     }
 }

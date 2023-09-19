@@ -11,16 +11,14 @@
             this.length = length;
         }
 
-        public override string ToText()
+        public override string? ToString()
         {
             return this.Source.Slice(this.Index, this.length).ToString();
         }
 
-        public override string ToString() => ToText();
-
-        public override string ToDebugString()
+        protected internal override string ToDebugString()
         {
-            return String.Concat(this.Source.Slice(this.Index).TrimStart().Slice(0, Math.Min(3, this.length)), "\u2026");
+            return String.Concat(this.Source[this.Index..].TrimStart()[..Math.Min(3, this.length)], "\u2026");
         }
 
         public bool TryAdd(Content content)

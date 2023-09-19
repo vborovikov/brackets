@@ -35,7 +35,7 @@ namespace Brackets
 
         public ReadOnlySpan<char> Value => this.Source.Slice(this.valueIndex, this.valueLength);
 
-        public override string ToText()
+        public override string? ToString()
         {
             if (!this.HasValue)
                 return String.Empty;
@@ -55,15 +55,10 @@ namespace Brackets
                 return false;
             }
 
-            return TryGetValue(ToText(), out value);
+            return TryGetValue(ToString(), out value);
         }
 
-        public override string ToString()
-        {
-            return this.Source[this.Index..(this.valueIndex + this.valueLength)].ToString();
-        }
-
-        public override string ToDebugString()
+        protected internal override string ToDebugString()
         {
             return this.HasValue ? $"{this.reference.Name}={this.Value.ToString()}" : this.reference.Name;
         }
@@ -75,7 +70,5 @@ namespace Brackets
 
         void Add(Attribute attribute);
         void Remove(Attribute attribute);
-
-        string ToString();
     }
 }

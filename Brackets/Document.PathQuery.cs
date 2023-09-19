@@ -38,14 +38,12 @@ public partial class Document
 
         public override bool TryGetValue<T>([MaybeNullWhen(false)] out T value) => TryGetValue(this.Value, out value);
 
-        public override string ToText()
+        public override string? ToString()
         {
-            return this.Value.ToString() ?? string.Empty;
+            return this.Value.ToString();
         }
 
-        public override string? ToString() => ToText();
-
-        public override string ToDebugString() => ToText();
+        protected internal override string ToDebugString() => this.Value.ToString() ?? string.Empty;
 
         public static DataElement From(int number) => new(DataType.Number, number);
         public static DataElement From(string text) => new(DataType.Text, text);
@@ -986,7 +984,7 @@ public partial class Document
         public static string Text(PathQueryContext context, IEnumerable<PathQuery> args)
         {
             var elements = args.FirstOrDefault()?.Run(context) ?? context;
-            return Element.ToText(elements);
+            return Element.ToString(elements);
         }
 
         public static string Unescape(PathQueryContext context, IEnumerable<PathQuery> args)
