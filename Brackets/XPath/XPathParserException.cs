@@ -3,6 +3,7 @@ namespace Brackets.XPath
     using System;
     using System.Text;
 
+    [Serializable]
     public class XPathParserException : Exception
     {
         private enum TrimType
@@ -12,19 +13,16 @@ namespace Brackets.XPath
             Middle,
         }
 
-        public string queryString;
+        public string? queryString;
         public int startChar;
         public int endChar;
 
-        public XPathParserException(string queryString, int startChar, int endChar, string message) : base(message)
+        public XPathParserException(string queryString, int startChar, int endChar,
+            string res, params string?[]? args) : this(CreateMessage(res, args))
         {
             this.queryString = queryString;
             this.startChar = startChar;
             this.endChar = endChar;
-        }
-
-        public XPathParserException() : base()
-        {
         }
 
         public XPathParserException(string message) : base(message)
@@ -35,45 +33,35 @@ namespace Brackets.XPath
         {
         }
 
+        public XPathParserException() : base()
+        {
+        }
+
         public override string ToString()
         {
-            string result = this.GetType().FullName;
+            string result = this.GetType().FullName!;
             string info = FormatDetailedMessage();
-            if (info != null && info.Length > 0)
+            if (!string.IsNullOrEmpty(info))
             {
                 result += ": " + info;
             }
-            if (StackTrace != null)
+            if (this.StackTrace != null)
             {
-                result += Environment.NewLine + StackTrace;
+                result += Environment.NewLine + this.StackTrace;
             }
             return result;
         }
 
-        internal string MarkOutError()
+        private static string CreateMessage(string res, params string?[]? args)
         {
-            if (queryString == null || queryString.Trim(' ').Length == 0)
+            if (args == null)
             {
-                return null;
+                return res;
             }
 
-            int len = endChar - startChar;
-            StringBuilder sb = new StringBuilder();
-
-            AppendTrimmed(sb, queryString, 0, startChar, TrimType.Left);
-            if (len > 0)
-            {
-                sb.Append(" -->");
-                AppendTrimmed(sb, queryString, startChar, len, TrimType.Middle);
-            }
-
-            sb.Append("<-- ");
-            AppendTrimmed(sb, queryString, endChar, queryString.Length - endChar, TrimType.Right);
-
-            return sb.ToString();
+            return string.Format(res, args);
         }
 
-        // This function is used to prevent long quotations in error messages
         private static void AppendTrimmed(StringBuilder sb, string value, int startIndex, int count, TrimType trimType)
         {
             const int TrimSize = 32;
@@ -91,12 +79,10 @@ namespace Brackets.XPath
                         sb.Append(TrimMarker);
                         sb.Append(value, startIndex + count - TrimSize, TrimSize);
                         break;
-
                     case TrimType.Right:
                         sb.Append(value, startIndex, TrimSize);
                         sb.Append(TrimMarker);
                         break;
-
                     case TrimType.Middle:
                         sb.Append(value, startIndex, TrimSize / 2);
                         sb.Append(TrimMarker);
@@ -106,10 +92,33 @@ namespace Brackets.XPath
             }
         }
 
+        private string? MarkOutError()
+        {
+            if (this.queryString == null || this.queryString.AsSpan().Trim(' ').IsEmpty)
+            {
+                return null;
+            }
+
+            int len = this.endChar - this.startChar;
+            StringBuilder sb = new StringBuilder();
+
+            AppendTrimmed(sb, this.queryString, 0, this.startChar, TrimType.Left);
+            if (len > 0)
+            {
+                sb.Append(" -->");
+                AppendTrimmed(sb, this.queryString, this.startChar, len, TrimType.Middle);
+            }
+
+            sb.Append("<-- ");
+            AppendTrimmed(sb, this.queryString, this.endChar, this.queryString.Length - this.endChar, TrimType.Right);
+
+            return sb.ToString();
+        }
+
         private string FormatDetailedMessage()
         {
-            string message = Message;
-            string error = MarkOutError();
+            string message = this.Message;
+            string? error = MarkOutError();
 
             if (error != null && error.Length > 0)
             {

@@ -1,6 +1,7 @@
 namespace Brackets.XPath
 {
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
 
     public interface IXPathBuilder<TNode>
     {
@@ -14,11 +15,11 @@ namespace Brackets.XPath
 
         TNode Number(string value);
 
-        TNode Axis(XPathAxis xpathAxis, XPathNodeType nodeType, string prefix, string name);
+        TNode Axis(XPathAxis xpathAxis, XPathNodeType nodeType, string? prefix, string? name);
 
-        TNode Operator(XPathOperator op, TNode left, TNode right);
+        TNode Operator(XPathOperator op, TNode left, [AllowNull] TNode right);
 
-        TNode Variable(string prefix, string name);
+        TNode Variable(string? prefix, string name);
 
         TNode Join(TNode left, TNode right);
 
@@ -28,6 +29,6 @@ namespace Brackets.XPath
         // reverseStep is how parser comunicates to builder diference between "ansestor[1]" and "(ansestor)[1]"
         TNode Predicate(TNode node, TNode condition, bool reverseStep);
 
-        TNode Function(string prefix, string name, IEnumerable<TNode> args);
+        TNode Function(string? prefix, string name, IEnumerable<TNode> args);
     }
 }

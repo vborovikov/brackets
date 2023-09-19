@@ -1,11 +1,12 @@
 namespace Brackets.XPath
 {
     /// <summary>
-    /// Represents a relationship to the context (current) node, 
+    /// Represents a relationship to the context (current) node,
     /// and is used to locate nodes relative to that node on the tree.
     /// </summary>
     public enum XPathAxis
     {
+        Unknown,
         /// <summary>
         /// Selects the current node.
         /// </summary>

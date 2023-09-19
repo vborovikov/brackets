@@ -17,7 +17,7 @@
             this.root = root;
         }
 
-        public static readonly HtmlReference Html = new HtmlReference();
+        public static readonly HtmlReference Html = new();
 
 #if DEBUG
         internal Root Root => this.root;
@@ -55,7 +55,8 @@
             ArgumentNullException.ThrowIfNull(path);
 
             var pathParser = new XPathParser<PathQuery>();
-            var pathQuery = pathParser.Parse(path, PathQueryBuilder.Instance);
+            var pathScanner = new XPathScanner(path);
+            var pathQuery = pathParser.Parse(pathScanner, PathQueryBuilder.Instance, LexKind.Eof);
 
             return pathQuery.Run(this);
         }

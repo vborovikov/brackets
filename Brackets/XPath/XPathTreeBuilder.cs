@@ -1,6 +1,7 @@
 ﻿namespace Brackets.XPath
 {
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Xml.Linq;
 
     public class XPathTreeBuilder : IXPathBuilder<XElement>
@@ -24,7 +25,7 @@
             return new XElement("number", new XAttribute("value", value));
         }
 
-        public XElement Operator(XPathOperator op, XElement left, XElement right)
+        public XElement Operator(XPathOperator op, XElement left, [AllowNull] XElement right)
         {
             if (op == XPathOperator.UnaryMinus)
             {
@@ -33,7 +34,7 @@
             return new XElement(op.ToString(), left, right);
         }
 
-        public XElement Axis(XPathAxis xpathAxis, XPathNodeType nodeType, string prefix, string name)
+        public XElement Axis(XPathAxis xpathAxis, XPathNodeType nodeType, string? prefix, string? name)
         {
             return new XElement(xpathAxis.ToString(),
                 new XAttribute("nodeTyepe", nodeType.ToString()),
@@ -54,7 +55,7 @@
             );
         }
 
-        public XElement Variable(string prefix, string name)
+        public XElement Variable(string? prefix, string name)
         {
             return new XElement("variable",
                 new XAttribute("prefix", prefix ?? "(null)"),
@@ -62,7 +63,7 @@
             );
         }
 
-        public XElement Function(string prefix, string name, IEnumerable<XElement> args)
+        public XElement Function(string? prefix, string name, IEnumerable<XElement> args)
         {
             XElement xe = new XElement("variable",
                 new XAttribute("prefix", prefix ?? "(null)"),

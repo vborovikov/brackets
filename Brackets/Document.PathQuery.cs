@@ -251,17 +251,17 @@ public partial class Document
     {
         private readonly XPathAxis axis;
         private readonly XPathNodeType nodeType;
-        private readonly string prefix;
-        private readonly string name;
+        private readonly string? prefix;
+        private readonly string? name;
         private readonly bool skipNameTest;
 
-        public PathAxis(XPathAxis axis, XPathNodeType nodeType, string prefix, string name)
+        public PathAxis(XPathAxis axis, XPathNodeType nodeType, string? prefix, string? name)
         {
             this.axis = axis;
             this.nodeType = nodeType;
             this.prefix = prefix;
             this.name = name;
-            this.skipNameTest = String.IsNullOrEmpty(this.name);
+            this.skipNameTest = string.IsNullOrEmpty(this.name);
         }
 
         public override DataType ResultType => DataType.Query;
@@ -270,13 +270,14 @@ public partial class Document
         {
             return this.nodeType switch
             {
-                XPathNodeType.Attribute => String.Concat("@", this.name),
+                XPathNodeType.Attribute => string.Concat("@", this.name),
                 XPathNodeType.Text => "text()",
                 XPathNodeType.Root => "/",
                 XPathNodeType.All when this.axis == XPathAxis.DescendantOrSelf => "/",
                 XPathNodeType.All when this.axis == XPathAxis.Parent => "..",
                 XPathNodeType.All when this.axis == XPathAxis.Self => ".",
                 _ when this.skipNameTest => $"{this.axis}::{this.nodeType}",
+                _ when this.prefix is not null => $"{this.prefix}:{this.name}",
                 _ => this.name,
             };
         }
@@ -304,7 +305,7 @@ public partial class Document
                         if (this.skipNameTest)
                             return true;
 
-                        return String.Equals(tag.Name, this.name, StringComparison.OrdinalIgnoreCase);
+                        return string.Equals(tag.Name, this.name, StringComparison.OrdinalIgnoreCase);
                     }
 
                 case XPathNodeType.Attribute:
@@ -315,7 +316,7 @@ public partial class Document
                         if (this.skipNameTest)
                             return true;
 
-                        return String.Equals(attr.Name, this.name, StringComparison.OrdinalIgnoreCase);
+                        return string.Equals(attr.Name, this.name, StringComparison.OrdinalIgnoreCase);
                     }
 
                 case XPathNodeType.Namespace:
@@ -592,7 +593,7 @@ public partial class Document
 
     private class PathOperator : PathQuery
     {
-        public PathOperator(XPathOperator @operator, PathQuery left, PathQuery right)
+        public PathOperator(XPathOperator @operator, PathQuery left, [AllowNull] PathQuery right)
         {
             this.Operator = @operator;
             this.Left = left;
@@ -610,7 +611,7 @@ public partial class Document
             XPathOperator.Gt or
             XPathOperator.Ge => DataType.Boolean,
             XPathOperator.Plus =>
-                this.Left.ResultType == DataType.Text && this.Right.ResultType == DataType.Text ? DataType.Text : DataType.Number,
+                this.Left.ResultType == DataType.Text && this.Right!.ResultType == DataType.Text ? DataType.Text : DataType.Number,
             XPathOperator.Minus or
             XPathOperator.Multiply or
             XPathOperator.Divide or
@@ -621,6 +622,7 @@ public partial class Document
 
         public XPathOperator Operator { get; }
         public PathQuery Left { get; }
+        [AllowNull]
         public PathQuery Right { get; }
 
         public override string? ToString()
@@ -644,7 +646,7 @@ public partial class Document
                 _ => "~",
             };
 
-            return String.Concat(this.Left, opStr, this.Right);
+            return string.Concat(this.Left, opStr, this.Right);
         }
 
         protected override PathQueryContext RunOverride(PathQueryContext context)
@@ -655,7 +657,7 @@ public partial class Document
             // apply the operator
 
             var left = this.Left.RunScalar(context);
-            var right = this.Right.RunScalar(context);
+            var right = this.Right!.RunScalar(context);
 
             if (left is not null && right is not null)
             {
@@ -694,14 +696,14 @@ public partial class Document
         {
             (DataType Type, object Value) result = this.Operator switch
             {
-                XPathOperator.Eq => (DataType.Boolean, String.Compare(leftString, rightString, ignoreCase: true) == 0),
-                XPathOperator.Ne => (DataType.Boolean, String.Compare(leftString, rightString, ignoreCase: true) != 0),
-                XPathOperator.Lt => (DataType.Boolean, String.Compare(leftString, rightString, ignoreCase: true) < 0),
-                XPathOperator.Le => (DataType.Boolean, String.Compare(leftString, rightString, ignoreCase: true) <= 0),
-                XPathOperator.Gt => (DataType.Boolean, String.Compare(leftString, rightString, ignoreCase: true) > 0),
-                XPathOperator.Ge => (DataType.Boolean, String.Compare(leftString, rightString, ignoreCase: true) >= 0),
+                XPathOperator.Eq => (DataType.Boolean, string.Compare(leftString, rightString, ignoreCase: true) == 0),
+                XPathOperator.Ne => (DataType.Boolean, string.Compare(leftString, rightString, ignoreCase: true) != 0),
+                XPathOperator.Lt => (DataType.Boolean, string.Compare(leftString, rightString, ignoreCase: true) < 0),
+                XPathOperator.Le => (DataType.Boolean, string.Compare(leftString, rightString, ignoreCase: true) <= 0),
+                XPathOperator.Gt => (DataType.Boolean, string.Compare(leftString, rightString, ignoreCase: true) > 0),
+                XPathOperator.Ge => (DataType.Boolean, string.Compare(leftString, rightString, ignoreCase: true) >= 0),
                 XPathOperator.Plus => (DataType.Text, leftString + rightString),
-                _ => (DataType.Text, String.Empty),
+                _ => (DataType.Text, string.Empty),
             };
 
             return new PathQueryElementContext(new DataElement(result.Type, result.Value));
@@ -765,7 +767,7 @@ public partial class Document
                 { nameof(XPathFunctions.Replace), XPathFunctions.Replace },
             };
 
-        public PathFunction(string prefix, string name, IEnumerable<PathQuery> arguments)
+        public PathFunction(string? prefix, string name, IEnumerable<PathQuery> arguments)
         {
             this.Prefix = prefix;
             this.Name = name;
@@ -779,13 +781,16 @@ public partial class Document
             knownStringFunctions.ContainsKey(this.Name) ? DataType.Text :
             DataType.Undefined;
 
-        public string Prefix { get; }
+        public string? Prefix { get; }
         public string Name { get; }
         public IEnumerable<PathQuery> Arguments { get; }
 
         public override string? ToString()
         {
-            return $"{this.Name}({String.Join(',', this.Arguments)})";
+            if (this.Prefix is not null)
+                return $"{this.Prefix}:{this.Name}({string.Join(',', this.Arguments)})";
+
+            return $"{this.Name}({string.Join(',', this.Arguments)})";
         }
 
         protected override PathQueryContext RunOverride(PathQueryContext context)
@@ -863,7 +868,7 @@ public partial class Document
             {
                 Tag tag => tag.Name,
                 Attribute attr => attr.Name,
-                _ => String.Empty,
+                _ => string.Empty,
             };
         }
 
@@ -939,8 +944,8 @@ public partial class Document
         public static string Trim(PathQueryContext context, IEnumerable<PathQuery> args)
         {
             var text = Text(context, args);
-            if (String.IsNullOrWhiteSpace(text))
-                return String.Empty;
+            if (string.IsNullOrWhiteSpace(text))
+                return string.Empty;
 
             return WebUtility.HtmlDecode(text).Trim();
         }
@@ -955,8 +960,8 @@ public partial class Document
         public static string NormalizeSpace(PathQueryContext context, IEnumerable<PathQuery> args)
         {
             var text = Text(context, args);
-            if (String.IsNullOrWhiteSpace(text))
-                return String.Empty;
+            if (string.IsNullOrWhiteSpace(text))
+                return string.Empty;
 
             return
                 // replace html entities
@@ -964,8 +969,8 @@ public partial class Document
                 // normalize multiple whitespaces
                 .NormalizeWhiteSpace(" \t\xA0")
                 // remove single whitespace lines
-                .Replace(" \r\n", String.Empty, StringComparison.Ordinal)
-                .Replace(" \n", String.Empty, StringComparison.Ordinal)
+                .Replace(" \r\n", string.Empty, StringComparison.Ordinal)
+                .Replace(" \n", string.Empty, StringComparison.Ordinal)
                 // normalize multiple empty lines
                 .NormalizeWhiteSpace("\r\n", Environment.NewLine)
                 // remove all leading and trailing whitespace
@@ -1010,7 +1015,7 @@ public partial class Document
                 }
             }
 
-            return String.Empty;
+            return string.Empty;
         }
 
         public static bool IsNumber(PathQueryContext context, IEnumerable<PathQuery> args)
@@ -1026,7 +1031,7 @@ public partial class Document
             var that = args.ElementAtOrDefault(2);
 
             if (text is null || what is null || that is null)
-                return String.Empty;
+                return string.Empty;
 
             if (what.TryEvaluate<string>(context, out var whatStr) && that.TryEvaluate<string>(context, out var thatStr))
             {
@@ -1037,7 +1042,7 @@ public partial class Document
                 }
             }
 
-            return String.Empty;
+            return string.Empty;
         }
     }
 
@@ -1058,12 +1063,12 @@ public partial class Document
             return result;
         }
 
-        public PathQuery Axis(XPathAxis xpathAxis, XPathNodeType nodeType, string prefix, string name)
+        public PathQuery Axis(XPathAxis xpathAxis, XPathNodeType nodeType, string? prefix, string? name)
         {
             return new PathAxis(xpathAxis, nodeType, prefix, name);
         }
 
-        public PathQuery Function(string prefix, string name, IEnumerable<PathQuery> args)
+        public PathQuery Function(string? prefix, string name, IEnumerable<PathQuery> args)
         {
             return new PathFunction(prefix, name, args);
         }
@@ -1080,10 +1085,10 @@ public partial class Document
 
         public PathQuery Number(string value)
         {
-            return new PathConst(DataElement.From(Int32.Parse(value)));
+            return new PathConst(DataElement.From(int.Parse(value)));
         }
 
-        public PathQuery Operator(XPathOperator op, PathQuery left, PathQuery right)
+        public PathQuery Operator(XPathOperator op, PathQuery left, [AllowNull] PathQuery right)
         {
             return new PathOperator(op, left, right);
         }
@@ -1098,7 +1103,7 @@ public partial class Document
             return new PathConst(DataElement.From(value));
         }
 
-        public PathQuery Variable(string prefix, string name)
+        public PathQuery Variable(string? prefix, string name)
         {
             throw new NotSupportedException();
         }

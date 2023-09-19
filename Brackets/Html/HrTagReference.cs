@@ -2,7 +2,7 @@ namespace Brackets.Html
 {
     public class HrTagReference : TagReference
     {
-        private static readonly string HorizontalLine = new string('-', 80);
+        private static readonly string HorizontalLine = new('-', 80);
 
         public HrTagReference() : base("hr")
         {
