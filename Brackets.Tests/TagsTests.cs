@@ -3,6 +3,7 @@
     using System;
     using Primitives;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using System.Text.RegularExpressions;
 
     [TestClass]
     public class TagsTests
@@ -97,13 +98,61 @@
             AssertTokens(tags, "<ms>", "<![CDATA[x<y]]>", "</ms>");
         }
 
+        [TestMethod]
+        public void Tags_UnclosedTag_HasOnlyContent()
+        {
+            var tags = Tags.Parse(
+                """
+                <rss version="2.0">
+                <channel>
+                <title>The Joy of Tech</title>
+                <link>http://www.geekculture.com/joyoftech/index.html
+                <copyright>Copyright 2023</copyright>
+                <lastBuildDate>Mon, 18 Sept 2023 00:00:01 EST</lastBuildDate>
+                <generator>manual</generator>
+                <docs>http://blogs.law.harvard.edu/tech/rss</x.html</link>
+                <description></description>docs>
+                </channel>
+                </rss>
+                """
+                );
+
+            AssertCategories(tags,
+                TagCategory.Opening,  // <rss>
+                TagCategory.Opening,  // <channel>
+                TagCategory.Opening,  // <title>
+                TagCategory.Content,  // The Joy of Tech
+                TagCategory.Closing,  // </title>
+                TagCategory.Opening,  // <link>
+                TagCategory.Content,  // http://www.geekculture.com/joyoftech/index.html
+                //TagCategory.Closing,  // </link>
+                TagCategory.Opening,  // <copyright>
+                TagCategory.Content,  // Copyright 2023
+                TagCategory.Closing,  // </copyright>
+                TagCategory.Opening,  // <lastBuildDate>
+                TagCategory.Content,  // Mon, 18 Sept 2023 00:00:01 EST
+                TagCategory.Closing,  // </lastBuildDate>
+                TagCategory.Opening,  // <generator>
+                TagCategory.Content,  // manual
+                TagCategory.Closing,  // </generator>
+                TagCategory.Opening,  // <docs>
+                TagCategory.Content,  // http://blogs.law.harvard.edu/tech/rss</x.html
+                TagCategory.Closing,  // </link>
+                TagCategory.Opening,  // <description>
+                TagCategory.Closing,  // </description>
+                TagCategory.Content,  // docs>
+                TagCategory.Closing,  // </channel>
+                TagCategory.Closing   // </rss>
+                );
+        }
+
         private static void AssertCategories(Tags.TagEnumerator tags, params TagCategory[] categories)
         {
             tags.Reset();
             foreach (var category in categories)
             {
                 Assert.IsTrue(tags.MoveNext() && tags.Current.Category == category,
-                    $"Wrong category '{tags.Current.Category}' for token '{tags.Current.Span.ToString()}', expected '{category}'.");
+                    $"Wrong category '{tags.Current.Category}' for token '{Regex.Escape(tags.Current.Span.ToString())}', expected '{category}'.");
             }
             Assert.IsFalse(tags.MoveNext(), "More tokens left.");
         }
@@ -114,7 +163,7 @@
             foreach (var token in tokens)
             {
                 Assert.IsTrue(tags.MoveNext() && tags.Current.Span.Equals(token, StringComparison.OrdinalIgnoreCase),
-                    $"Wrong token '{tags.Current.Span.ToString()}', expected '{token}'.");
+                    $"Wrong token '{Regex.Escape(tags.Current.Span.ToString())}', expected '{token}'.");
             }
             Assert.IsFalse(tags.MoveNext(), "More tokens left.");
         }

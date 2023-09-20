@@ -76,7 +76,7 @@
             return $"<{this.Name}/>";
         }
 
-        public bool IsClosedBy(ReadOnlySpan<char> other)
+        internal bool IsClosedBy(ReadOnlySpan<char> other)
         {
             if (this.reference.IsRoot)
             {

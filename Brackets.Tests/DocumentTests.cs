@@ -21,7 +21,6 @@
         {
             using var fileStream = assembly.GetManifestResourceStream($"Brackets.Tests.Samples.{fileName}");
             using var fileReader = new StreamReader(fileStream, Encoding.UTF8);
-
             return fileReader.ReadToEnd();
         }
 
@@ -52,6 +51,17 @@
 
             var contentStr = content.ToString();
             Assert.IsFalse(contentStr.EndsWith("</script>"));
+        }
+
+        [TestMethod]
+        public void XmlParse_BrokenTag_ClosedBeforeNextTag()
+        {
+            var sample = GetSample("broken.xml");
+            var document = Document.Xml.Parse(sample);
+
+            var docsTag = document.Find<ParentTag>(t => t.Name == "docs");
+            Assert.IsNotNull(docsTag);
+            Assert.AreEqual(0, docsTag.SkipWhile(el => el is Content).Count());
         }
     }
 }

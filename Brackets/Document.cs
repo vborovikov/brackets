@@ -7,6 +7,7 @@
     using System.Linq;
     using Collections;
     using Html;
+    using Xml;
     using XPath;
 
     public partial class Document : IEnumerable<Element>
@@ -20,6 +21,8 @@
         }
 
         public static readonly HtmlReference Html = new();
+
+        public static readonly XmlReference Xml = new();
 
 #if DEBUG
         internal Root Root => this.root;

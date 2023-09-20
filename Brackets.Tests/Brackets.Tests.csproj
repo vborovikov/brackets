@@ -3,14 +3,14 @@
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-
+    <Nullable>disable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Samples\benq.html" />
+    <EmbeddedResource Include="Samples\broken.xml" />
     <EmbeddedResource Include="Samples\google.html" />
     <EmbeddedResource Include="Samples\head_script.html" />
   </ItemGroup>
