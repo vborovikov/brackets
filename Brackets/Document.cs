@@ -5,11 +5,13 @@
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
+    using Collections;
     using Html;
     using XPath;
 
     public partial class Document : IEnumerable<Element>
     {
+        private static readonly LRUCache<string, PathQuery> pathQueryCache = new(10);
         private readonly Root root;
 
         private Document(Root root)
@@ -54,9 +56,12 @@
         {
             ArgumentNullException.ThrowIfNull(path);
 
-            var pathParser = new XPathParser<PathQuery>();
-            var pathScanner = new XPathScanner(path);
-            var pathQuery = pathParser.Parse(pathScanner, PathQueryBuilder.Instance, LexKind.Eof);
+            var pathQuery = pathQueryCache.GetOrAdd(path, path =>
+            {
+                var pathParser = new XPathParser<PathQuery>();
+                var pathScanner = new XPathScanner(path);
+                return pathParser.Parse(pathScanner, PathQueryBuilder.Instance, LexKind.Eof);
+            });
 
             return pathQuery.Run(this);
         }

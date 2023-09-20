@@ -2,27 +2,24 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
-    using System.Net.Http;
-    using System.Threading;
-    using System.Threading.Tasks;
+    using Collections;
     using Primitives;
 
     public sealed partial class Document
     {
         public abstract class MarkupReference
         {
-            private readonly Dictionary<string, TagReference> tagReferences;
-            private readonly Dictionary<string, AttributeReference> attributeReferences;
+            private readonly StringDir<TagReference> tagReferences;
+            private readonly StringDir<AttributeReference> attributeReferences;
 
             protected MarkupReference()
             {
-                this.tagReferences = new Dictionary<string, TagReference>(StringComparer.OrdinalIgnoreCase)
+                this.tagReferences = new(StringComparison.OrdinalIgnoreCase)
                 {
                     { RootReference.Default.Name, RootReference.Default }
                 };
 
-                this.attributeReferences = new Dictionary<string, AttributeReference>(StringComparer.OrdinalIgnoreCase)
+                this.attributeReferences = new(StringComparison.OrdinalIgnoreCase)
                 {
                 };
             }
@@ -170,10 +167,9 @@
 
             private TagReference CreateOrFindTagReference(TagSpan tagSpan)
             {
-                var tagName = ToLowerInvariant(tagSpan.Name);
-                if (!this.tagReferences.TryGetValue(tagName, out var reference))
+                if (!this.tagReferences.TryGetValue(tagSpan.Name, out var reference))
                 {
-                    reference = new TagReference(tagName);
+                    reference = new TagReference(ToLowerInvariant(tagSpan.Name));
                     AddReference(reference);
                 }
 
@@ -182,10 +178,9 @@
 
             private AttributeReference CreateOrFindAttributeReference(AttributeSpan attr)
             {
-                var attrName = ToLowerInvariant(attr);
-                if (!this.attributeReferences.TryGetValue(attrName, out var reference))
+                if (!this.attributeReferences.TryGetValue(attr, out var reference))
                 {
-                    reference = new AttributeReference(attrName);
+                    reference = new AttributeReference(ToLowerInvariant(attr));
                     AddReference(reference);
                 }
 
