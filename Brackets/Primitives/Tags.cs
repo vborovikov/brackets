@@ -56,7 +56,7 @@ namespace Brackets.Primitives
         public ref struct TagEnumerator
         {
             private readonly ReadOnlySpan<char> text;
-            private ref readonly MarkupSyntax stx;
+            private readonly ref readonly MarkupSyntax stx;
             private ReadOnlySpan<char> span;
             private int index;
 
@@ -203,7 +203,7 @@ namespace Brackets.Primitives
         public ref struct AttributeEnumerator
         {
             private readonly TagSpan tag;
-            private ref readonly MarkupSyntax stx;
+            private readonly ref readonly MarkupSyntax stx;
             private ReadOnlySpan<char> span;
             private int index;
 
