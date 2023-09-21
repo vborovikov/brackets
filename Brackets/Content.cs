@@ -21,7 +21,7 @@
             return String.Concat(this.Source[this.Index..].TrimStart()[..Math.Min(3, this.length)], "\u2026");
         }
 
-        public bool TryAdd(Content content)
+        internal bool TryAdd(Content content)
         {
             if (content.Index == (this.Index + this.length))
             {

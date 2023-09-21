@@ -2,6 +2,7 @@
 
 public readonly struct MarkupSyntax
 {
+    public required StringComparison Comparison { get; init; }
     public required char Opener { get; init; }
     public required char Closer { get; init; }
     public required char Terminator { get; init; }

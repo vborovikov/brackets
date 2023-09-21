@@ -6,6 +6,7 @@ public class HtmlReference : Document.MarkupReference
 {
     public HtmlReference() : base(new MarkupSyntax
     {
+        Comparison = StringComparison.OrdinalIgnoreCase,
         Opener = '<',
         Closer = '>',
         Terminator = '/',

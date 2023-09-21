@@ -6,6 +6,7 @@ public class XmlReference : Document.MarkupReference
 {
     public XmlReference() : base(new MarkupSyntax
     {
+        Comparison = StringComparison.Ordinal,
         Opener = '<',
         Closer = '>',
         Terminator = '/',
