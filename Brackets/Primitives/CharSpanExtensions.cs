@@ -55,6 +55,7 @@ static class CharSpanExtensions
     ///  Any consecutive white-space (including tabs, newlines) is replaced with whatever is in normalizeTo.
     /// </summary>
     /// <param name="input">Input string.</param>
+    /// <param name="whiteSpace">White-space characters.</param>
     /// <param name="normalizeTo">Character which is replacing whitespace.</param>
     /// <remarks>Based on http://stackoverflow.com/a/25023688/897326 </remarks>
     public static string NormalizeWhiteSpace(this ReadOnlySpan<char> input,

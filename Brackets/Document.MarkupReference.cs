@@ -9,20 +9,21 @@
     {
         public abstract class MarkupReference
         {
+            private readonly MarkupSyntax syntax;
             private readonly StringDir<TagReference> tagReferences;
             private readonly StringDir<AttributeReference> attributeReferences;
 
-            protected MarkupReference()
+            protected MarkupReference(in MarkupSyntax syntax)
             {
+                this.syntax = syntax;
                 this.tagReferences = new(StringComparison.OrdinalIgnoreCase)
                 {
                     { RootReference.Default.Name, RootReference.Default }
                 };
-
-                this.attributeReferences = new(StringComparison.OrdinalIgnoreCase)
-                {
-                };
+                this.attributeReferences = new(StringComparison.OrdinalIgnoreCase);
             }
+
+            internal ref readonly MarkupSyntax Syntax => ref this.syntax;
 
             public Document Parse(string markup)
             {
