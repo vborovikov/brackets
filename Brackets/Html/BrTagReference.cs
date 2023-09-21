@@ -4,7 +4,7 @@ namespace Brackets.Html
 
     class BrTagReference : TagReference
     {
-        public BrTagReference() : base("br")
+        public BrTagReference(Document.MarkupReference markup) : base("br", markup)
         {
             this.IsParent = false;
             this.Level = ElementLevel.Inline;

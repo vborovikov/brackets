@@ -6,27 +6,14 @@ namespace Brackets.Primitives
 
     public static class Tags
     {
-        internal const char Opener = '<';
-        internal const char Closer = '>';
-        internal const char Slash = '/';
-        internal const char EqSign = '=';
-        internal const char AltOpener = '!';
-        internal static readonly char[] Separators = { ' ', '\r', '\n', '\t', '\xA0', /*'\f', '\v'*/ };
-        internal static readonly char[] AttrSeparators = { EqSign, ' ', '\r', '\n', '\t', '\xA0', /*'\f', '\v'*/ };
-        internal static readonly char[] QuotationMarks = { '\'', '"' };
-        private static readonly char[] CommentOpener = { Opener, AltOpener, '-', '-' };
-        private static readonly char[] CommentCloser = { '-', '-', Closer };
-        private static readonly char[] SectionOpener = { Opener, AltOpener, '[' };
-        private static readonly char[] SectionCloser = { ']', ']', Closer };
-
-        public static TagEnumerator Parse(ReadOnlySpan<char> text)
+        public static TagEnumerator Parse(ReadOnlySpan<char> text, in MarkupSyntax syntax)
         {
-            return new TagEnumerator(text);
+            return new TagEnumerator(text, syntax);
         }
 
-        public static AttributeEnumerator ParseAttributes(TagSpan tagSpan)
+        public static AttributeEnumerator ParseAttributes(TagSpan tagSpan, in MarkupSyntax syntax)
         {
-            return new AttributeEnumerator(tagSpan);
+            return new AttributeEnumerator(tagSpan, syntax);
         }
 
         private static bool IsElementName(ReadOnlySpan<char> span)
@@ -69,12 +56,14 @@ namespace Brackets.Primitives
         public ref struct TagEnumerator
         {
             private readonly ReadOnlySpan<char> text;
+            private ref readonly MarkupSyntax stx;
             private ReadOnlySpan<char> span;
             private int index;
 
-            public TagEnumerator(ReadOnlySpan<char> text)
+            public TagEnumerator(ReadOnlySpan<char> text, in MarkupSyntax syntax)
             {
                 this.text = text;
+                this.stx = ref syntax;
                 this.span = text;
                 this.index = 0;
                 this.Current = default;
@@ -97,8 +86,8 @@ namespace Brackets.Primitives
                     return false;
 
                 // find next opener and closer
-                var openerPos = this.span.IndexOf(Opener);
-                var closerPos = this.span.IndexOf(Closer);
+                var openerPos = this.span.IndexOf(this.stx.Opener);
+                var closerPos = this.span.IndexOf(this.stx.Closer);
                 if (openerPos < 0 || closerPos < 0)
                 {
                     // no more tags
@@ -126,14 +115,14 @@ namespace Brackets.Primitives
 
                 if (!tag.IsEmpty)
                 {
-                    var slashPos = tag[0] == Slash ? 0 : tag[^1] == Slash ? tag.Length - 1 : -1;
-                    var spacePos = tag.IndexOfAny(Separators);
+                    var slashPos = tag[0] == this.stx.Slash ? 0 : tag[^1] == this.stx.Slash ? tag.Length - 1 : -1;
+                    var spacePos = tag.IndexOfAny(this.stx.Separators);
                     var nameStartIdx = slashPos == 0 ? 1 : 0;
                     var nameEndIdx = spacePos > 0 ? spacePos : slashPos > 0 ? slashPos : ^0;
                     var tagName = tag[nameStartIdx..nameEndIdx];
                     var tagNameIsValid = true;
 
-                    if (IsElementName(tagName) || (tagName[0] == AltOpener && IsElementName(tagName[1..])))
+                    if (IsElementName(tagName) || (tagName[0] == this.stx.AltOpener && IsElementName(tagName[1..])))
                     {
                         // correct closing, opening or unpaired tag
                         category = slashPos switch
@@ -144,7 +133,7 @@ namespace Brackets.Primitives
                         };
                         name = tagName;
                     }
-                    else if (tagName[0] == AltOpener && tagName.Length >= 3)
+                    else if (tagName[0] == this.stx.AltOpener && tagName.Length >= 3)
                     {
                         if (tagName[1] == '-' && tagName[2] == '-')
                         {
@@ -152,10 +141,10 @@ namespace Brackets.Primitives
 
                             category = TagCategory.Comment;
 
-                            var commentCloserPos = this.span.IndexOf(CommentCloser, StringComparison.Ordinal);
+                            var commentCloserPos = this.span.IndexOf(this.stx.CommentCloser, StringComparison.Ordinal);
                             if (commentCloserPos > 0)
                             {
-                                closerPos = commentCloserPos + CommentCloser.Length - 1;
+                                closerPos = commentCloserPos + this.stx.CommentCloser.Length - 1;
                             }
                             else
                             {
@@ -167,10 +156,10 @@ namespace Brackets.Primitives
                         {
                             // <![###[ ... ]]>
 
-                            var sectionCloserPos = this.span.IndexOf(SectionCloser, StringComparison.Ordinal);
+                            var sectionCloserPos = this.span.IndexOf(this.stx.SectionCloser, StringComparison.Ordinal);
                             if (sectionCloserPos > 0)
                             {
-                                closerPos = sectionCloserPos + SectionCloser.Length - 1;
+                                closerPos = sectionCloserPos + this.stx.SectionCloser.Length - 1;
                                 var nameEndPos = tagName[2..].IndexOf('[');
                                 if (nameEndPos > 0)
                                 {
@@ -193,7 +182,7 @@ namespace Brackets.Primitives
                     if (!tagNameIsValid)
                     {
                         // the tag name is incorrect, let's try not to discard it all as a content
-                        var anotherOpenerPos = this.span[1..].IndexOf(Opener);
+                        var anotherOpenerPos = this.span[1..].IndexOf(this.stx.Opener);
                         if (anotherOpenerPos > 0)
                         {
                             // in the original span it's the position right before anotherOpenerPos
@@ -214,12 +203,14 @@ namespace Brackets.Primitives
         public ref struct AttributeEnumerator
         {
             private readonly TagSpan tag;
+            private ref readonly MarkupSyntax stx;
             private ReadOnlySpan<char> span;
             private int index;
 
-            public AttributeEnumerator(TagSpan tag)
+            public AttributeEnumerator(TagSpan tag, in MarkupSyntax syntax)
             {
                 this.tag = tag;
+                this.stx = ref syntax;
                 this.span = tag;
                 this.index = tag.Index;
                 this.Current = default;
@@ -246,12 +237,12 @@ namespace Brackets.Primitives
                 var startPos = 0;
                 var endPos = 0;
                 var skipPos = 0;
-                var category = this.span[0] == EqSign ? AttributeCategory.Value : AttributeCategory.Name;
+                var category = this.span[0] == this.stx.EqSign ? AttributeCategory.Value : AttributeCategory.Name;
 
                 if (category == AttributeCategory.Value)
                 {
                     // the span starts from '=' followed by a value
-                    var charsSkipped = this.span[1..].IndexOfAnyExcept(Separators);
+                    var charsSkipped = this.span[1..].IndexOfAnyExcept(this.stx.Separators);
                     var nextPart = charsSkipped >= 0 ? this.span[(1 + charsSkipped)..] : default;
                     if (nextPart.IsEmpty)
                     {
@@ -262,11 +253,11 @@ namespace Brackets.Primitives
                     {
                         startPos = 1 + charsSkipped;
                         // find the last quotation mark
-                        var sepPos = nextPart.IndexOfAnyAfterQuotes(Separators, QuotationMarks);
+                        var sepPos = nextPart.IndexOfAnyAfterQuotes(this.stx.Separators, this.stx.QuotationMarks);
                         if (sepPos < 0)
                             sepPos = nextPart.Length;
                         endPos = startPos + sepPos;
-                        skipPos = this.span[endPos..].IndexOfAnyExcept(Separators);
+                        skipPos = this.span[endPos..].IndexOfAnyExcept(this.stx.Separators);
                         if (skipPos < 0)
                         {
                             skipPos = this.span.Length;
@@ -280,7 +271,7 @@ namespace Brackets.Primitives
                 else
                 {
                     // the span starts from a name
-                    endPos = this.span.IndexOfAny(AttrSeparators);
+                    endPos = this.span.IndexOfAny(this.stx.AttrSeparators);
                     if (endPos < 0)
                     {
                         // no value for sure, it's a flag
@@ -290,9 +281,9 @@ namespace Brackets.Primitives
                     else
                     {
                         // check for '='
-                        var charsSkipped = this.span[endPos..].IndexOfAnyExcept(Separators);
+                        var charsSkipped = this.span[endPos..].IndexOfAnyExcept(this.stx.Separators);
                         var nextPart = charsSkipped >= 0 ? this.span[(endPos + charsSkipped)..] : default;
-                        if (nextPart.IsEmpty || nextPart[0] != EqSign)
+                        if (nextPart.IsEmpty || nextPart[0] != this.stx.EqSign)
                         {
                             // no value or the rest is just white-space, the attribute is a flag
                             category = AttributeCategory.Flag;
@@ -312,7 +303,7 @@ namespace Brackets.Primitives
 
             private void StripTag()
             {
-                var spacePos = this.span.IndexOfAny(Separators);
+                var spacePos = this.span.IndexOfAny(this.stx.Separators);
                 if (spacePos < 0)
                 {
                     this.span = ReadOnlySpan<char>.Empty;
@@ -325,16 +316,16 @@ namespace Brackets.Primitives
                 this.index += afterSpacePos;
 
                 // skip the rest of space characters if any
-                afterSpacePos = this.span.IndexOfAnyExcept(Separators);
+                afterSpacePos = this.span.IndexOfAnyExcept(this.stx.Separators);
                 this.span = this.span[afterSpacePos..];
                 this.index += afterSpacePos;
 
-                if (this.span[^1] == Closer)
+                if (this.span[^1] == this.stx.Closer)
                 {
                     var endIdx = ^1;
-                    if (this.span.Length > 1 && this.span[^2] == Slash)
+                    if (this.span.Length > 1 && this.span[^2] == this.stx.Slash)
                         endIdx = ^2;
-                    this.span = this.span[..endIdx].TrimEnd(Separators);
+                    this.span = this.span[..endIdx].TrimEnd(this.stx.Separators);
                 }
             }
         }

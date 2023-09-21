@@ -41,7 +41,7 @@ namespace Brackets
                 return String.Empty;
 
             var valueSpan = this.Value;
-            if (valueSpan[0] == valueSpan[^1] && Tags.QuotationMarks.Contains(valueSpan[0]))
+            if (valueSpan[0] == valueSpan[^1] && this.reference.Syntax.QuotationMarks.Contains(valueSpan[0]))
                 valueSpan = valueSpan[1..^1];
 
             return valueSpan.ToString();

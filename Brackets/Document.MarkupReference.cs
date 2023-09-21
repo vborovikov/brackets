@@ -12,15 +12,14 @@
             private readonly MarkupSyntax syntax;
             private readonly StringDir<TagReference> tagReferences;
             private readonly StringDir<AttributeReference> attributeReferences;
+            private readonly RootReference rootReference;
 
             protected MarkupReference(in MarkupSyntax syntax)
             {
                 this.syntax = syntax;
-                this.tagReferences = new(StringComparison.OrdinalIgnoreCase)
-                {
-                    { RootReference.Default.Name, RootReference.Default }
-                };
+                this.tagReferences = new(StringComparison.OrdinalIgnoreCase);
                 this.attributeReferences = new(StringComparison.OrdinalIgnoreCase);
+                this.rootReference = new RootReference(this);
             }
 
             internal ref readonly MarkupSyntax Syntax => ref this.syntax;
@@ -44,9 +43,9 @@
             private Root Parse(ReadOnlyMemory<char> markup)
             {
                 var tree = new Stack<ParentTag>();
-                tree.Push(new Root(markup));
+                tree.Push(new Root(this.rootReference, markup));
 
-                foreach (var tag in Tags.Parse(markup.Span))
+                foreach (var tag in Tags.Parse(markup.Span, this.syntax))
                 {
                     // skip comments
                     if (tag.Category == TagCategory.Comment)
@@ -143,7 +142,7 @@
             private void ParseAttributes(Tag tag, TagSpan tagSpan)
             {
                 var attrName = default(AttributeSpan);
-                foreach (var attr in Tags.ParseAttributes(tagSpan))
+                foreach (var attr in Tags.ParseAttributes(tagSpan, this.syntax))
                 {
                     if (attr.Category == AttributeCategory.Name)
                     {
@@ -170,7 +169,7 @@
             {
                 if (!this.tagReferences.TryGetValue(tagSpan.Name, out var reference))
                 {
-                    reference = new TagReference(ToLowerInvariant(tagSpan.Name));
+                    reference = new TagReference(ToLowerInvariant(tagSpan.Name), this);
                     AddReference(reference);
                 }
 
@@ -181,7 +180,7 @@
             {
                 if (!this.attributeReferences.TryGetValue(attr, out var reference))
                 {
-                    reference = new AttributeReference(ToLowerInvariant(attr));
+                    reference = new AttributeReference(ToLowerInvariant(attr), this);
                     AddReference(reference);
                 }
 

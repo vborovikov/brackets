@@ -88,7 +88,9 @@
                 return false;
 
             var nameIdx = other.IndexOf(this.reference.Name, StringComparison.OrdinalIgnoreCase);
-            return nameIdx == 0 || (nameIdx == 2 && other[0] == Tags.Opener && other[1] == Tags.Slash);
+            return 
+                nameIdx == 0 ||
+                (nameIdx == 2 && other[0] == this.reference.Syntax.Opener && other[1] == this.reference.Syntax.Slash);
         }
     }
 

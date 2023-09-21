@@ -4,15 +4,15 @@ namespace Brackets
 
     public sealed class Root : ParentTag
     {
-        private readonly ReadOnlyMemory<char> markup;
+        private readonly ReadOnlyMemory<char> text;
 
-        public Root(ReadOnlyMemory<char> markup)
-            : base(RootReference.Default, -1)
+        public Root(RootReference rootReference, ReadOnlyMemory<char> text)
+            : base(rootReference, -1)
         {
-            this.markup = markup;
+            this.text = text;
         }
 
-        protected override ReadOnlySpan<char> Source => this.markup.Span;
+        protected override ReadOnlySpan<char> Source => this.text.Span;
 
         public override string? ToString()
         {

@@ -11,21 +11,21 @@
         [TestMethod]
         public void SimpleMarkup_Parse_Tags()
         {
-            var tags = Tags.Parse("foo<tag>bar</tag>");
+            var tags = Tags.Parse("foo<tag>bar</tag>", Document.Html.Syntax);
             AssertTokens(tags, "foo", "<tag>", "bar", "</tag>");
         }
 
         [TestMethod]
         public void EmptyTag_Parse_Content()
         {
-            var tags = Tags.Parse("<tag><></tag>");
+            var tags = Tags.Parse("<tag><></tag>", Document.Html.Syntax);
             AssertTokens(tags, "<tag>", "<>", "</tag>");
         }
 
         [TestMethod]
         public void UnpairedTag_Parse_Content()
         {
-            var tags = Tags.Parse("<tag><img /></tag>");
+            var tags = Tags.Parse("<tag><img /></tag>", Document.Html.Syntax);
             AssertTokens(tags, "<tag>", "<img />", "</tag>");
             AssertCategories(tags, TagCategory.Opening, TagCategory.Unpaired, TagCategory.Closing);
         }
@@ -33,7 +33,7 @@
         [TestMethod]
         public void IncorrectClosingTag_Parse_Content()
         {
-            var tags = Tags.Parse("<tag></ta<g/>");
+            var tags = Tags.Parse("<tag></ta<g/>", Document.Html.Syntax);
             AssertTokens(tags, "<tag>", "</ta", "<g/>");
             AssertCategories(tags, TagCategory.Opening, TagCategory.Content, TagCategory.Unpaired);
         }
@@ -41,7 +41,7 @@
         [TestMethod]
         public void ExclamationMarkTagName_Parse_AsTag()
         {
-            var tags = Tags.Parse("<!doctype>");
+            var tags = Tags.Parse("<!doctype>", Document.Html.Syntax);
             AssertTokens(tags, "<!doctype>");
             AssertCategories(tags, TagCategory.Opening);
         }
@@ -49,7 +49,7 @@
         [TestMethod]
         public void Tags_CommentNoSpace_ParsedAsComment()
         {
-            var tags = Tags.Parse("<!--TERMS OF SERVICE-->");
+            var tags = Tags.Parse("<!--TERMS OF SERVICE-->", Document.Html.Syntax);
             AssertCategories(tags, TagCategory.Comment);
             AssertTokens(tags, "<!--TERMS OF SERVICE-->");
         }
@@ -57,7 +57,7 @@
         [TestMethod]
         public void Tags_CommentedSelfClosingTag_ParsedAsComment()
         {
-            var tags = Tags.Parse("<!-- <tag /> -->");
+            var tags = Tags.Parse("<!-- <tag /> -->", Document.Html.Syntax);
             AssertCategories(tags, TagCategory.Comment);
             AssertTokens(tags, "<!-- <tag /> -->");
         }
@@ -65,7 +65,7 @@
         [TestMethod]
         public void Tags_CommentedParentTags_ParsedAsComment()
         {
-            var tags = Tags.Parse("<!-- <tag>abc</tag> -->");
+            var tags = Tags.Parse("<!-- <tag>abc</tag> -->", Document.Html.Syntax);
             AssertCategories(tags, TagCategory.Comment);
             AssertTokens(tags, "<!-- <tag>abc</tag> -->");
         }
@@ -86,14 +86,14 @@
                 <script type="text/javascript" src="/assets/iepngfix/iepngfix_tilebg.js"></script>
 
                 <![endif]-->
-                """);
+                """, Document.Html.Syntax);
             AssertCategories(tags, TagCategory.Comment);
         }
 
         [TestMethod]
         public void Tags_SectionContent_ParsedAsSection()
         {
-            var tags = Tags.Parse("<ms><![CDATA[x<y]]></ms>");
+            var tags = Tags.Parse("<ms><![CDATA[x<y]]></ms>", Document.Html.Syntax);
             AssertCategories(tags, TagCategory.Opening, TagCategory.Section, TagCategory.Closing);
             AssertTokens(tags, "<ms>", "<![CDATA[x<y]]>", "</ms>");
         }
@@ -103,6 +103,7 @@
         {
             var tags = Tags.Parse(
                 """
+                <?xml version="1.0" encoding="utf-8"?>
                 <rss version="2.0">
                 <channel>
                 <title>The Joy of Tech</title>
@@ -114,10 +115,10 @@
                 <description></description>docs>
                 </channel>
                 </rss>
-                """
-                );
+                """, Document.Html.Syntax);
 
             AssertCategories(tags,
+                TagCategory.Unpaired, // <?xml version="1.0" encoding="utf-8"?>
                 TagCategory.Opening,  // <rss>
                 TagCategory.Opening,  // <channel>
                 TagCategory.Opening,  // <title>

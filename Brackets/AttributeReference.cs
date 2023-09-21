@@ -1,19 +1,14 @@
-namespace Brackets
+namespace Brackets;
+
+public class AttributeReference : SyntaxReference
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-
-    public class AttributeReference
+    public AttributeReference(string name, Document.MarkupReference markup)
+        : base(markup)
     {
-        public AttributeReference(string name)
-        {
-            this.Name = name;
-        }
-
-        public string Name { get; }
-
-        public bool IsFlag { get; init; }
+        this.Name = name;
     }
+
+    public string Name { get; }
+
+    public bool IsFlag { get; init; }
 }

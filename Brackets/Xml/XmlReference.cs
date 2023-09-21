@@ -21,6 +21,6 @@ public class XmlReference : Document.MarkupReference
     })
     {
         // void elements
-        AddReference(new TagReference("?xml") { IsParent = false });
+        AddReference(new TagReference("?xml", this) { IsParent = false });
     }
 }

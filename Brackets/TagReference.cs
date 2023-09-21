@@ -2,9 +2,9 @@
 {
     using System;
 
-    public class TagReference
+    public class TagReference : SyntaxReference
     {
-        public TagReference(string name)
+        public TagReference(string name, Document.MarkupReference markup) : base(markup)
         {
             this.Name = name;
             this.IsParent = true;
@@ -26,10 +26,8 @@
 
     public sealed class RootReference : TagReference
     {
-        public static readonly RootReference Default = new();
-
-        private RootReference()
-            : base(String.Empty)
+        internal RootReference(Document.MarkupReference markup)
+            : base(String.Empty, markup)
         {
         }
 
