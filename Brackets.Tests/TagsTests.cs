@@ -91,9 +91,17 @@
         }
 
         [TestMethod]
-        public void Tags_SectionContent_ParsedAsSection()
+        public void Tags_SectionContentHtml_ParsedAsSection()
         {
             var tags = Tags.Parse("<ms><![CDATA[x<y]]></ms>", Document.Html.Syntax);
+            AssertCategories(tags, TagCategory.Opening, TagCategory.Section, TagCategory.Closing);
+            AssertTokens(tags, "<ms>", "<![CDATA[x<y]]>", "</ms>");
+        }
+
+        [TestMethod]
+        public void Tags_SectionContentXml_ParsedAsSection()
+        {
+            var tags = Tags.Parse("<ms><![CDATA[x<y]]></ms>", Document.Xml.Syntax);
             AssertCategories(tags, TagCategory.Opening, TagCategory.Section, TagCategory.Closing);
             AssertTokens(tags, "<ms>", "<![CDATA[x<y]]>", "</ms>");
         }
@@ -115,10 +123,10 @@
                 <description></description>docs>
                 </channel>
                 </rss>
-                """, Document.Html.Syntax);
+                """, Document.Xml.Syntax);
 
             AssertCategories(tags,
-                TagCategory.Unpaired, // <?xml version="1.0" encoding="utf-8"?>
+                TagCategory.Opening, // <?xml version="1.0" encoding="utf-8"?>
                 TagCategory.Opening,  // <rss>
                 TagCategory.Opening,  // <channel>
                 TagCategory.Opening,  // <title>
@@ -137,7 +145,8 @@
                 TagCategory.Content,  // manual
                 TagCategory.Closing,  // </generator>
                 TagCategory.Opening,  // <docs>
-                TagCategory.Content,  // http://blogs.law.harvard.edu/tech/rss</x.html
+                TagCategory.Content,  // http://blogs.law.harvard.edu/tech/rss
+                TagCategory.Content,  // </x.html
                 TagCategory.Closing,  // </link>
                 TagCategory.Opening,  // <description>
                 TagCategory.Closing,  // </description>
@@ -152,7 +161,10 @@
             tags.Reset();
             foreach (var category in categories)
             {
-                Assert.IsTrue(tags.MoveNext() && tags.Current.Category == category,
+                do { Assert.IsTrue(tags.MoveNext()); }
+                while (tags.Current.IsEmpty);
+
+                Assert.AreEqual(category, tags.Current.Category,
                     $"Wrong category '{tags.Current.Category}' for token '{Regex.Escape(tags.Current.Span.ToString())}', expected '{category}'.");
             }
             Assert.IsFalse(tags.MoveNext(), "More tokens left.");
@@ -163,7 +175,10 @@
             tags.Reset();
             foreach (var token in tokens)
             {
-                Assert.IsTrue(tags.MoveNext() && tags.Current.Span.Equals(token, StringComparison.OrdinalIgnoreCase),
+                do { Assert.IsTrue(tags.MoveNext()); }
+                while (tags.Current.IsEmpty);
+
+                Assert.IsTrue(tags.Current.Span.Equals(token, StringComparison.OrdinalIgnoreCase),
                     $"Wrong token '{Regex.Escape(tags.Current.Span.ToString())}', expected '{token}'.");
             }
             Assert.IsFalse(tags.MoveNext(), "More tokens left.");
