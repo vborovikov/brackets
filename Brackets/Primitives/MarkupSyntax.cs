@@ -4,7 +4,7 @@ public readonly struct MarkupSyntax
 {
     public required char Opener { get; init; }
     public required char Closer { get; init; }
-    public required char Slash { get; init; }
+    public required char Terminator { get; init; }
     public required char EqSign { get; init; }
     public required char AltOpener { get; init; }
     public required string Separators { get; init; }

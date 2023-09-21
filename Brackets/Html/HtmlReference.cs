@@ -8,7 +8,7 @@ public class HtmlReference : Document.MarkupReference
     {
         Opener = '<',
         Closer = '>',
-        Slash = '/',
+        Terminator = '/',
         EqSign = '=',
         AltOpener = '!',
         Separators = " \r\n\t\xA0",

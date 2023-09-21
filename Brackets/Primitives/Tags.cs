@@ -115,7 +115,7 @@ namespace Brackets.Primitives
 
                 if (!tag.IsEmpty)
                 {
-                    var slashPos = tag[0] == this.stx.Slash ? 0 : tag[^1] == this.stx.Slash ? tag.Length - 1 : -1;
+                    var slashPos = tag[0] == this.stx.Terminator ? 0 : tag[^1] == this.stx.Terminator ? tag.Length - 1 : -1;
                     var spacePos = tag.IndexOfAny(this.stx.Separators);
                     var nameStartIdx = slashPos == 0 ? 1 : 0;
                     var nameEndIdx = spacePos > 0 ? spacePos : slashPos > 0 ? slashPos : ^0;
@@ -323,7 +323,7 @@ namespace Brackets.Primitives
                 if (this.span[^1] == this.stx.Closer)
                 {
                     var endIdx = ^1;
-                    if (this.span.Length > 1 && this.span[^2] == this.stx.Slash)
+                    if (this.span.Length > 1 && this.span[^2] == this.stx.Terminator)
                         endIdx = ^2;
                     this.span = this.span[..endIdx].TrimEnd(this.stx.Separators);
                 }
