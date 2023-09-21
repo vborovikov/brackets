@@ -7,7 +7,7 @@ namespace Brackets
         private readonly ReadOnlyMemory<char> text;
 
         public Root(RootReference rootReference, ReadOnlyMemory<char> text)
-            : base(rootReference, -1)
+            : base(rootReference, -1, -1)
         {
             this.text = text;
         }

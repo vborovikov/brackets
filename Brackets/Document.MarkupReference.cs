@@ -42,10 +42,11 @@
 
             private Root Parse(ReadOnlyMemory<char> text)
             {
+                var span = text.Span;
                 var tree = new Stack<ParentTag>();
                 tree.Push(new Root(this.rootReference, text));
 
-                foreach (var tag in Tags.Parse(text.Span, this.syntax))
+                foreach (var tag in Tags.Parse(span, this.syntax))
                 {
                     // skip comments
                     if (tag.Category == TagCategory.Comment)
@@ -91,7 +92,19 @@
                 // close unclosed tags
                 while (tree.Count > 1)
                 {
-                    tree.Pop();
+                    var unclosedTag = tree.Pop();
+                    if (!unclosedTag.IsClosedBy(span[unclosedTag.End..]))
+                    {
+                        var parentTag = tree.Peek();
+                        if (parentTag is Root)
+                            continue;
+
+                        var lostChild = unclosedTag.Abandon();
+                        if (lostChild is not null)
+                        {
+                            parentTag.Adopt(lostChild);
+                        }
+                    }
                 }
 
                 return (Root)tree.Pop();
@@ -115,6 +128,7 @@
             {
                 if (parent.IsClosedBy(tagSpan))
                 {
+                    parent.CloseAt(tagSpan.Index);
                     tree.Pop();
                 }
                 else
@@ -131,8 +145,9 @@
             private Tag CreateTag(TagSpan tagSpan)
             {
                 var reference = CreateOrFindTagReference(tagSpan);
-                Tag tag = tagSpan.Category != TagCategory.Unpaired && reference.IsParent ? 
-                    new ParentTag(reference, tagSpan.Index) : new Tag(reference, tagSpan.Index);
+                var tag = tagSpan.Category != TagCategory.Unpaired && reference.IsParent ?
+                    new ParentTag(reference, tagSpan.Index, tagSpan.Index + tagSpan.Span.Length) :
+                    new Tag(reference, tagSpan.Index, tagSpan.Index + tagSpan.Span.Length);
 
                 ParseAttributes(tag, tagSpan);
 

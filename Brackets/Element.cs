@@ -6,6 +6,7 @@
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.Text;
+    using System.Xml.Linq;
 
     public enum ElementLevel
     {
@@ -127,7 +128,7 @@
 
         protected internal abstract string ToDebugString();
 
-        protected static Element? Link(Element element, Tag parent, Element? sibling)
+        protected static Element Link(Element element, Tag parent, Element? sibling)
         {
             if (element.parent is not null)
                 throw new InvalidOperationException();
@@ -149,7 +150,7 @@
             return sibling;
         }
 
-        protected static Element? Unlink(Element element, Tag parent, Element? sibling)
+        protected static Element? Unlink(Element element, Tag parent, Element sibling)
         {
             if (element.parent is null || element.parent != parent)
                 throw new InvalidOperationException();
@@ -157,9 +158,10 @@
             if (sibling is null)
                 throw new InvalidOperationException();
 
+            var child = sibling;
             if (element.next == element)
             {
-                sibling = null;
+                child = null;
             }
             else
             {
@@ -168,7 +170,7 @@
 
                 if (sibling == element)
                 {
-                    sibling = elementNext;
+                    child = elementNext;
                 }
 
                 elementNext.prev = elementPrev;
@@ -178,7 +180,50 @@
             element.prev = element.next = element;
             element.parent = null;
 
-            return sibling;
+            return child;
+        }
+
+        protected static Element? Exclude(Element element)
+        {
+            if (element.next == element)
+            {
+                element.parent = null;
+                return element;
+            }
+
+            var elementPrev = element.prev;
+            var elementNext = element.next;
+            elementNext.prev = elementPrev;
+            elementPrev.next = elementNext;
+
+            element.prev = element.next = element;
+
+            return elementNext;
+        }
+
+        protected static Element Include(Element adopted, Tag parent, Element? child)
+        {
+            if (child is null)
+            {
+                child = adopted;
+            }
+            else
+            {
+                var lastChild = child.prev;
+                var lastAdopted = adopted.prev;
+                lastChild.next = adopted;
+                lastAdopted.next = child;
+                child.prev = lastAdopted;
+            }
+
+            var el = adopted;
+            do
+            {
+                el.parent = parent;
+                el = el.next;
+            } while (el != child);
+
+            return adopted;
         }
 
         protected internal Tag? Parent => this.parent;

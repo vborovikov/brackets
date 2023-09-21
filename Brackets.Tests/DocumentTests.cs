@@ -4,8 +4,10 @@
     using System.Linq;
     using System.Reflection;
     using System.Text;
+    using System.Text.RegularExpressions;
     using Brackets.Primitives;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Newtonsoft.Json.Linq;
 
     [TestClass]
     public class DocumentTests
@@ -84,9 +86,26 @@
                 </rss>
                 """);
 
+            AssertTags(document, "?xml", "rss");
+            AssertTags(document.Find<ParentTag>(t => t.Name == "channel"), 
+                "title", "link", "copyright", "lastBuildDate", "generator", "docs", "description");
+
             var linkTag = document.Find<ParentTag>(t => t.Name == "link");
             Assert.IsNotNull(linkTag);
             Assert.AreEqual(1, linkTag.Count());
+        }
+
+        private static void AssertTags(IEnumerable<Element> parent, params string[] tags)
+        {
+            var elements = parent.GetEnumerator();
+            foreach (var tag in tags)
+            {
+                do { Assert.IsTrue(elements.MoveNext()); }
+                while (elements.Current is not Tag);
+
+                Assert.AreEqual(tag, ((Tag)elements.Current).Name,
+                    $"Wrong element '{elements.Current.ToDebugString()}', expected '{tag}'.");
+            }
         }
     }
 }

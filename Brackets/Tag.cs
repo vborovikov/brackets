@@ -3,7 +3,6 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using Primitives;
 
     public class Tag : Element
     {
@@ -33,8 +32,11 @@
 
             public void Remove(Attribute attribute)
             {
-                --this.attributeCount;
-                this.attribute = (Attribute?)Unlink(attribute, this.owner, this.attribute);
+                if (this.attribute is not null)
+                {
+                    --this.attributeCount;
+                    this.attribute = (Attribute?)Unlink(attribute, this.owner, this.attribute);
+                }
             }
 
             public IEnumerator<Attribute> GetEnumerator()
@@ -53,11 +55,13 @@
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
 
-        private readonly TagReference reference;
+        protected readonly TagReference reference;
+        private int end;
 
-        public Tag(TagReference reference, int index) : base(index)
+        public Tag(TagReference reference, int index, int end) : base(index)
         {
             this.reference = reference;
+            this.end = end;
             this.Attributes = new AttributeCollection(this);
         }
 
@@ -68,6 +72,8 @@
         public override ElementLevel Level => this.reference.Level;
 
         public IAttributeCollection Attributes { get; }
+
+        public int End => this.end;
 
         public override string? ToString() => this.reference.ToString(this);
 
@@ -87,10 +93,15 @@
             if (other.IsEmpty)
                 return false;
 
-            var nameIdx = other.IndexOf(this.reference.Name, StringComparison.OrdinalIgnoreCase);
-            return 
+            var nameIdx = other.IndexOf(this.reference.Name, this.reference.Syntax.Comparison);
+            return
                 nameIdx == 0 ||
                 (nameIdx == 2 && other[0] == this.reference.Syntax.Opener && other[1] == this.reference.Syntax.Terminator);
+        }
+
+        internal void CloseAt(int index)
+        {
+            this.end = index;
         }
     }
 
@@ -98,7 +109,7 @@
     {
         private Element? child;
 
-        public ParentTag(TagReference reference, int index) : base(reference, index)
+        public ParentTag(TagReference reference, int index, int length) : base(reference, index, length)
         {
         }
 
@@ -137,7 +148,10 @@
 
         public void Remove(Element element)
         {
-            this.child = Unlink(element, this, this.child);
+            if (this.child is not null)
+            {
+                this.child = Unlink(element, this, this.child);
+            }
         }
 
         public Element? Find(Predicate<Element> match)
@@ -190,6 +204,19 @@
                 return String.Empty;
 
             return ToString(this);
+        }
+
+        internal Element? Abandon()
+        {
+            if (this.child is null)
+                return null;
+
+            return Exclude(this.child);
+        }
+
+        internal void Adopt(Element child)
+        {
+            this.child = Include(child, this, this.child);
         }
 
         protected internal override string ToDebugString()
