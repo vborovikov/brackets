@@ -4,6 +4,7 @@
     using System.Linq;
     using System.Reflection;
     using System.Text;
+    using Brackets.Primitives;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
@@ -62,6 +63,30 @@
             var docsTag = document.Find<ParentTag>(t => t.Name == "docs");
             Assert.IsNotNull(docsTag);
             Assert.AreEqual(0, docsTag.SkipWhile(el => el is Content).Count());
+        }
+
+        [TestMethod]
+        public void XmlParse_UnclosedTags_ClosedAfterContent()
+        {
+            var document = Document.Xml.Parse(
+                """
+                <?xml version="1.0" encoding="utf-8"?>
+                <rss version="2.0">
+                <channel>
+                <title>The Joy of Tech</title>
+                <link>http://www.geekculture.com/joyoftech/index.html
+                <copyright>Copyright 2023</copyright>
+                <lastBuildDate>Mon, 18 Sept 2023 00:00:01 EST</lastBuildDate>
+                <generator>manual</generator>
+                <docs>http://blogs.law.harvard.edu/tech/rss</x.html</link>
+                <description></description>docs>
+                </channel>
+                </rss>
+                """);
+
+            var linkTag = document.Find<ParentTag>(t => t.Name == "link");
+            Assert.IsNotNull(linkTag);
+            Assert.AreEqual(1, linkTag.Count());
         }
     }
 }

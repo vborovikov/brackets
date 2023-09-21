@@ -24,9 +24,9 @@
 
             internal ref readonly MarkupSyntax Syntax => ref this.syntax;
 
-            public Document Parse(string markup)
+            public Document Parse(string text)
             {
-                var root = Parse(markup.AsMemory());
+                var root = Parse(text.AsMemory());
                 return new Document(root);
             }
 
@@ -40,12 +40,12 @@
                 this.attributeReferences.Add(reference.Name, reference);
             }
 
-            private Root Parse(ReadOnlyMemory<char> markup)
+            private Root Parse(ReadOnlyMemory<char> text)
             {
                 var tree = new Stack<ParentTag>();
-                tree.Push(new Root(this.rootReference, markup));
+                tree.Push(new Root(this.rootReference, text));
 
-                foreach (var tag in Tags.Parse(markup.Span, this.syntax))
+                foreach (var tag in Tags.Parse(text.Span, this.syntax))
                 {
                     // skip comments
                     if (tag.Category == TagCategory.Comment)
