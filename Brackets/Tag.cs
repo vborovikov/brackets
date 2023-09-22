@@ -82,6 +82,47 @@
             return $"<{this.Name}/>";
         }
 
+        internal void CloseAt(int end)
+        {
+            this.end = end;
+        }
+    }
+
+    public class ParentTag : Tag, IEnumerable<Element>
+    {
+        private Element? child;
+
+        public ParentTag(TagReference reference, int start, int length) : base(reference, start, length)
+        {
+        }
+
+        public int ContentStart => this.child?.Start ?? -1;
+
+        public int ContentEnd => this.child?.Prev?.End ?? -1;
+
+        protected internal Element? Child => this.child;
+
+        internal bool IsClosed
+        {
+            get
+            {
+                var span = this.Source;
+                if (this.child is null)
+                {
+                    span = span[this.Start..this.End]
+                        .TrimEnd(this.reference.Syntax.Closer)
+                        .TrimEnd(this.reference.Syntax.Separators);
+                    return span.EndsWith(this.Name, this.reference.Syntax.Comparison);
+                }
+
+                span = span[this.child.Prev.End..]
+                    .TrimStart(this.reference.Syntax.Separators)
+                    .TrimStart(this.reference.Syntax.Opener)
+                    .TrimStart(this.reference.Syntax.Terminator);
+                return span.StartsWith(this.Name, this.reference.Syntax.Comparison);
+            }
+        }
+
         internal bool IsClosedBy(ReadOnlySpan<char> other)
         {
             if (this.reference.IsRoot)
@@ -98,23 +139,6 @@
                 nameIdx == 0 ||
                 (nameIdx == 2 && other[0] == this.reference.Syntax.Opener && other[1] == this.reference.Syntax.Terminator);
         }
-
-        internal void CloseAt(int index)
-        {
-            //todo: this must be the position after the closing tag for parent tags
-            this.end = index;
-        }
-    }
-
-    public class ParentTag : Tag, IEnumerable<Element>
-    {
-        private Element? child;
-
-        public ParentTag(TagReference reference, int start, int length) : base(reference, start, length)
-        {
-        }
-
-        protected internal Element? Child => this.child;
 
         public void Add(Element element)
         {

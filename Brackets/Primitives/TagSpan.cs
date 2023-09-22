@@ -14,6 +14,7 @@
 
         public ReadOnlySpan<char> Span { get; }
         public int Start { get; }
+        public int End => this.Start + this.Span.Length;
         public TagCategory Category { get; }
         public ReadOnlySpan<char> Name { get; init; }
 

@@ -93,7 +93,7 @@
                 while (tree.Count > 1)
                 {
                     var unclosedTag = tree.Pop();
-                    if (!unclosedTag.IsClosedBy(span[unclosedTag.End..]))
+                    if (!unclosedTag.IsClosed)
                     {
                         var parentTag = tree.Peek();
                         if (parentTag is Root)
@@ -139,7 +139,7 @@
                                     parentTag.Graft(tag);
                                 }
 
-                                tag.CloseAt(tagSpan.Start);
+                                tag.CloseAt(tagSpan.End);
                                 return;
                             }
                             else
