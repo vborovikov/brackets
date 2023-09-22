@@ -16,9 +16,12 @@ public class HtmlReference : Document.MarkupReference
         AttrSeparators = "= \r\n\t\xA0",
         QuotationMarks = "'\"",
         CommentOpener = "<!--",
+        CommentOpenerNB = "!--",
         CommentCloser = "-->",
         SectionOpener = "<![",
+        SectionOpenerNB = "![",
         SectionCloser = "]]>",
+        ContentOpener = '[',
     })
     {
         // void elements

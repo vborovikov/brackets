@@ -12,7 +12,10 @@ public readonly struct MarkupSyntax
     public required string AttrSeparators { get; init; }
     public required string QuotationMarks { get; init; }
     public required string CommentOpener { get; init; }
+    public required string CommentOpenerNB { get; init; }
     public required string CommentCloser { get; init; }
     public required string SectionOpener { get; init; }
+    public required string SectionOpenerNB { get; init; }
     public required string SectionCloser { get; init; }
+    public required char ContentOpener { get; init; }
 }

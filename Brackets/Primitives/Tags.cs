@@ -133,45 +133,42 @@ namespace Brackets.Primitives
                         };
                         name = tagName;
                     }
-                    else if (tagName[0] == this.stx.AltOpener && tagName.Length >= 3)
+                    else if (tagName.StartsWith(this.stx.CommentOpenerNB, this.stx.Comparison))
                     {
-                        if (tagName[1] == '-' && tagName[2] == '-')
+                        // <!-- ... -->
+
+                        category = TagCategory.Comment;
+
+                        var commentCloserPos = this.span.IndexOf(this.stx.CommentCloser, this.stx.Comparison);
+                        if (commentCloserPos > 0)
                         {
-                            // <!-- ... -->
+                            closerPos = commentCloserPos + this.stx.CommentCloser.Length - 1;
+                        }
+                        else
+                        {
+                            // treat the rest of the span as comment then
+                            closerPos = this.span.Length - 1;
+                        }
+                    }
+                    else if (tagName.StartsWith(this.stx.SectionOpenerNB, this.stx.Comparison))
+                    {
+                        // <![###[ ... ]]>
 
-                            category = TagCategory.Comment;
-
-                            var commentCloserPos = this.span.IndexOf(this.stx.CommentCloser, this.stx.Comparison);
-                            if (commentCloserPos > 0)
+                        var sectionCloserPos = this.span.IndexOf(this.stx.SectionCloser, this.stx.Comparison);
+                        if (sectionCloserPos > 0)
+                        {
+                            closerPos = sectionCloserPos + this.stx.SectionCloser.Length - 1;
+                            var nameEndPos = tagName[this.stx.SectionOpenerNB.Length..].IndexOf(this.stx.ContentOpener);
+                            if (nameEndPos > 0)
                             {
-                                closerPos = commentCloserPos + this.stx.CommentCloser.Length - 1;
-                            }
-                            else
-                            {
-                                // treat the rest of the span as comment then
-                                closerPos = this.span.Length - 1;
+                                name = tagName[this.stx.SectionOpenerNB.Length..(nameEndPos + this.stx.SectionOpenerNB.Length)];
+                                category = TagCategory.Section;
                             }
                         }
-                        else if (tagName[1] == '[')
+                        else
                         {
-                            // <![###[ ... ]]>
-
-                            var sectionCloserPos = this.span.IndexOf(this.stx.SectionCloser, this.stx.Comparison);
-                            if (sectionCloserPos > 0)
-                            {
-                                closerPos = sectionCloserPos + this.stx.SectionCloser.Length - 1;
-                                var nameEndPos = tagName[2..].IndexOf('[');
-                                if (nameEndPos > 0)
-                                {
-                                    name = tagName[2..(nameEndPos + 2)];
-                                    category = TagCategory.Section;
-                                }
-                            }
-                            else
-                            {
-                                // section is incorrect
-                                tagNameIsValid = false;
-                            }
+                            // section is incorrect
+                            tagNameIsValid = false;
                         }
                     }
                     else
