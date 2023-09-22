@@ -266,16 +266,8 @@
 
             if (this.child is not null)
             {
-                var lastChild = this.child.Prev;
-                if (lastChild is Tag tag)
-                {
-                    //todo: hack, add Length property to Element
-                    CloseAt(tag.End + tag.Name.Length + 3);
-                }
-                else if (lastChild is Content content)
-                {
-                    CloseAt(content.Start + content.Length);
-                }
+                //todo: find the closing tag end position
+                CloseAt(this.child.Prev.End);
             }
         }
 
