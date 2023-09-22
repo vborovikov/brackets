@@ -4,30 +4,30 @@
 
     public class Content : Element
     {
-        private int length;
+        private int end;
 
-        public Content(int index, int length) : base(index)
+        public Content(int start, int length) : base(start)
         {
-            this.length = length;
+            this.end = start + length;
         }
 
-        public int Length => this.length;
+        public sealed override int End => this.end;
 
         public override string? ToString()
         {
-            return this.Source.Slice(this.Index, this.length).ToString();
+            return this.Source[this.Start..this.End].ToString();
         }
 
         protected internal override string ToDebugString()
         {
-            return String.Concat(this.Source[this.Index..].TrimStart()[..Math.Min(3, this.length)], "\u2026");
+            return String.Concat(this.Source[this.Start..].TrimStart()[..Math.Min(3, this.Length)], "\u2026");
         }
 
         internal bool TryAdd(Content content)
         {
-            if (content.Index == (this.Index + this.length))
+            if (content.Start == this.End)
             {
-                this.length += content.length;
+                this.end = content.end;
                 return true;
             }
 
@@ -36,7 +36,7 @@
 
         public bool Contains(ReadOnlySpan<char> text)
         {
-            return this.Source.Slice(this.Index, this.length).Contains(text, StringComparison.CurrentCultureIgnoreCase);
+            return this.Source[this.Start..this.End].Contains(text, StringComparison.CurrentCultureIgnoreCase);
         }
     }
 }

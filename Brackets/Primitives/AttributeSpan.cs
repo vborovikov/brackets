@@ -4,15 +4,15 @@ namespace Brackets.Primitives
 
     public readonly ref struct AttributeSpan
     {
-        public AttributeSpan(ReadOnlySpan<char> span, int index, AttributeCategory category)
+        public AttributeSpan(ReadOnlySpan<char> span, int start, AttributeCategory category)
         {
             this.Span = span;
-            this.Index = index;
+            this.Start = start;
             this.Category = category;
         }
 
         public ReadOnlySpan<char> Span { get; }
-        public int Index { get; }
+        public int Start { get; }
         public AttributeCategory Category { get; }
 
         public bool IsEmpty => this.Span.IsEmpty;

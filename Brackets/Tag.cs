@@ -58,10 +58,10 @@
         protected readonly TagReference reference;
         private int end;
 
-        public Tag(TagReference reference, int index, int end) : base(index)
+        public Tag(TagReference reference, int start, int length) : base(start)
         {
             this.reference = reference;
-            this.end = end;
+            this.end = start + length;
             this.Attributes = new AttributeCollection(this);
         }
 
@@ -73,7 +73,7 @@
 
         public IAttributeCollection Attributes { get; }
 
-        public int End => this.end;
+        public sealed override int End => this.end;
 
         public override string? ToString() => this.reference.ToString(this);
 
@@ -101,6 +101,7 @@
 
         internal void CloseAt(int index)
         {
+            //todo: this must be the position after the closing tag for parent tags
             this.end = index;
         }
     }
@@ -109,7 +110,7 @@
     {
         private Element? child;
 
-        public ParentTag(TagReference reference, int index, int length) : base(reference, index, length)
+        public ParentTag(TagReference reference, int start, int length) : base(reference, start, length)
         {
         }
 
@@ -249,7 +250,7 @@
                 }
                 else if (lastChild is Content content)
                 {
-                    CloseAt(content.Index + content.Length);
+                    CloseAt(content.Start + content.Length);
                 }
             }
         }

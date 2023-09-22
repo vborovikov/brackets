@@ -139,7 +139,7 @@
                                     parentTag.Graft(tag);
                                 }
 
-                                tag.CloseAt(tagSpan.Index);
+                                tag.CloseAt(tagSpan.Start);
                                 return;
                             }
                             else
@@ -157,15 +157,15 @@
 
             private static Content CreateContent(TagSpan tagSpan)
             {
-                return new Content(tagSpan.Index, tagSpan.Span.Length);
+                return new Content(tagSpan.Start, tagSpan.Span.Length);
             }
 
             private Tag CreateTag(TagSpan tagSpan)
             {
                 var reference = CreateOrFindTagReference(tagSpan);
                 var tag = tagSpan.Category != TagCategory.Unpaired && reference.IsParent ?
-                    new ParentTag(reference, tagSpan.Index, tagSpan.Index + tagSpan.Span.Length) :
-                    new Tag(reference, tagSpan.Index, tagSpan.Index + tagSpan.Span.Length);
+                    new ParentTag(reference, tagSpan.Start, tagSpan.Span.Length) :
+                    new Tag(reference, tagSpan.Start, tagSpan.Span.Length);
 
                 ParseAttributes(tag, tagSpan);
 
@@ -194,8 +194,8 @@
             {
                 var reference = CreateOrFindAttributeReference(name);
                 return value.IsEmpty ?
-                    new Attribute(reference, name.Index, name.Span.Length) :
-                    new Attribute(reference, name.Index, name.Span.Length, value.Index, value.Span.Length);
+                    new Attribute(reference, name.Start, name.Span.Length) :
+                    new Attribute(reference, name.Start, name.Span.Length, value.Start, value.Span.Length);
             }
 
             private TagReference CreateOrFindTagReference(TagSpan tagSpan)

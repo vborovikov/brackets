@@ -6,7 +6,6 @@
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.Text;
-    using System.Xml.Linq;
 
     public enum ElementLevel
     {
@@ -21,15 +20,19 @@
         private Element prev;
         private Element next;
 
-        protected Element(int index)
+        protected Element(int start)
         {
             this.prev = this.next = this;
-            this.Index = index;
+            this.Start = start;
         }
 
         public virtual ElementLevel Level => ElementLevel.Inline;
 
-        public int Index { get; }
+        public int Start { get; }
+
+        public abstract int End { get; }
+
+        public int Length => this.End - this.Start;
 
         public int NestingLevel
         {

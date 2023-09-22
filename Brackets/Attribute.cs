@@ -10,30 +10,32 @@ namespace Brackets
     {
         private readonly AttributeReference reference;
         private readonly int length;
-        private readonly int valueIndex;
+        private readonly int valueStart;
         private readonly int valueLength;
 
-        public Attribute(AttributeReference reference, int index, int length)
-            : this(reference, index, length, index, length)
+        public Attribute(AttributeReference reference, int start, int length)
+            : this(reference, start, length, start, length)
         {
         }
 
-        public Attribute(AttributeReference reference, int index, int length, int valueIndex, int valueLength)
-            : base(index)
+        public Attribute(AttributeReference reference, int start, int length, int valueStart, int valueLength)
+            : base(start)
         {
             this.reference = reference;
             this.length = length;
-            this.valueIndex = valueIndex;
+            this.valueStart = valueStart;
             this.valueLength = valueLength;
         }
+
+        public sealed override int End => this.valueStart + this.valueLength;
 
         public string Name => this.reference.Name;
 
         public bool IsFlag => this.reference.IsFlag || !this.HasValue;
 
-        public bool HasValue => this.Index < this.valueIndex;
+        public bool HasValue => this.Start < this.valueStart;
 
-        public ReadOnlySpan<char> Value => this.Source.Slice(this.valueIndex, this.valueLength);
+        public ReadOnlySpan<char> Value => this.Source.Slice(this.valueStart, this.valueLength);
 
         public override string? ToString()
         {

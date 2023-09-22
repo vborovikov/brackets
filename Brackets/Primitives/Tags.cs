@@ -58,14 +58,14 @@ namespace Brackets.Primitives
             private readonly ReadOnlySpan<char> text;
             private readonly ref readonly MarkupSyntax stx;
             private ReadOnlySpan<char> span;
-            private int index;
+            private int start;
 
             public TagEnumerator(ReadOnlySpan<char> text, in MarkupSyntax syntax)
             {
                 this.text = text;
                 this.stx = ref syntax;
                 this.span = text;
-                this.index = 0;
+                this.start = 0;
                 this.Current = default;
             }
 
@@ -74,7 +74,7 @@ namespace Brackets.Primitives
             public void Reset()
             {
                 this.span = this.text;
-                this.index = 0;
+                this.start = 0;
                 this.Current = default;
             }
 
@@ -91,8 +91,8 @@ namespace Brackets.Primitives
                 if (openerPos < 0 || closerPos < 0)
                 {
                     // no more tags
-                    this.Current = new TagSpan(this.span, this.index, TagCategory.Content);
-                    this.index += this.span.Length;
+                    this.Current = new TagSpan(this.span, this.start, TagCategory.Content);
+                    this.start += this.span.Length;
                     this.span = default;
 
                     return true;
@@ -101,8 +101,8 @@ namespace Brackets.Primitives
                 if (openerPos > 0)
                 {
                     // there is a content before the tag
-                    this.Current = new TagSpan(this.span[0..openerPos], this.index, TagCategory.Content);
-                    this.index += openerPos;
+                    this.Current = new TagSpan(this.span[0..openerPos], this.start, TagCategory.Content);
+                    this.start += openerPos;
                     this.span = this.span.Slice(openerPos);
 
                     return true;
@@ -192,8 +192,8 @@ namespace Brackets.Primitives
                 }
 
                 var afterCloserPos = closerPos + 1;
-                this.Current = new TagSpan(this.span[openerPos..afterCloserPos], this.index, category) { Name = name };
-                this.index += afterCloserPos;
+                this.Current = new TagSpan(this.span[openerPos..afterCloserPos], this.start, category) { Name = name };
+                this.start += afterCloserPos;
                 this.span = this.span.Slice(afterCloserPos);
 
                 return true;
@@ -205,14 +205,14 @@ namespace Brackets.Primitives
             private readonly TagSpan tag;
             private readonly ref readonly MarkupSyntax stx;
             private ReadOnlySpan<char> span;
-            private int index;
+            private int start;
 
             public AttributeEnumerator(TagSpan tag, in MarkupSyntax syntax)
             {
                 this.tag = tag;
                 this.stx = ref syntax;
                 this.span = tag;
-                this.index = tag.Index;
+                this.start = tag.Start;
                 this.Current = default;
                 StripTag();
             }
@@ -222,7 +222,7 @@ namespace Brackets.Primitives
             public void Reset()
             {
                 this.span = this.tag;
-                this.index = this.tag.Index;
+                this.start = this.tag.Start;
                 this.Current = default;
                 StripTag();
             }
@@ -294,9 +294,9 @@ namespace Brackets.Primitives
                     }
                 }
 
-                this.Current = new AttributeSpan(this.span[startPos..endPos], this.index + startPos, category);
+                this.Current = new AttributeSpan(this.span[startPos..endPos], this.start + startPos, category);
                 this.span = this.span[skipPos..];
-                this.index += skipPos;
+                this.start += skipPos;
 
                 return true;
             }
@@ -313,12 +313,12 @@ namespace Brackets.Primitives
                 // skip the first space character
                 var afterSpacePos = spacePos + 1;
                 this.span = this.span[afterSpacePos..];
-                this.index += afterSpacePos;
+                this.start += afterSpacePos;
 
                 // skip the rest of space characters if any
                 afterSpacePos = this.span.IndexOfAnyExcept(this.stx.Separators);
                 this.span = this.span[afterSpacePos..];
-                this.index += afterSpacePos;
+                this.start += afterSpacePos;
 
                 if (this.span[^1] == this.stx.Closer)
                 {

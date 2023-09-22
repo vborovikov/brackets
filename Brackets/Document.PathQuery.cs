@@ -32,6 +32,8 @@ public partial class Document
             this.Value = value;
         }
 
+        public override int End => -1;
+
         public DataType DataType { get; }
 
         public object Value { get; }

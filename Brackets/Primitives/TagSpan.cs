@@ -4,16 +4,16 @@
 
     public readonly ref struct TagSpan
     {
-        public TagSpan(ReadOnlySpan<char> span, int index, TagCategory category)
+        public TagSpan(ReadOnlySpan<char> span, int start, TagCategory category)
         {
             this.Span = span;
-            this.Index = index;
+            this.Start = start;
             this.Category = category;
             this.Name = ReadOnlySpan<char>.Empty;
         }
 
         public ReadOnlySpan<char> Span { get; }
-        public int Index { get; }
+        public int Start { get; }
         public TagCategory Category { get; }
         public ReadOnlySpan<char> Name { get; init; }
 
