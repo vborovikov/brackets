@@ -158,18 +158,13 @@
             this.child = Link(element, this, this.child);
         }
 
-        public IEnumerator<Element> GetEnumerator()
-        {
-            if (this.child is null)
-                yield break;
+        public Enumerator GetEnumerator() => new(this.child);
 
-            var element = this.child;
-            do
-            {
-                yield return element;
-                element = element.Next;
-            } while (element != this.child);
-        }
+        IEnumerator<Element> IEnumerable<Element>.GetEnumerator() =>
+            this.child is null ? ((IEnumerable<Element>)Array.Empty<Element>()).GetEnumerator() : GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() =>
+            ((IEnumerable<Element>)this).GetEnumerator();
 
         public void Remove(Element element)
         {
@@ -275,7 +270,5 @@
         {
             return $"<{this.Name}>\u2026</{this.Name}>";
         }
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

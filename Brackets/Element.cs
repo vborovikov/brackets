@@ -1,6 +1,7 @@
 ﻿namespace Brackets
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.Diagnostics;
@@ -140,6 +141,7 @@
             if (sibling is null)
             {
                 sibling = element;
+                sibling.prev = sibling.next = sibling;
             }
             else
             {
@@ -238,6 +240,47 @@
         protected internal Element Next => this.next;
 
         protected internal Element Prev => this.prev;
+
+        public struct Enumerator : IEnumerator<Element>
+        {
+            private readonly Element? first;
+            private Element? node;
+            private Element? current;
+
+            internal Enumerator(Element? node)
+            {
+                this.first = node;
+                this.node = node;
+            }
+
+            public readonly Element Current => this.current!;
+            readonly object IEnumerator.Current => this.current!;
+
+            public readonly void Dispose()
+            {
+            }
+
+            public bool MoveNext()
+            {
+                if (this.node is null)
+                    return false;
+
+                this.current = this.node;
+                this.node = this.node.next;
+                if (this.node == this.first)
+                {
+                    this.node = null;
+                }
+
+                return true;
+            }
+
+            public void Reset()
+            {
+                this.node = this.first;
+                this.current = null;
+            }
+        }
     }
 
     public static class ElementExtensions

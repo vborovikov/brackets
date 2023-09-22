@@ -69,9 +69,13 @@
             return pathQuery.Run(this);
         }
 
-        public IEnumerator<Element> GetEnumerator() => this.root.GetEnumerator();
+        public Element.Enumerator GetEnumerator() => this.root.GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        IEnumerator<Element> IEnumerable<Element>.GetEnumerator() =>
+            ((IEnumerable<Element>)this.root).GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() =>
+            ((IEnumerable<Element>)this.root).GetEnumerator();
     }
 
     public static class DocumentExtensions
@@ -81,7 +85,7 @@
             str = default;
             if (String.IsNullOrWhiteSpace(path))
                 return false;
-            
+
             var elements = document.Find(path);
             return elements.FirstOrDefault()?.TryGetValue(out str) == true;
         }
