@@ -141,7 +141,7 @@ namespace Brackets.Primitives
 
                             category = TagCategory.Comment;
 
-                            var commentCloserPos = this.span.IndexOf(this.stx.CommentCloser, StringComparison.Ordinal);
+                            var commentCloserPos = this.span.IndexOf(this.stx.CommentCloser, this.stx.Comparison);
                             if (commentCloserPos > 0)
                             {
                                 closerPos = commentCloserPos + this.stx.CommentCloser.Length - 1;
@@ -156,7 +156,7 @@ namespace Brackets.Primitives
                         {
                             // <![###[ ... ]]>
 
-                            var sectionCloserPos = this.span.IndexOf(this.stx.SectionCloser, StringComparison.Ordinal);
+                            var sectionCloserPos = this.span.IndexOf(this.stx.SectionCloser, this.stx.Comparison);
                             if (sectionCloserPos > 0)
                             {
                                 closerPos = sectionCloserPos + this.stx.SectionCloser.Length - 1;

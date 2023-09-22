@@ -183,47 +183,51 @@
             return child;
         }
 
-        protected static Element? Exclude(Element element)
+        protected static Element? Prune(Element element, Element sibling)
         {
-            if (element.next == element)
+            if (element == sibling)
             {
                 element.parent = null;
-                return element;
+                return null;
             }
 
-            var elementPrev = element.prev;
-            var elementNext = element.next;
-            elementNext.prev = elementPrev;
-            elementPrev.next = elementNext;
+            var lastElement = sibling.prev;
+            var lastSibling = element.prev;
 
-            element.prev = element.next = element;
+            lastSibling.next = sibling;
+            sibling.prev = lastSibling;
 
-            return elementNext;
+            lastElement.next = element;
+            element.prev = lastElement;
+
+            return sibling;
         }
 
-        protected static Element Include(Element adopted, Tag parent, Element? child)
+        protected static Element Graft(Element child, Tag parent, Element? sibling)
         {
-            if (child is null)
+            // connect
+            if (sibling is null)
             {
-                child = adopted;
+                sibling = child;
             }
             else
             {
-                var lastChild = child.prev;
-                var lastAdopted = adopted.prev;
-                lastChild.next = adopted;
-                lastAdopted.next = child;
-                child.prev = lastAdopted;
+                var lastChild = sibling.prev;
+                var lastAdopted = child.prev;
+                lastChild.next = child;
+                lastAdopted.next = sibling;
+                sibling.prev = lastAdopted;
             }
 
-            var el = adopted;
+            // adopt
+            var el = child;
             do
             {
                 el.parent = parent;
                 el = el.next;
-            } while (el != child);
+            } while (el != sibling);
 
-            return adopted;
+            return sibling;
         }
 
         protected internal Tag? Parent => this.parent;

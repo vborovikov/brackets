@@ -17,8 +17,8 @@
             protected MarkupReference(in MarkupSyntax syntax)
             {
                 this.syntax = syntax;
-                this.tagReferences = new(StringComparison.OrdinalIgnoreCase);
-                this.attributeReferences = new(StringComparison.OrdinalIgnoreCase);
+                this.tagReferences = new(this.syntax.Comparison);
+                this.attributeReferences = new(this.syntax.Comparison);
                 this.rootReference = new RootReference(this);
             }
 
@@ -99,11 +99,7 @@
                         if (parentTag is Root)
                             continue;
 
-                        var lostChild = unclosedTag.Abandon();
-                        if (lostChild is not null)
-                        {
-                            parentTag.Adopt(lostChild);
-                        }
+                        parentTag.Graft(unclosedTag);
                     }
                 }
 
@@ -126,18 +122,40 @@
 
             private void ParseClosingTag(TagSpan tagSpan, ParentTag parent, Stack<ParentTag> tree)
             {
-                if (parent.IsClosedBy(tagSpan))
+                // close the current tag
+                // also special handling for a misplaced closing tag
+                foreach (var unclosedTag in tree)
                 {
-                    parent.CloseAt(tagSpan.Index);
-                    tree.Pop();
+                    if (unclosedTag.IsClosedBy(tagSpan))
+                    {
+                        while (tree.Count > 1)
+                        {
+                            var tag = tree.Pop();
+                            if (tag == unclosedTag)
+                            {
+                                if (tag != parent)
+                                {
+                                    var parentTag = tree.Peek();
+                                    parentTag.Graft(tag);
+                                }
+
+                                tag.CloseAt(tagSpan.Index);
+                                return;
+                            }
+                            else
+                            {
+                                var parentTag = tree.Peek();
+                                parentTag.Graft(tag);
+                            }
+                        }
+                    }
                 }
-                else
-                {
-                    parent.Add(CreateContent(tagSpan));
-                }
+
+                // there was no opening tag for this closing tag, turn it into content
+                parent.Add(CreateContent(tagSpan));
             }
 
-            private Content CreateContent(TagSpan tagSpan)
+            private static Content CreateContent(TagSpan tagSpan)
             {
                 return new Content(tagSpan.Index, tagSpan.Span.Length);
             }
@@ -184,7 +202,7 @@
             {
                 if (!this.tagReferences.TryGetValue(tagSpan.Name, out var reference))
                 {
-                    reference = new TagReference(ToLowerInvariant(tagSpan.Name), this);
+                    reference = new TagReference(tagSpan.Name.ToString(), this);
                     AddReference(reference);
                 }
 
@@ -195,18 +213,11 @@
             {
                 if (!this.attributeReferences.TryGetValue(attr, out var reference))
                 {
-                    reference = new AttributeReference(ToLowerInvariant(attr), this);
+                    reference = new AttributeReference(attr.Span.ToString(), this);
                     AddReference(reference);
                 }
 
                 return reference;
-            }
-
-            private static string ToLowerInvariant(ReadOnlySpan<char> span)
-            {
-                Span<char> buffer = stackalloc char[span.Length];
-                span.ToLowerInvariant(buffer);
-                return buffer.ToString();
             }
         }
     }

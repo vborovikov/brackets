@@ -11,6 +11,8 @@
             this.length = length;
         }
 
+        public int Length => this.length;
+
         public override string? ToString()
         {
             return this.Source.Slice(this.Index, this.length).ToString();

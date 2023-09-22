@@ -206,17 +206,52 @@
             return ToString(this);
         }
 
-        internal Element? Abandon()
+        internal void Graft(ParentTag other)
+        {
+            var element = other.Prune();
+            if (element is not null)
+            {
+                Graft(element);
+            }
+        }
+
+        private Element? Prune()
         {
             if (this.child is null)
                 return null;
 
-            return Exclude(this.child);
+            var tag = this.child;
+            do
+            {
+                if (tag is Tag)
+                {
+                    this.child = Prune(tag, this.child);
+                    return tag;
+                }
+                tag = tag.Next;
+            }
+            while (tag != this.child);
+
+            return null;
         }
 
-        internal void Adopt(Element child)
+        private void Graft(Element child)
         {
-            this.child = Include(child, this, this.child);
+            this.child = Graft(child, this, this.child);
+
+            if (this.child is not null)
+            {
+                var lastChild = this.child.Prev;
+                if (lastChild is Tag tag)
+                {
+                    //todo: hack, add Length property to Element
+                    CloseAt(tag.End + tag.Name.Length + 3);
+                }
+                else if (lastChild is Content content)
+                {
+                    CloseAt(content.Index + content.Length);
+                }
+            }
         }
 
         protected internal override string ToDebugString()
