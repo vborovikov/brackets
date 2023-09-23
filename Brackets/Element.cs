@@ -235,7 +235,7 @@
             return sibling;
         }
 
-        protected internal Tag? Parent => this.parent;
+        public Tag? Parent => this.parent;
 
         protected internal Element Next => this.next;
 
