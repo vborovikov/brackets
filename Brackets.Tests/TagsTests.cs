@@ -107,6 +107,22 @@
         }
 
         [TestMethod]
+        public void ParseAttributes_Prolog_QuestionMarkIgnored()
+        {
+            var tags = Tags.Parse("""<?xml version="1.0" encoding="utf-8"?>""", Document.Xml.Syntax);
+            Assert.IsTrue(tags.MoveNext());
+
+            var prolog = tags.Current;
+            var attrs = Tags.ParseAttributes(prolog, Document.Xml.Syntax);
+            
+            Assert.IsTrue(attrs.MoveNext()); // version
+            Assert.IsTrue(attrs.MoveNext()); // "1.0"
+            Assert.IsTrue(attrs.MoveNext()); // encoding
+            Assert.IsTrue(attrs.MoveNext()); // "utf-8"
+            Assert.AreEqual("\"utf-8\"", attrs.Current.Span.ToString());
+        }
+
+        [TestMethod]
         public void Tags_UnclosedTag_HasOnlyContent()
         {
             var tags = Tags.Parse(

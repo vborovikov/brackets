@@ -39,7 +39,8 @@ namespace Brackets.Primitives
                     ((uint)((c | 0x20) - 'a') <= 'z' - 'a') ||
                     ((uint)(c - '0') <= 9u) ||
                     (c == '-') ||
-                    (c == '_')
+                    (c == '_') ||
+                    (c == ':')
                    ))
                 {
                     // c is not an ASCII letter or digit or dash or underscrore
@@ -320,7 +321,7 @@ namespace Brackets.Primitives
                 if (this.span[^1] == this.stx.Closer)
                 {
                     var endIdx = ^1;
-                    if (this.span.Length > 1 && this.span[^2] == this.stx.Terminator)
+                    if (this.span.Length > 1 && (this.span[^2] == this.stx.Terminator || this.span[^2] == this.stx.AltOpener))
                         endIdx = ^2;
                     this.span = this.span[..endIdx].TrimEnd(this.stx.Separators);
                 }

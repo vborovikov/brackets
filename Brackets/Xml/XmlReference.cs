@@ -25,6 +25,7 @@ public class XmlReference : Document.MarkupReference
     })
     {
         // void elements
-        AddReference(new TagReference("?xml", this) { IsParent = false });
+        AddReference(new TagReference("?xml", this) { IsParent = false, Level = ElementLevel.Inline });
+        AddReference(new TagReference("?xml-stylesheet", this) { IsParent = false, Level = ElementLevel.Inline });
     }
 }

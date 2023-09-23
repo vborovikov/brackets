@@ -1,5 +1,6 @@
 ﻿namespace Brackets.Primitives;
 
+//todo: make it an abstract class?
 public readonly struct MarkupSyntax
 {
     public required StringComparison Comparison { get; init; }
