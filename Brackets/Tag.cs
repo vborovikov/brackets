@@ -39,20 +39,13 @@
                 }
             }
 
-            public IEnumerator<Attribute> GetEnumerator()
-            {
-                if (this.attribute is null)
-                    yield break;
+            public Attribute.Enumerator GetEnumerator() => new(this.attribute);
 
-                var attr = this.attribute;
-                do
-                {
-                    yield return attr;
-                    attr = (Attribute)attr.Next;
-                } while (attr != this.attribute);
-            }
+            IEnumerator<Attribute> IEnumerable<Attribute>.GetEnumerator() =>
+                this.attribute is null ? ((IEnumerable<Attribute>)Array.Empty<Attribute>()).GetEnumerator() : GetEnumerator();
 
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+            IEnumerator IEnumerable.GetEnumerator() =>
+                ((IEnumerable<Attribute>)this).GetEnumerator();
         }
 
         protected readonly TagReference reference;

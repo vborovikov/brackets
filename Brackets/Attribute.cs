@@ -1,6 +1,7 @@
 namespace Brackets
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
@@ -64,6 +65,47 @@ namespace Brackets
         {
             return this.HasValue ? $"{this.reference.Name}={this.Value.ToString()}" : this.reference.Name;
         }
+
+        public new struct Enumerator : IEnumerator<Attribute>
+        {
+            private readonly Attribute? first;
+            private Attribute? sibling;
+            private Attribute? current;
+
+            internal Enumerator(Attribute? node)
+            {
+                this.first = node;
+                this.sibling = node;
+            }
+
+            public readonly Attribute Current => this.current!;
+            readonly object IEnumerator.Current => this.current!;
+
+            public readonly void Dispose()
+            {
+            }
+
+            public bool MoveNext()
+            {
+                if (this.sibling is null)
+                    return false;
+
+                this.current = this.sibling;
+                this.sibling = (Attribute)this.sibling.Next;
+                if (this.sibling == this.first)
+                {
+                    this.sibling = null;
+                }
+
+                return true;
+            }
+
+            public void Reset()
+            {
+                this.sibling = this.first;
+                this.current = null;
+            }
+        }
     }
 
     public interface IAttributeCollection : IEnumerable<Attribute>
@@ -72,5 +114,7 @@ namespace Brackets
 
         void Add(Attribute attribute);
         void Remove(Attribute attribute);
+
+        new Attribute.Enumerator GetEnumerator();
     }
 }
