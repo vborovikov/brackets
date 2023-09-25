@@ -11,9 +11,11 @@ namespace Brackets.Primitives
             this.Category = category;
         }
 
+        public AttributeCategory Category { get; }
         public ReadOnlySpan<char> Span { get; }
         public int Start { get; }
-        public AttributeCategory Category { get; }
+        public int End => this.Start + this.Span.Length;
+        public int Length => this.Span.Length;
 
         public bool IsEmpty => this.Span.IsEmpty;
 

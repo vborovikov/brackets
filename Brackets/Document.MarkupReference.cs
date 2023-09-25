@@ -85,6 +85,10 @@
                             case TagCategory.Closing:
                                 ParseClosingTag(tag, parent, tree);
                                 break;
+
+                            case TagCategory.Section:
+                                ParseSection(tag, parent, tree);
+                                break;
                         }
                     }
                 }
@@ -104,6 +108,11 @@
                 }
 
                 return (Root)tree.Pop();
+            }
+
+            private void ParseSection(TagSpan tagSpan, ParentTag parent, Stack<ParentTag> tree)
+            {
+                //todo: parent.Add(new Section(tagSpan.Start, tagSpan.Length, ));
             }
 
             private void ParseContent(TagSpan tagSpan, ParentTag parent)
@@ -157,15 +166,15 @@
 
             private static Content CreateContent(TagSpan tagSpan)
             {
-                return new Content(tagSpan.Start, tagSpan.Span.Length);
+                return new Content(tagSpan.Start, tagSpan.Length);
             }
 
             private Tag CreateTag(TagSpan tagSpan)
             {
                 var reference = CreateOrFindTagReference(tagSpan);
                 var tag = tagSpan.Category != TagCategory.Unpaired && reference.IsParent ?
-                    new ParentTag(reference, tagSpan.Start, tagSpan.Span.Length) :
-                    new Tag(reference, tagSpan.Start, tagSpan.Span.Length);
+                    new ParentTag(reference, tagSpan.Start, tagSpan.Length) :
+                    new Tag(reference, tagSpan.Start, tagSpan.Length);
 
                 ParseAttributes(tag, tagSpan);
 
@@ -194,8 +203,8 @@
             {
                 var reference = CreateOrFindAttributeReference(name);
                 return value.IsEmpty ?
-                    new Attribute(reference, name.Start, name.Span.Length) :
-                    new Attribute(reference, name.Start, name.Span.Length, value.Start, value.Span.Length);
+                    new Attribute(reference, name.Start, name.Length) :
+                    new Attribute(reference, name.Start, name.Length, value.Start, value.Length);
             }
 
             private TagReference CreateOrFindTagReference(TagSpan tagSpan)
