@@ -61,7 +61,7 @@ namespace Brackets
             return TryGetValue(ToString(), out value);
         }
 
-        protected internal override string ToDebugString()
+        internal override string ToDebugString()
         {
             return this.HasValue ? $"{this.reference.Name}={this.Value.ToString()}" : this.reference.Name;
         }

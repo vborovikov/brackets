@@ -45,7 +45,7 @@ public partial class Document
             return this.Value.ToString();
         }
 
-        protected internal override string ToDebugString() => this.Value.ToString() ?? string.Empty;
+        internal override string ToDebugString() => this.Value.ToString() ?? string.Empty;
 
         public static DataElement From(int number) => new(DataType.Number, number);
         public static DataElement From(string text) => new(DataType.Text, text);

@@ -130,7 +130,7 @@
             return false;
         }
 
-        protected internal abstract string ToDebugString();
+        internal abstract string ToDebugString();
 
         protected static Element Link(Element element, Tag parent, Element? sibling)
         {

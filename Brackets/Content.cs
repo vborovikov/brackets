@@ -18,12 +18,12 @@
             return this.Source[this.Start..this.End].ToString();
         }
 
-        protected internal override string ToDebugString()
+        internal override string ToDebugString()
         {
-            return String.Concat(this.Source[this.Start..].TrimStart()[..Math.Min(3, this.Length)], "\u2026");
+            return String.Concat(this.Source[this.Start..].TrimStart()[..Math.Min(15, this.Length)], "\u2026");
         }
 
-        internal bool TryAdd(Content content)
+        internal virtual bool TryAdd(Content content)
         {
             if (content.Start == this.End)
             {
@@ -38,5 +38,25 @@
         {
             return this.Source[this.Start..this.End].Contains(text, StringComparison.CurrentCultureIgnoreCase);
         }
+    }
+
+    public class Section : Content
+    {
+        private readonly int dataStart;
+        private readonly int dataLength;
+
+        public Section(int start, int length, int dataStart, int dataLength)
+            : base(start, length)
+        {
+            this.dataStart = dataStart;
+            this.dataLength = dataLength;
+        }
+
+        public override string? ToString()
+        {
+            return this.Source.Slice(this.dataStart, this.dataLength).ToString();
+        }
+
+        internal override bool TryAdd(Content content) => false;
     }
 }

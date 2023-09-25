@@ -70,7 +70,7 @@
 
         public override string? ToString() => this.reference.ToString(this);
 
-        protected internal override string ToDebugString()
+        internal override string ToDebugString()
         {
             return $"<{this.Name}/>";
         }
@@ -259,7 +259,7 @@
             }
         }
 
-        protected internal override string ToDebugString()
+        internal override string ToDebugString()
         {
             return $"<{this.Name}>\u2026</{this.Name}>";
         }
