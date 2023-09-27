@@ -5,24 +5,30 @@
     using Collections;
     using Primitives;
 
+    public interface ISyntaxReference
+    {
+        ReadOnlySpan<char> TrimAttributeValue(ReadOnlySpan<char> value);
+    }
+
     public sealed partial class Document
     {
-        public abstract class MarkupReference
+        public abstract class MarkupReference<TMarkupLexer> : ISyntaxReference
+            where TMarkupLexer : struct, IMarkupLexer
         {
-            private readonly MarkupSyntax syntax;
+            private readonly TMarkupLexer lexer;
             private readonly StringDir<TagReference> tagReferences;
             private readonly StringDir<AttributeReference> attributeReferences;
             private readonly RootReference rootReference;
 
-            protected MarkupReference(in MarkupSyntax syntax)
+            protected MarkupReference()
             {
-                this.syntax = syntax;
-                this.tagReferences = new(this.syntax.Comparison);
-                this.attributeReferences = new(this.syntax.Comparison);
+                this.lexer = new();
+                this.tagReferences = new(this.lexer.Comparison);
+                this.attributeReferences = new(this.lexer.Comparison);
                 this.rootReference = new RootReference(this);
             }
 
-            internal ref readonly MarkupSyntax Syntax => ref this.syntax;
+            internal ref readonly TMarkupLexer Syntax => ref this.lexer;
 
             public Document Parse(string text)
             {
@@ -46,48 +52,48 @@
                 var tree = new Stack<ParentTag>();
                 tree.Push(new Root(this.rootReference, text));
 
-                foreach (var tag in Tags.Parse(span, this.syntax))
+                foreach (var token in Lexer.TokenizeElements(span, this.lexer))
                 {
                     // skip comments
-                    if (tag.Category == TagCategory.Comment)
+                    if (token.Category == TokenCategory.Comment)
                         continue;
 
                     var parent = tree.Peek();
 
                     if (parent.HasRawContent)
                     {
-                        if (tag.Category == TagCategory.Closing && parent.IsClosedBy(tag))
+                        if (token.Category == TokenCategory.ClosingTag && this.lexer.ClosesTag(token, parent.Name))
                         {
-                            ParseClosingTag(tag, parent, tree);
+                            ParseClosingTag(token, parent, tree);
                         }
                         else
                         {
-                            ParseContent(tag, parent);
+                            ParseContent(token, parent);
                         }
                     }
                     else
                     {
                         // skip empty content
-                        if (tag.IsEmpty)
+                        if (token.IsEmpty)
                             continue;
 
-                        switch (tag.Category)
+                        switch (token.Category)
                         {
-                            case TagCategory.Content:
-                                ParseContent(tag, parent);
+                            case TokenCategory.Content:
+                                ParseContent(token, parent);
                                 break;
 
-                            case TagCategory.Opening:
-                            case TagCategory.Unpaired:
-                                ParseOpeningTag(tag, parent, tree);
+                            case TokenCategory.OpeningTag:
+                            case TokenCategory.UnpairedTag:
+                                ParseOpeningTag(token, parent, tree);
                                 break;
 
-                            case TagCategory.Closing:
-                                ParseClosingTag(tag, parent, tree);
+                            case TokenCategory.ClosingTag:
+                                ParseClosingTag(token, parent, tree);
                                 break;
 
-                            case TagCategory.Section:
-                                ParseSection(tag, parent, tree);
+                            case TokenCategory.Section:
+                                ParseSection(token, parent);
                                 break;
                         }
                     }
@@ -97,7 +103,7 @@
                 while (tree.Count > 1)
                 {
                     var unclosedTag = tree.Pop();
-                    if (!unclosedTag.IsClosed)
+                    if (!this.lexer.TagIsClosed(span[unclosedTag.Start..unclosedTag.End]))
                     {
                         var parentTag = tree.Peek();
                         if (parentTag is Root)
@@ -110,32 +116,32 @@
                 return (Root)tree.Pop();
             }
 
-            private void ParseSection(TagSpan tagSpan, ParentTag parent, Stack<ParentTag> tree)
+            private void ParseSection(Token token, ParentTag parent)
             {
-                //todo: parent.Add(new Section(tagSpan.Start, tagSpan.Length, ));
+                parent.Add(new Section(token.Offset, token.Length, token.DataOffset, token.Data.Length));
             }
 
-            private void ParseContent(TagSpan tagSpan, ParentTag parent)
+            private void ParseContent(Token token, ParentTag parent)
             {
-                parent.Add(CreateContent(tagSpan));
+                parent.Add(CreateContent(token));
             }
 
-            private void ParseOpeningTag(TagSpan tagSpan, ParentTag parent, Stack<ParentTag> tree)
+            private void ParseOpeningTag(Token token, ParentTag parent, Stack<ParentTag> tree)
             {
-                var tag = CreateTag(tagSpan);
+                var tag = CreateTag(token);
                 parent.Add(tag);
 
                 if (tag is ParentTag pairedTag)
                     tree.Push(pairedTag);
             }
 
-            private void ParseClosingTag(TagSpan tagSpan, ParentTag parent, Stack<ParentTag> tree)
+            private void ParseClosingTag(Token token, ParentTag parent, Stack<ParentTag> tree)
             {
                 // close the current tag
                 // also special handling for a misplaced closing tag
                 foreach (var unclosedTag in tree)
                 {
-                    if (unclosedTag.IsClosedBy(tagSpan))
+                    if (this.lexer.ClosesTag(token, unclosedTag.Name))
                     {
                         while (tree.Count > 1)
                         {
@@ -148,7 +154,7 @@
                                     parentTag.Graft(tag);
                                 }
 
-                                tag.CloseAt(tagSpan.End);
+                                tag.CloseAt(token.End);
                                 return;
                             }
                             else
@@ -161,72 +167,71 @@
                 }
 
                 // there was no opening tag for this closing tag, turn it into content
-                parent.Add(CreateContent(tagSpan));
+                parent.Add(CreateContent(token));
             }
 
-            private static Content CreateContent(TagSpan tagSpan)
+            private static Content CreateContent(Token token)
             {
-                return new Content(tagSpan.Start, tagSpan.Length);
+                return new Content(token.Start, token.Length);
             }
 
-            private Tag CreateTag(TagSpan tagSpan)
+            private Tag CreateTag(Token token)
             {
-                var reference = CreateOrFindTagReference(tagSpan);
-                var tag = tagSpan.Category != TagCategory.Unpaired && reference.IsParent ?
-                    new ParentTag(reference, tagSpan.Start, tagSpan.Length) :
-                    new Tag(reference, tagSpan.Start, tagSpan.Length);
+                var reference = CreateOrFindTagReference(token.Name);
+                var tag = token.Category != TokenCategory.UnpairedTag && reference.IsParent ?
+                    new ParentTag(reference, token.Start, token.Length) :
+                    new Tag(reference, token.Start, token.Length);
 
-                ParseAttributes(tag, tagSpan);
+                ParseAttributes(tag, token);
 
                 return tag;
             }
 
-            private void ParseAttributes(Tag tag, TagSpan tagSpan)
+            private void ParseAttributes(Tag tag, Token token)
             {
-                var attrName = default(AttributeSpan);
-                foreach (var attr in Tags.ParseAttributes(tagSpan, this.syntax))
+                if (token.Data.IsEmpty)
+                    return;
+
+                foreach (var attr in Lexer.TokenizeAttributes(token, this.lexer))
                 {
-                    if (attr.Category == AttributeCategory.Name)
-                    {
-                        attrName = attr;
-                    }
-                    else
-                    {
-                        var attribute = attr.Category == AttributeCategory.Flag ?
-                            CreateAttribute(attr) : CreateAttribute(attrName, attr);
-                        tag.Attributes.Add(attribute);
-                    }
+                    var attribute = CreateAttribute(attr);
+                    tag.Attributes.Add(attribute);
                 }
             }
 
-            private Attribute CreateAttribute(AttributeSpan name, AttributeSpan value = default)
+            private Attribute CreateAttribute(Token token)
             {
-                var reference = CreateOrFindAttributeReference(name);
-                return value.IsEmpty ?
-                    new Attribute(reference, name.Start, name.Length) :
-                    new Attribute(reference, name.Start, name.Length, value.Start, value.Length);
+                var reference = CreateOrFindAttributeReference(token.Name);
+                return token.Data.IsEmpty ?
+                    new Attribute(reference, token.Offset, token.Length) :
+                    new Attribute(reference, token.Offset, token.Length, token.DataOffset, token.Data.Length);
             }
 
-            private TagReference CreateOrFindTagReference(TagSpan tagSpan)
+            private TagReference CreateOrFindTagReference(ReadOnlySpan<char> tagName)
             {
-                if (!this.tagReferences.TryGetValue(tagSpan.Name, out var reference))
+                if (!this.tagReferences.TryGetValue(tagName, out var reference))
                 {
-                    reference = new TagReference(tagSpan.Name.ToString(), this);
+                    reference = new TagReference(tagName.ToString(), this);
                     AddReference(reference);
                 }
 
                 return reference;
             }
 
-            private AttributeReference CreateOrFindAttributeReference(AttributeSpan attr)
+            private AttributeReference CreateOrFindAttributeReference(ReadOnlySpan<char> attributeName)
             {
-                if (!this.attributeReferences.TryGetValue(attr, out var reference))
+                if (!this.attributeReferences.TryGetValue(attributeName, out var reference))
                 {
-                    reference = new AttributeReference(attr.Span.ToString(), this);
+                    reference = new AttributeReference(attributeName.ToString(), this);
                     AddReference(reference);
                 }
 
                 return reference;
+            }
+
+            ReadOnlySpan<char> ISyntaxReference.TrimAttributeValue(ReadOnlySpan<char> value)
+            {
+                return this.lexer.TrimValue(value);
             }
         }
     }

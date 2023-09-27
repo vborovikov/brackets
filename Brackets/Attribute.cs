@@ -4,8 +4,6 @@ namespace Brackets
     using System.Collections;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
-    using System.Linq;
-    using Primitives;
 
     public class Attribute : Element
     {
@@ -23,6 +21,7 @@ namespace Brackets
             : base(start)
         {
             this.reference = reference;
+            //todo: should be the length of the whole attribute span including the value
             this.length = length;
             this.valueStart = valueStart;
             this.valueLength = valueLength;
@@ -43,11 +42,7 @@ namespace Brackets
             if (!this.HasValue)
                 return String.Empty;
 
-            var valueSpan = this.Value;
-            if (valueSpan[0] == valueSpan[^1] && this.reference.Syntax.QuotationMarks.Contains(valueSpan[0]))
-                valueSpan = valueSpan[1..^1];
-
-            return valueSpan.ToString();
+            return this.reference.Syntax.TrimAttributeValue(this.Value).ToString();
         }
 
         public override bool TryGetValue<T>([MaybeNullWhen(false)] out T value)

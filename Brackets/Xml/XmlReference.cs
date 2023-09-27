@@ -1,28 +1,8 @@
 ﻿namespace Brackets.Xml;
 
-using Primitives;
-
-public class XmlReference : Document.MarkupReference
+public class XmlReference : Document.MarkupReference<XmlLexer>
 {
-    public XmlReference() : base(new MarkupSyntax
-    {
-        Comparison = StringComparison.Ordinal,
-        Opener = '<',
-        Closer = '>',
-        Terminator = '/',
-        EqSign = '=',
-        AltOpener = '?',
-        Separators = " \r\n\t\xA0",
-        AttrSeparators = "= \r\n\t\xA0",
-        QuotationMarks = "'\"",
-        CommentOpener = "<!--",
-        CommentOpenerNB = "!--",
-        CommentCloser = "-->",
-        SectionOpener = "<![",
-        SectionOpenerNB = "![",
-        SectionCloser = "]]>",
-        ContentOpener = '[',
-    })
+    public XmlReference()
     {
         // void elements
         AddReference(new TagReference("?xml", this) { IsParent = false, Level = ElementLevel.Inline });

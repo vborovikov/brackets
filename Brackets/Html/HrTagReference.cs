@@ -4,7 +4,7 @@ namespace Brackets.Html
     {
         private static readonly string HorizontalLine = new('-', 80);
 
-        public HrTagReference(Document.MarkupReference markup) : base("hr", markup)
+        public HrTagReference(ISyntaxReference syntax) : base("hr", syntax)
         {
             this.IsParent = false;
         }

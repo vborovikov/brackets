@@ -11,69 +11,69 @@
         [TestMethod]
         public void SimpleMarkup_Parse_Tags()
         {
-            var tags = Tags.Parse("foo<tag>bar</tag>", Document.Html.Syntax);
+            var tags = Lexer.TokenizeElements("foo<tag>bar</tag>", Document.Html.Syntax);
             AssertTokens(tags, "foo", "<tag>", "bar", "</tag>");
         }
 
         [TestMethod]
         public void EmptyTag_Parse_Content()
         {
-            var tags = Tags.Parse("<tag><></tag>", Document.Html.Syntax);
+            var tags = Lexer.TokenizeElements("<tag><></tag>", Document.Html.Syntax);
             AssertTokens(tags, "<tag>", "<>", "</tag>");
         }
 
         [TestMethod]
         public void UnpairedTag_Parse_Content()
         {
-            var tags = Tags.Parse("<tag><img /></tag>", Document.Html.Syntax);
+            var tags = Lexer.TokenizeElements("<tag><img /></tag>", Document.Html.Syntax);
             AssertTokens(tags, "<tag>", "<img />", "</tag>");
-            AssertCategories(tags, TagCategory.Opening, TagCategory.Unpaired, TagCategory.Closing);
+            AssertCategories(tags, TokenCategory.OpeningTag, TokenCategory.UnpairedTag, TokenCategory.ClosingTag);
         }
 
         [TestMethod]
         public void IncorrectClosingTag_Parse_Content()
         {
-            var tags = Tags.Parse("<tag></ta<g/>", Document.Html.Syntax);
+            var tags = Lexer.TokenizeElements("<tag></ta<g/>", Document.Html.Syntax);
             AssertTokens(tags, "<tag>", "</ta", "<g/>");
-            AssertCategories(tags, TagCategory.Opening, TagCategory.Content, TagCategory.Unpaired);
+            AssertCategories(tags, TokenCategory.OpeningTag, TokenCategory.Content, TokenCategory.UnpairedTag);
         }
 
         [TestMethod]
         public void ExclamationMarkTagName_Parse_AsTag()
         {
-            var tags = Tags.Parse("<!doctype>", Document.Html.Syntax);
+            var tags = Lexer.TokenizeElements("<!doctype>", Document.Html.Syntax);
             AssertTokens(tags, "<!doctype>");
-            AssertCategories(tags, TagCategory.Opening);
+            AssertCategories(tags, TokenCategory.OpeningTag);
         }
 
         [TestMethod]
         public void Tags_CommentNoSpace_ParsedAsComment()
         {
-            var tags = Tags.Parse("<!--TERMS OF SERVICE-->", Document.Html.Syntax);
-            AssertCategories(tags, TagCategory.Comment);
+            var tags = Lexer.TokenizeElements("<!--TERMS OF SERVICE-->", Document.Html.Syntax);
+            AssertCategories(tags, TokenCategory.Comment);
             AssertTokens(tags, "<!--TERMS OF SERVICE-->");
         }
 
         [TestMethod]
         public void Tags_CommentedSelfClosingTag_ParsedAsComment()
         {
-            var tags = Tags.Parse("<!-- <tag /> -->", Document.Html.Syntax);
-            AssertCategories(tags, TagCategory.Comment);
+            var tags = Lexer.TokenizeElements("<!-- <tag /> -->", Document.Html.Syntax);
+            AssertCategories(tags, TokenCategory.Comment);
             AssertTokens(tags, "<!-- <tag /> -->");
         }
 
         [TestMethod]
         public void Tags_CommentedParentTags_ParsedAsComment()
         {
-            var tags = Tags.Parse("<!-- <tag>abc</tag> -->", Document.Html.Syntax);
-            AssertCategories(tags, TagCategory.Comment);
+            var tags = Lexer.TokenizeElements("<!-- <tag>abc</tag> -->", Document.Html.Syntax);
+            AssertCategories(tags, TokenCategory.Comment);
             AssertTokens(tags, "<!-- <tag>abc</tag> -->");
         }
 
         [TestMethod]
         public void Tags_CommentedTags_ParsedAsComment()
         {
-            var tags = Tags.Parse(
+            var tags = Lexer.TokenizeElements(
                 """
                 <!--[if lt IE 7]>
 
@@ -87,45 +87,43 @@
 
                 <![endif]-->
                 """, Document.Html.Syntax);
-            AssertCategories(tags, TagCategory.Comment);
+            AssertCategories(tags, TokenCategory.Comment);
         }
 
         [TestMethod]
         public void Tags_SectionContentHtml_ParsedAsSection()
         {
-            var tags = Tags.Parse("<ms><![CDATA[x<y]]></ms>", Document.Html.Syntax);
-            AssertCategories(tags, TagCategory.Opening, TagCategory.Section, TagCategory.Closing);
+            var tags = Lexer.TokenizeElements("<ms><![CDATA[x<y]]></ms>", Document.Html.Syntax);
+            AssertCategories(tags, TokenCategory.OpeningTag, TokenCategory.Section, TokenCategory.ClosingTag);
             AssertTokens(tags, "<ms>", "<![CDATA[x<y]]>", "</ms>");
         }
 
         [TestMethod]
         public void Tags_SectionContentXml_ParsedAsSection()
         {
-            var tags = Tags.Parse("<ms><![CDATA[x<y]]></ms>", Document.Xml.Syntax);
-            AssertCategories(tags, TagCategory.Opening, TagCategory.Section, TagCategory.Closing);
+            var tags = Lexer.TokenizeElements("<ms><![CDATA[x<y]]></ms>", Document.Xml.Syntax);
+            AssertCategories(tags, TokenCategory.OpeningTag, TokenCategory.Section, TokenCategory.ClosingTag);
             AssertTokens(tags, "<ms>", "<![CDATA[x<y]]>", "</ms>");
         }
 
         [TestMethod]
         public void ParseAttributes_Prolog_QuestionMarkIgnored()
         {
-            var tags = Tags.Parse("""<?xml version="1.0" encoding="utf-8"?>""", Document.Xml.Syntax);
+            var tags = Lexer.TokenizeElements("""<?xml version="1.0" encoding="utf-8"?>""", Document.Xml.Syntax);
             Assert.IsTrue(tags.MoveNext());
 
             var prolog = tags.Current;
-            var attrs = Tags.ParseAttributes(prolog, Document.Xml.Syntax);
+            var attrs = Lexer.TokenizeAttributes(prolog, Document.Xml.Syntax);
             
-            Assert.IsTrue(attrs.MoveNext()); // version
-            Assert.IsTrue(attrs.MoveNext()); // "1.0"
-            Assert.IsTrue(attrs.MoveNext()); // encoding
-            Assert.IsTrue(attrs.MoveNext()); // "utf-8"
-            Assert.AreEqual("\"utf-8\"", attrs.Current.Span.ToString());
+            Assert.IsTrue(attrs.MoveNext()); // version="1.0"
+            Assert.IsTrue(attrs.MoveNext()); // encoding="utf-8"
+            Assert.AreEqual("\"utf-8\"", attrs.Current.Data.ToString());
         }
 
         [TestMethod]
         public void Tags_UnclosedTag_HasOnlyContent()
         {
-            var tags = Tags.Parse(
+            var tags = Lexer.TokenizeElements(
                 """
                 <?xml version="1.0" encoding="utf-8"?>
                 <rss version="2.0">
@@ -142,37 +140,37 @@
                 """, Document.Xml.Syntax);
 
             AssertCategories(tags,
-                TagCategory.Opening, // <?xml version="1.0" encoding="utf-8"?>
-                TagCategory.Opening,  // <rss>
-                TagCategory.Opening,  // <channel>
-                TagCategory.Opening,  // <title>
-                TagCategory.Content,  // The Joy of Tech
-                TagCategory.Closing,  // </title>
-                TagCategory.Opening,  // <link>
-                TagCategory.Content,  // http://www.geekculture.com/joyoftech/index.html
-                //TagCategory.Closing,  // </link>
-                TagCategory.Opening,  // <copyright>
-                TagCategory.Content,  // Copyright 2023
-                TagCategory.Closing,  // </copyright>
-                TagCategory.Opening,  // <lastBuildDate>
-                TagCategory.Content,  // Mon, 18 Sept 2023 00:00:01 EST
-                TagCategory.Closing,  // </lastBuildDate>
-                TagCategory.Opening,  // <generator>
-                TagCategory.Content,  // manual
-                TagCategory.Closing,  // </generator>
-                TagCategory.Opening,  // <docs>
-                TagCategory.Content,  // http://blogs.law.harvard.edu/tech/rss
-                TagCategory.Content,  // </x.html
-                TagCategory.Closing,  // </link>
-                TagCategory.Opening,  // <description>
-                TagCategory.Closing,  // </description>
-                TagCategory.Content,  // docs>
-                TagCategory.Closing,  // </channel>
-                TagCategory.Closing   // </rss>
+                TokenCategory.UnpairedTag,  // <?xml version="1.0" encoding="utf-8"?>
+                TokenCategory.OpeningTag,   // <rss>
+                TokenCategory.OpeningTag,   // <channel>
+                TokenCategory.OpeningTag,   // <title>
+                TokenCategory.Content,      // The Joy of Tech
+                TokenCategory.ClosingTag,   // </title>
+                TokenCategory.OpeningTag,   // <link>
+                TokenCategory.Content,      // http://www.geekculture.com/joyoftech/index.html
+                TokenCategory.OpeningTag,   // <copyright>
+                TokenCategory.Content,      // Copyright 2023
+                TokenCategory.ClosingTag,   // </copyright>
+                TokenCategory.OpeningTag,   // <lastBuildDate>
+                TokenCategory.Content,      // Mon, 18 Sept 2023 00:00:01 EST
+                TokenCategory.ClosingTag,   // </lastBuildDate>
+                TokenCategory.OpeningTag,   // <generator>
+                TokenCategory.Content,      // manual
+                TokenCategory.ClosingTag,   // </generator>
+                TokenCategory.OpeningTag,   // <docs>
+                TokenCategory.Content,      // http://blogs.law.harvard.edu/tech/rss
+                TokenCategory.Content,      // </x.html
+                TokenCategory.ClosingTag,   // </link>
+                TokenCategory.OpeningTag,   // <description>
+                TokenCategory.ClosingTag,   // </description>
+                TokenCategory.Content,      // docs>
+                TokenCategory.ClosingTag,   // </channel>
+                TokenCategory.ClosingTag    // </rss>
                 );
         }
 
-        private static void AssertCategories(Tags.TagEnumerator tags, params TagCategory[] categories)
+        private static void AssertCategories<TLexer>(Lexer.ElementTokenEnumerator<TLexer> tags, params TokenCategory[] categories)
+            where TLexer : struct, IMarkupLexer
         {
             tags.Reset();
             foreach (var category in categories)
@@ -186,7 +184,8 @@
             Assert.IsFalse(tags.MoveNext(), "More tokens left.");
         }
 
-        private static void AssertTokens(Tags.TagEnumerator tags, params string[] tokens)
+        private static void AssertTokens<TLexer>(Lexer.ElementTokenEnumerator<TLexer> tags, params string[] tokens)
+            where TLexer : struct, IMarkupLexer
         {
             tags.Reset();
             foreach (var token in tokens)

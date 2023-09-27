@@ -95,44 +95,6 @@
 
         protected internal Element? Child => this.child;
 
-        internal bool IsClosed
-        {
-            get
-            {
-                var span = this.Source;
-                if (this.child is null)
-                {
-                    span = span[this.Start..this.End]
-                        .TrimEnd(this.reference.Syntax.Closer)
-                        .TrimEnd(this.reference.Syntax.Separators);
-                    return span.EndsWith(this.Name, this.reference.Syntax.Comparison);
-                }
-
-                span = span[this.child.Prev.End..]
-                    .TrimStart(this.reference.Syntax.Separators)
-                    .TrimStart(this.reference.Syntax.Opener)
-                    .TrimStart(this.reference.Syntax.Terminator);
-                return span.StartsWith(this.Name, this.reference.Syntax.Comparison);
-            }
-        }
-
-        internal bool IsClosedBy(ReadOnlySpan<char> other)
-        {
-            if (this.reference.IsRoot)
-            {
-                // nothing is equal to the root tag
-                return false;
-            }
-
-            if (other.IsEmpty)
-                return false;
-
-            var nameIdx = other.IndexOf(this.reference.Name, this.reference.Syntax.Comparison);
-            return
-                nameIdx == 0 ||
-                (nameIdx == 2 && other[0] == this.reference.Syntax.Opener && other[1] == this.reference.Syntax.Terminator);
-        }
-
         public void Add(Element element)
         {
             if (this.HasRawContent && element is Content content && this.child is not null)

@@ -52,9 +52,11 @@
             this.dataLength = dataLength;
         }
 
+        public ReadOnlySpan<char> Data => this.Source.Slice(this.dataStart, this.dataLength);
+
         public override string? ToString()
         {
-            return this.Source.Slice(this.dataStart, this.dataLength).ToString();
+            return this.Data.ToString();
         }
 
         internal override bool TryAdd(Content content) => false;

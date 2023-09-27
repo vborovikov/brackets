@@ -1,28 +1,8 @@
 ﻿namespace Brackets.Html;
 
-using Primitives;
-
-public class HtmlReference : Document.MarkupReference
+public class HtmlReference : Document.MarkupReference<HtmlLexer>
 {
-    public HtmlReference() : base(new MarkupSyntax
-    {
-        Comparison = StringComparison.OrdinalIgnoreCase,
-        Opener = '<',
-        Closer = '>',
-        Terminator = '/',
-        EqSign = '=',
-        AltOpener = '!',
-        Separators = " \r\n\t\xA0",
-        AttrSeparators = "= \r\n\t\xA0",
-        QuotationMarks = "'\"",
-        CommentOpener = "<!--",
-        CommentOpenerNB = "!--",
-        CommentCloser = "-->",
-        SectionOpener = "<![",
-        SectionOpenerNB = "![",
-        SectionCloser = "]]>",
-        ContentOpener = '[',
-    })
+    public HtmlReference()
     {
         // void elements
         AddReference(new TagReference("!doctype", this) { IsParent = false });
