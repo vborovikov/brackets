@@ -1,4 +1,4 @@
-﻿namespace Brackets.Primitives;
+﻿namespace Brackets.Parsing;
 
 public enum TokenCategory
 {

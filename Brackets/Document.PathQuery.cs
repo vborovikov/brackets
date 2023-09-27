@@ -9,7 +9,7 @@ using System.Net;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using JPath;
-using Primitives;
+using Parsing;
 using XPath;
 
 public partial class Document

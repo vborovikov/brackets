@@ -1,7 +1,7 @@
 namespace Brackets.XPath;
 
 using System.Diagnostics;
-using Primitives;
+using Parsing;
 
 // Extends XPathOperator enumeration
 internal enum LexKind

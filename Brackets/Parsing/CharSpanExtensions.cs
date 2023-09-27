@@ -1,4 +1,4 @@
-﻿namespace Brackets.Primitives;
+﻿namespace Brackets.Parsing;
 
 using System;
 using System.Text;

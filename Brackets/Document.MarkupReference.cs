@@ -3,7 +3,7 @@
     using System;
     using System.Collections.Generic;
     using Collections;
-    using Primitives;
+    using Parsing;
 
     public interface ISyntaxReference
     {

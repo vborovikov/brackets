@@ -3,7 +3,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Primitives;
+using Parsing;
 
 public readonly struct XmlLexer : IMarkupLexer
 {

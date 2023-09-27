@@ -33,6 +33,8 @@
 
         public abstract int End { get; }
 
+        public int Offset => this.Start;
+
         public int Length => this.End - this.Start;
 
         public int NestingLevel

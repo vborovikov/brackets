@@ -1,7 +1,7 @@
 ﻿namespace Brackets.Tests.Markup
 {
     using System;
-    using Primitives;
+    using Parsing;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using System.Text.RegularExpressions;
 
