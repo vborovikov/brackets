@@ -80,9 +80,9 @@ public interface IMarkupLexer
     /// <summary>
     /// Trims the value from the specified attribute span.
     /// </summary>
-    /// <param name="attribute">The attribute span.</param>
+    /// <param name="value">The attribute value span.</param>
     /// <returns>The trimmed value.</returns>
-    ReadOnlySpan<char> TrimValue(ReadOnlySpan<char> attribute);
+    ReadOnlySpan<char> TrimValue(ReadOnlySpan<char> value);
 
     /// <summary>
     /// Trims the data from the specified section span.

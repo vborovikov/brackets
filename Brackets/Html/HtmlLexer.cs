@@ -39,14 +39,14 @@ public readonly struct HtmlLexer : IMarkupLexer
         {
             return new(TokenCategory.Content, text[..start], globalOffset);
         }
-        var end = text.IndexOf(Closer);
-        if (end < 0)
+        var end = text.IndexOf(Closer) + 1;
+        if (end <= 0)
         {
             return new(TokenCategory.Content, text, globalOffset);
         }
 
         var category = TokenCategory.Content;
-        var span = text[start..(end + 1)];
+        var span = text[start..end];
         if (span.Length <= 2)
         {
             return new(category, span, globalOffset);
@@ -82,6 +82,7 @@ public readonly struct HtmlLexer : IMarkupLexer
 
             // section token
             // CDATA[...]]>
+            span = text[start..end];
             var section = text[(start + SectionOpener.Length)..end];
             var dataPos = section.IndexOf(DataOpener);
             if (dataPos <= 0)
@@ -328,14 +329,12 @@ public readonly struct HtmlLexer : IMarkupLexer
         return section[(section.IndexOf(DataOpener) + 1)..];
     }
 
-    public ReadOnlySpan<char> TrimValue(ReadOnlySpan<char> attribute)
+    public ReadOnlySpan<char> TrimValue(ReadOnlySpan<char> value)
     {
-        var valueSpan = attribute[(attribute.IndexOf(ValueSeparator) + 1)..].Trim(AttrSeparators);
+        if (value[0] == value[^1] && QuotationMarks.Contains(value[0]))
+            value = value[1..^1];
 
-        if (valueSpan[0] == valueSpan[^1] && QuotationMarks.Contains(valueSpan[0]))
-            valueSpan = valueSpan[1..^1];
-
-        return valueSpan;
+        return value;
     }
 
     private static bool IsElementName(ReadOnlySpan<char> span)

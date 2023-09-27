@@ -44,6 +44,31 @@ public class XmlTests
 
         Assert.AreEqual("""This week we talk about <a href="https://itunes/apple.com/us/book/antique-trader-salt-pepper/id429691295?mt=11">salt and pepper shakers</a>, comparing and contrasting pour rates, construction materials, and overall aesthetics. Come and join the party!""",
             cdata.ToString());
+    }
 
+    [TestMethod]
+    public void Parse_TagAttributeValueWithEqSign_Ignored()
+    {
+        var document = Document.Xml.Parse("""<link rel="alternate" href="http://www.youtube.com/watch?v=AbcdDefG"/>""");
+
+        var link = document.FirstOrDefault() as Tag;
+        Assert.IsNotNull(link);
+
+        Assert.AreEqual(2, link.Attributes.Count);
+        Assert.AreEqual("alternate", link.Attributes.ElementAt(0).ToString());
+        Assert.AreEqual("http://www.youtube.com/watch?v=AbcdDefG", link.Attributes.ElementAt(1).ToString());
+    }
+
+    [TestMethod]
+    public void Parse_TagAttributeValueWithEqSign2_Ignored()
+    {
+        var document = Document.Xml.Parse("""<link rel="self" href="http://www.youtube.com/feeds/videos.xml?channel_id=UCmEN5ZnsHUXIxgpLitRTmWw"/>""");
+
+        var link = document.FirstOrDefault() as Tag;
+        Assert.IsNotNull(link);
+
+        Assert.AreEqual(2, link.Attributes.Count);
+        Assert.AreEqual("self", link.Attributes.ElementAt(0).ToString());
+        Assert.AreEqual("http://www.youtube.com/feeds/videos.xml?channel_id=UCmEN5ZnsHUXIxgpLitRTmWw", link.Attributes.ElementAt(1).ToString());
     }
 }
