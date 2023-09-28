@@ -14,6 +14,8 @@ namespace Brackets
 
         protected override ReadOnlySpan<char> Source => this.text.Span;
 
+        internal bool? IsWellFormed { get; set; }
+
         public override string? ToString()
         {
             return String.Concat(this);

@@ -24,6 +24,10 @@
 
         public static readonly XmlReference Xml = new();
 
+        public bool IsComplete => this.root.IsWellFormed.HasValue;
+
+        public bool IsWellFormed => this.root.IsWellFormed == true;
+
 #if DEBUG
         internal DocumentRoot Root => this.root;
 #endif

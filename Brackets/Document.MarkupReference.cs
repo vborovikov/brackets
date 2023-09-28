@@ -100,6 +100,7 @@
                 }
 
                 // close unclosed tags
+                var wellFormed = tree.Count > 0 && tree.Count == 1;
                 while (tree.Count > 1)
                 {
                     var unclosedTag = tree.Pop();
@@ -113,7 +114,9 @@
                     }
                 }
 
-                return (DocumentRoot)tree.Pop();
+                var root = (DocumentRoot)tree.Pop();
+                root.IsWellFormed = wellFormed;
+                return root;
             }
 
             private static void ParseSection(in Token token, ParentTag parent)
