@@ -192,8 +192,12 @@
 
         private Element? Prune()
         {
-            if (this.child is null)
+            if (this.child is null || this.child is Tag)
+            {
+                // if the child element is a tag we don't prune it
+                //todo: or maybe we want to find the first content element amoung children and prune the tag from there
                 return null;
+            }
 
             var tag = this.child;
             do

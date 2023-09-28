@@ -8,6 +8,23 @@
     public class HtmlTests
     {
         [TestMethod]
+        public void HtmlParse_ImproperlyNestedTags_Corrected()
+        {
+            var document = Document.Html.Parse("<b><i>This text is bold and italic</b></i>");
+            Assert.IsTrue(document.IsWellFormed);
+
+            var b = document.First() as ParentTag;
+            Assert.IsNotNull(b);
+            Assert.AreEqual("b", b.Name);
+            var i = b.First() as ParentTag;
+            Assert.IsNotNull(i);
+            Assert.AreEqual("i", i.Name);
+            var innerText = i.First() as Content;
+            Assert.IsNotNull(innerText);
+            Assert.AreEqual("This text is bold and italic", innerText.ToString());
+        }
+
+        [TestMethod]
         public void EmptyHtml_Parse_AllTags()
         {
             var document = Document.Html.Parse(
