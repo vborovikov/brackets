@@ -46,11 +46,11 @@
                 this.attributeReferences.Add(reference.Name, reference);
             }
 
-            private Root Parse(ReadOnlyMemory<char> text)
+            private DocumentRoot Parse(ReadOnlyMemory<char> text)
             {
                 var span = text.Span;
                 var tree = new Stack<ParentTag>();
-                tree.Push(new Root(this.rootReference, text));
+                tree.Push(new DocumentRoot(this.rootReference, text));
 
                 foreach (var token in Lexer.TokenizeElements(span, this.lexer))
                 {
@@ -106,14 +106,14 @@
                     if (!this.lexer.TagIsClosed(span[unclosedTag.Start..unclosedTag.End]))
                     {
                         var parentTag = tree.Peek();
-                        if (parentTag is Root)
+                        if (parentTag is DocumentRoot)
                             continue;
 
                         parentTag.Graft(unclosedTag);
                     }
                 }
 
-                return (Root)tree.Pop();
+                return (DocumentRoot)tree.Pop();
             }
 
             private static void ParseSection(in Token token, ParentTag parent)

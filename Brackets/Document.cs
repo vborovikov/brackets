@@ -13,9 +13,9 @@
     public partial class Document : IEnumerable<Element>
     {
         private static readonly LRUCache<string, PathQuery> pathQueryCache = new(10);
-        private readonly Root root;
+        private readonly DocumentRoot root;
 
-        private Document(Root root)
+        private Document(DocumentRoot root)
         {
             this.root = root;
         }
@@ -25,7 +25,7 @@
         public static readonly XmlReference Xml = new();
 
 #if DEBUG
-        internal Root Root => this.root;
+        internal DocumentRoot Root => this.root;
 #endif
 
         public override string? ToString()

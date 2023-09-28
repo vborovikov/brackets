@@ -2,11 +2,11 @@ namespace Brackets
 {
     using System;
 
-    public sealed class Root : ParentTag
+    sealed class DocumentRoot : ParentTag
     {
         private readonly ReadOnlyMemory<char> text;
 
-        public Root(RootReference rootReference, ReadOnlyMemory<char> text)
+        public DocumentRoot(RootReference rootReference, ReadOnlyMemory<char> text)
             : base(rootReference, -1, -1)
         {
             this.text = text;

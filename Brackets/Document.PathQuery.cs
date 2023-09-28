@@ -297,7 +297,7 @@ public partial class Document
             switch (this.nodeType)
             {
                 case XPathNodeType.Root:
-                    return element is Root;
+                    return element is DocumentRoot;
 
                 case XPathNodeType.Element:
                     {
