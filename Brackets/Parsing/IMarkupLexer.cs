@@ -43,7 +43,7 @@ public readonly ref struct Token
     internal int End => this.Offset + this.Span.Length;
     internal int Length => this.Span.Length;
 
-    public static implicit operator ReadOnlySpan<char>(Token token) => token.Span;
+    public static implicit operator ReadOnlySpan<char>(in Token token) => token.Span;
 }
 
 /// <summary>

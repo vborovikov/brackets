@@ -116,17 +116,17 @@
                 return (Root)tree.Pop();
             }
 
-            private void ParseSection(Token token, ParentTag parent)
+            private static void ParseSection(in Token token, ParentTag parent)
             {
                 parent.Add(new Section(token.Offset, token.Length, token.DataOffset, token.Data.Length));
             }
 
-            private void ParseContent(Token token, ParentTag parent)
+            private static void ParseContent(in Token token, ParentTag parent)
             {
                 parent.Add(CreateContent(token));
             }
 
-            private void ParseOpeningTag(Token token, ParentTag parent, Stack<ParentTag> tree)
+            private void ParseOpeningTag(in Token token, ParentTag parent, Stack<ParentTag> tree)
             {
                 var tag = CreateTag(token);
                 parent.Add(tag);
@@ -135,7 +135,7 @@
                     tree.Push(pairedTag);
             }
 
-            private void ParseClosingTag(Token token, ParentTag parent, Stack<ParentTag> tree)
+            private void ParseClosingTag(in Token token, ParentTag parent, Stack<ParentTag> tree)
             {
                 // close the current tag
                 // also special handling for a misplaced closing tag
@@ -170,12 +170,12 @@
                 parent.Add(CreateContent(token));
             }
 
-            private static Content CreateContent(Token token)
+            private static Content CreateContent(in Token token)
             {
                 return new Content(token.Start, token.Length);
             }
 
-            private Tag CreateTag(Token token)
+            private Tag CreateTag(in Token token)
             {
                 var reference = CreateOrFindTagReference(token.Name);
                 var tag = token.Category != TokenCategory.UnpairedTag && reference.IsParent ?
@@ -187,7 +187,7 @@
                 return tag;
             }
 
-            private void ParseAttributes(Tag tag, Token token)
+            private void ParseAttributes(Tag tag, in Token token)
             {
                 if (token.Data.IsEmpty)
                     return;
@@ -199,7 +199,7 @@
                 }
             }
 
-            private Attribute CreateAttribute(Token token)
+            private Attribute CreateAttribute(in Token token)
             {
                 var reference = CreateOrFindAttributeReference(token.Name);
                 return token.Data.IsEmpty ?
