@@ -64,7 +64,7 @@
             var tag = doc.FirstOrDefault() as Tag;
 
             Assert.IsNotNull(tag);
-            Assert.AreEqual(5, tag.Attributes.Count);
+            Assert.AreEqual(5, tag.EnumerateAttributes().Count());
         }
 
         [TestMethod]
@@ -86,7 +86,7 @@
             var buttonTag = doc.FirstOrDefault() as Tag;
             Assert.IsNotNull(buttonTag);
 
-            var dataDisabledAttr = buttonTag.Attributes.FirstOrDefault(attr => attr.Name.StartsWith("data-disabled"));
+            var dataDisabledAttr = buttonTag.EnumerateAttributes().FirstOrDefault(attr => attr.Name.StartsWith("data-disabled"));
             Assert.IsNotNull(dataDisabledAttr);
 
             Assert.AreEqual("data-disabled", dataDisabledAttr.Name);
@@ -101,9 +101,9 @@
             var tag = doc.FirstOrDefault() as Tag;
 
             Assert.IsNotNull(tag);
-            Assert.AreEqual(1, tag.Attributes.Count);
+            Assert.AreEqual(1, tag.EnumerateAttributes().Count());
 
-            var attr = tag.Attributes.First();
+            var attr = tag.EnumerateAttributes().First();
             Assert.AreEqual("\" \"\"v1\"\" \"", attr.Value.ToString());
         }
 
@@ -116,11 +116,11 @@
 
             Assert.IsNotNull(tag);
             Assert.IsNull(tag as ParentTag);
-            var attr = tag.Attributes.LastOrDefault();
+            var attr = tag.EnumerateAttributes().LastOrDefault();
             Assert.IsNotNull(attr);
             Assert.AreNotEqual("/", attr.Value.ToString());
 
-            Assert.AreEqual(2, tag.Attributes.Count);
+            Assert.AreEqual(2, tag.EnumerateAttributes().Count());
         }
 
         [TestMethod]

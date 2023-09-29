@@ -54,9 +54,9 @@ public class XmlTests
         var link = document.FirstOrDefault() as Tag;
         Assert.IsNotNull(link);
 
-        Assert.AreEqual(2, link.Attributes.Count);
-        Assert.AreEqual("alternate", link.Attributes.ElementAt(0).ToString());
-        Assert.AreEqual("http://www.youtube.com/watch?v=AbcdDefG", link.Attributes.ElementAt(1).ToString());
+        Assert.AreEqual(2, link.EnumerateAttributes().Count());
+        Assert.AreEqual("alternate", link.EnumerateAttributes().ElementAt(0).ToString());
+        Assert.AreEqual("http://www.youtube.com/watch?v=AbcdDefG", link.EnumerateAttributes().ElementAt(1).ToString());
     }
 
     [TestMethod]
@@ -67,8 +67,8 @@ public class XmlTests
         var link = document.FirstOrDefault() as Tag;
         Assert.IsNotNull(link);
 
-        Assert.AreEqual(2, link.Attributes.Count);
-        Assert.AreEqual("self", link.Attributes.ElementAt(0).ToString());
-        Assert.AreEqual("http://www.youtube.com/feeds/videos.xml?channel_id=UCmEN5ZnsHUXIxgpLitRTmWw", link.Attributes.ElementAt(1).ToString());
+        Assert.AreEqual(2, link.EnumerateAttributes().Count());
+        Assert.AreEqual("self", link.EnumerateAttributes().ElementAt(0).ToString());
+        Assert.AreEqual("http://www.youtube.com/feeds/videos.xml?channel_id=UCmEN5ZnsHUXIxgpLitRTmWw", link.EnumerateAttributes().ElementAt(1).ToString());
     }
 }

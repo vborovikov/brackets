@@ -374,12 +374,15 @@ public partial class Document
             throw new NotImplementedException();
         }
 
-        private IEnumerable<Element> EnumerateAttributes(Element element)
+        private static IEnumerable<Element> EnumerateAttributes(Element element)
         {
             if (element is Tag tag)
-                return tag.Attributes;
-
-            return Nothing();
+            {
+                foreach (var attribute in tag.EnumerateAttributes())
+                {
+                    yield return attribute;
+                }
+            }
         }
 
         private IEnumerable<Element> EnumerateSelf(Element element)
@@ -408,7 +411,7 @@ public partial class Document
                     yield return ancestorSibling;
         }
 
-        private IEnumerable<Element> EnumeratePrecedingSiblings(Element element)
+        private static IEnumerable<Element> EnumeratePrecedingSiblings(Element element)
         {
             var lastSibling = ((ParentTag?)element.Parent)?.Child?.Prev;
 
@@ -431,7 +434,7 @@ public partial class Document
                     yield return ancestorSibling;
         }
 
-        private IEnumerable<Element> EnumerateFollowingSiblings(Element element)
+        private static IEnumerable<Element> EnumerateFollowingSiblings(Element element)
         {
             var firstSibling = ((ParentTag?)element.Parent)?.Child;
 
@@ -442,7 +445,7 @@ public partial class Document
             }
         }
 
-        private IEnumerable<Element> EnumerateDescendants(Element element, bool includeSelf)
+        private static IEnumerable<Element> EnumerateDescendants(Element element, bool includeSelf)
         {
             if (includeSelf)
                 yield return element;
@@ -452,7 +455,7 @@ public partial class Document
                     yield return descendant;
         }
 
-        private IEnumerable<Element> EnumerateAncestors(Element element, bool includeSelf)
+        private static IEnumerable<Element> EnumerateAncestors(Element element, bool includeSelf)
         {
             if (includeSelf)
                 yield return element;

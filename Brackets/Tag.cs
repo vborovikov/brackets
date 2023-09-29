@@ -6,56 +6,14 @@
 
     public class Tag : Element
     {
-        private class AttributeCollection : IAttributeCollection
-        {
-            private readonly Tag owner;
-            private Attribute? attribute;
-            private int attributeCount;
-
-            public AttributeCollection(Tag owner)
-            {
-                this.owner = owner;
-            }
-
-            public int Count => this.attributeCount;
-
-            public override string? ToString()
-            {
-                return String.Join(' ', this);
-            }
-
-            public void Add(Attribute attribute)
-            {
-                this.attribute = (Attribute?)Link(attribute, this.owner, this.attribute);
-                ++this.attributeCount;
-            }
-
-            public void Remove(Attribute attribute)
-            {
-                if (this.attribute is not null)
-                {
-                    --this.attributeCount;
-                    this.attribute = (Attribute?)Unlink(attribute, this.owner, this.attribute);
-                }
-            }
-
-            public Attribute.Enumerator GetEnumerator() => new(this.attribute);
-
-            IEnumerator<Attribute> IEnumerable<Attribute>.GetEnumerator() =>
-                this.attribute is null ? ((IEnumerable<Attribute>)Array.Empty<Attribute>()).GetEnumerator() : GetEnumerator();
-
-            IEnumerator IEnumerable.GetEnumerator() =>
-                ((IEnumerable<Attribute>)this).GetEnumerator();
-        }
-
         protected readonly TagReference reference;
+        private Attribute? attribute;
         private int end;
 
         public Tag(TagReference reference, int start, int length) : base(start)
         {
             this.reference = reference;
             this.end = start + length;
-            this.Attributes = new AttributeCollection(this);
         }
 
         public string Name => this.reference.Name;
@@ -64,11 +22,24 @@
 
         public override ElementLevel Level => this.reference.Level;
 
-        public IAttributeCollection Attributes { get; }
+        public Attribute.Enumerator EnumerateAttributes() => new(this.attribute);
 
         public sealed override int End => this.end;
 
         public override string? ToString() => this.reference.ToString(this);
+
+        public void Add(Attribute attribute)
+        {
+            this.attribute = (Attribute?)Link(attribute, this, this.attribute);
+        }
+
+        public void Remove(Attribute attribute)
+        {
+            if (this.attribute is not null)
+            {
+                this.attribute = (Attribute?)Unlink(attribute, this, this.attribute);
+            }
+        }
 
         internal override string ToDebugString()
         {

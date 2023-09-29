@@ -61,7 +61,7 @@ namespace Brackets
             return this.HasValue ? $"{this.reference.Name}={this.Value.ToString()}" : this.reference.Name;
         }
 
-        public new struct Enumerator : IEnumerator<Attribute>
+        public new struct Enumerator : IEnumerable<Attribute>, IEnumerator<Attribute>
         {
             private readonly Attribute? first;
             private Attribute? sibling;
@@ -74,6 +74,7 @@ namespace Brackets
             }
 
             public readonly Attribute Current => this.current!;
+            public readonly Enumerator GetEnumerator() => this;
             readonly object IEnumerator.Current => this.current!;
 
             public readonly void Dispose()
@@ -100,16 +101,9 @@ namespace Brackets
                 this.sibling = this.first;
                 this.current = null;
             }
+
+            readonly IEnumerator<Attribute> IEnumerable<Attribute>.GetEnumerator() => GetEnumerator();
+            readonly IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
-    }
-
-    public interface IAttributeCollection : IEnumerable<Attribute>
-    {
-        int Count { get; }
-
-        void Add(Attribute attribute);
-        void Remove(Attribute attribute);
-
-        new Attribute.Enumerator GetEnumerator();
     }
 }

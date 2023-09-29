@@ -243,7 +243,7 @@
 
         protected internal Element Prev => this.prev;
 
-        public struct Enumerator : IEnumerator<Element>
+        public struct Enumerator : IEnumerable<Element>, IEnumerator<Element>
         {
             private readonly Element? first;
             private Element? node;
@@ -256,6 +256,7 @@
             }
 
             public readonly Element Current => this.current!;
+            public readonly Enumerator GetEnumerator() => this;
             readonly object IEnumerator.Current => this.current!;
 
             public readonly void Dispose()
@@ -282,6 +283,9 @@
                 this.node = this.first;
                 this.current = null;
             }
+
+            readonly IEnumerator<Element> IEnumerable<Element>.GetEnumerator() => GetEnumerator();
+            readonly IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
     }
 
