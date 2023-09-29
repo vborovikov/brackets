@@ -2,6 +2,7 @@
 
 public enum TokenCategory
 {
+    Discarded,   // tokens discarded as content
     Content,     // abc...
     OpeningTag,  // <abc ...>
     ClosingTag,  // </abc>
