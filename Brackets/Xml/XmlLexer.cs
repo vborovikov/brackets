@@ -160,14 +160,17 @@ public readonly struct XmlLexer : IMarkupLexer
                 {
                     var offsetAfterTagName = start + separatorPos + 2;
                     var attr = span[offsetAfterTagName..];
-                    var leadingSpaceLength = attr.IndexOfAnyExcept(Separators);
                     var attrEnd = attr.Length - (attr[^2] == Terminator || attr[^2] == AltCloser ? 2 : 1);
                     attr = attr[..attrEnd];
+                    var leadingSpaceLength = attr.IndexOfAnyExcept(Separators);
+                    if (leadingSpaceLength > -1)
+                    {
                     attrEnd = offsetAfterTagName + attr.LastIndexOfAnyExcept(Separators) + 1;
                     var attrStart = offsetAfterTagName + leadingSpaceLength;
 
                     data = span[attrStart..attrEnd];
                     dataOffset = attrStart;
+                }
                 }
 
                 // tag token

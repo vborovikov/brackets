@@ -71,6 +71,14 @@
             Assert.AreEqual(32580d, value);
         }
 
+        [TestMethod]
+        public void XPath_FeedLinks_Found()
+        {
+            var document = LoadSample("newsde.html");
+            var links = document.Find("/html/head/link[@rel='alternate']");
+            Assert.AreEqual(2, links.Count());
+        }
+
         private static Document LoadSample(string fileName)
         {
             using var htmlStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Brackets.Tests.Samples." + fileName);
