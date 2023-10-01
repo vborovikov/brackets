@@ -146,7 +146,7 @@ public readonly struct XmlLexer : IMarkupLexer
                 // tag name
                 name = tagName;
                 nameOffset = start + nameStart + 1;
-                
+
                 // token category
                 category = terminatorPos switch
                 {
@@ -165,12 +165,12 @@ public readonly struct XmlLexer : IMarkupLexer
                     var leadingSpaceLength = attr.IndexOfAnyExcept(Separators);
                     if (leadingSpaceLength > -1)
                     {
-                    attrEnd = offsetAfterTagName + attr.LastIndexOfAnyExcept(Separators) + 1;
-                    var attrStart = offsetAfterTagName + leadingSpaceLength;
+                        attrEnd = offsetAfterTagName + attr.LastIndexOfAnyExcept(Separators) + 1;
+                        var attrStart = offsetAfterTagName + leadingSpaceLength;
 
-                    data = span[attrStart..attrEnd];
-                    dataOffset = attrStart;
-                }
+                        data = span[attrStart..attrEnd];
+                        dataOffset = attrStart;
+                    }
                 }
 
                 // tag token
