@@ -23,6 +23,7 @@ public class HtmlReference : Document.MarkupReference<HtmlLexer>
         // raw text elements
         AddReference(new TagReference("style", this) { HasRawContent = true });
         AddReference(new TagReference("script", this) { HasRawContent = true, Level = ElementLevel.Inline });
+        AddReference(new TagReference("code", this) { HasRawContent = true, Level = ElementLevel.Inline });
         // other inline elements
         AddReference(new TagReference("a", this) { Level = ElementLevel.Inline });
         AddReference(new TagReference("abbr", this) { Level = ElementLevel.Inline });
@@ -35,7 +36,6 @@ public class HtmlReference : Document.MarkupReference<HtmlLexer>
         AddReference(new TagReference("button", this) { Level = ElementLevel.Inline });
         AddReference(new TagReference("canvas", this) { Level = ElementLevel.Inline });
         AddReference(new TagReference("cite", this) { Level = ElementLevel.Inline });
-        AddReference(new TagReference("code", this) { Level = ElementLevel.Inline });
         AddReference(new TagReference("data", this) { Level = ElementLevel.Inline });
         AddReference(new TagReference("datalist", this) { Level = ElementLevel.Inline });
         AddReference(new TagReference("del", this) { Level = ElementLevel.Inline });
