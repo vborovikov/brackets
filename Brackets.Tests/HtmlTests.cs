@@ -170,5 +170,16 @@
 
             Assert.AreEqual(2, doc.Count());
         }
+
+        [TestMethod]
+        public void Parse_CodeTag_RawContent()
+        {
+            var document = Document.Html.Parse("<code><PackageReference/></code>");
+            var code = document.First() as ParentTag;
+            Assert.IsNotNull(code);
+            var content = code.SingleOrDefault() as Content;
+            Assert.IsNotNull(content);
+            Assert.AreEqual("<PackageReference/>", content.ToString());
+        }
     }
 }
