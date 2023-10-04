@@ -182,7 +182,7 @@ public readonly struct HtmlLexer : IMarkupLexer
             {
                 // the tag name is incorrect, let's try not to discard it all as a content
                 var anotherOpenerPos = text[(start + 1)..].IndexOf(Opener);
-                if (anotherOpenerPos > 0)
+                if (anotherOpenerPos >= 0)
                 {
                     end = start + anotherOpenerPos + 1;
                     span = text[start..end];
