@@ -13,7 +13,7 @@
 
         public sealed override int End => this.end;
 
-        public override string? ToString()
+        public override string ToString()
         {
             return this.Source[this.Start..this.End].ToString();
         }

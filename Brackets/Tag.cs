@@ -26,7 +26,7 @@
 
         public sealed override int End => this.end;
 
-        public override string? ToString() => this.reference.ToString(this);
+        public override string ToString() => this.reference.ToString(this);
 
         public void Add(Attribute attribute)
         {
@@ -144,7 +144,7 @@
             } while (elementParent != this || element != this.child);
         }
 
-        public override string? ToString()
+        public override string ToString()
         {
             if (this.child is null)
                 return String.Empty;

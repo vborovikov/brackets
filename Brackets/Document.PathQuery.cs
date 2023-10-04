@@ -40,9 +40,9 @@ public partial class Document
 
         public override bool TryGetValue<T>([MaybeNullWhen(false)] out T value) => TryGetValue(this.Value, out value);
 
-        public override string? ToString()
+        public override string ToString()
         {
-            return this.Value.ToString();
+            return this.Value.ToString()!;
         }
 
         internal override string ToDebugString() => this.Value.ToString() ?? string.Empty;

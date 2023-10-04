@@ -37,7 +37,7 @@ namespace Brackets
 
         public ReadOnlySpan<char> Value => this.Source.Slice(this.valueStart, this.valueLength);
 
-        public override string? ToString()
+        public override string ToString()
         {
             if (!this.HasValue)
                 return String.Empty;
