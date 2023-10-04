@@ -182,5 +182,56 @@
             Assert.IsNotNull(content);
             Assert.AreEqual("<PackageReference/>", content.ToString());
         }
+
+        [TestMethod]
+        public void Parse_CodeTagMultipleTags_RawContent()
+        {
+            var document = Document.Html.Parse(
+                """
+                <pre><code class="language-xml"><Project Sdk="Microsoft.NET.Sdk">
+
+                  <PropertyGroup>
+                    <OutputType>Exe</OutputType>
+                    <TargetFrameworks>net8.0;net7.0</TargetFrameworks>
+                    <LangVersion>Preview</LangVersion>
+                    <ImplicitUsings>enable</ImplicitUsings>
+                    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+                    <ServerGarbageCollection>true</ServerGarbageCollection>
+                  </PropertyGroup>
+
+                  <ItemGroup>
+                    <PackageReference Include="BenchmarkDotNet" Version="0.13.8" />
+                  </ItemGroup>
+
+                </Project></code></pre>
+                """);
+
+            var pre = document.SingleOrDefault() as ParentTag;
+            Assert.IsNotNull(pre);
+            var code = pre.SingleOrDefault() as ParentTag;
+            Assert.IsNotNull(code);
+            var content = code.SingleOrDefault() as Content;
+            Assert.IsNotNull(content);
+
+            Assert.AreEqual(
+                """
+                <Project Sdk="Microsoft.NET.Sdk">
+                
+                  <PropertyGroup>
+                    <OutputType>Exe</OutputType>
+                    <TargetFrameworks>net8.0;net7.0</TargetFrameworks>
+                    <LangVersion>Preview</LangVersion>
+                    <ImplicitUsings>enable</ImplicitUsings>
+                    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+                    <ServerGarbageCollection>true</ServerGarbageCollection>
+                  </PropertyGroup>
+                
+                  <ItemGroup>
+                    <PackageReference Include="BenchmarkDotNet" Version="0.13.8" />
+                  </ItemGroup>
+                
+                </Project>
+                """, content.ToString());
+        }
     }
 }
