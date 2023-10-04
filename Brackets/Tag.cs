@@ -22,6 +22,8 @@
 
         public override ElementLevel Level => this.reference.Level;
 
+        public bool HasAttributes => this.attribute is not null;
+
         public Attribute.Enumerator EnumerateAttributes() => new(this.attribute);
 
         public sealed override int End => this.end;

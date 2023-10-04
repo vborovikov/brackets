@@ -101,10 +101,11 @@
             var tag = doc.FirstOrDefault() as Tag;
 
             Assert.IsNotNull(tag);
+            Assert.IsTrue(tag.HasAttributes);
             Assert.AreEqual(1, tag.EnumerateAttributes().Count());
 
             var attr = tag.EnumerateAttributes().First();
-            Assert.AreEqual("\" \"\"v1\"\" \"", attr.Value.ToString());
+            Assert.AreEqual(" \"\"v1\"\" ", attr.Value.ToString());
         }
 
         [TestMethod]

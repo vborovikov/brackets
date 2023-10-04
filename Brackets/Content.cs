@@ -54,7 +54,7 @@
 
         public ReadOnlySpan<char> Data => this.Source.Slice(this.dataStart, this.dataLength);
 
-        public override string? ToString()
+        public override string ToString()
         {
             return this.Data.ToString();
         }

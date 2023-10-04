@@ -35,14 +35,15 @@ namespace Brackets
 
         public bool HasValue => this.Start < this.valueStart;
 
-        public ReadOnlySpan<char> Value => this.Source.Slice(this.valueStart, this.valueLength);
+        public ReadOnlySpan<char> Value =>
+            this.reference.Syntax.TrimAttributeValue(this.Source.Slice(this.valueStart, this.valueLength));
 
         public override string ToString()
         {
             if (!this.HasValue)
                 return String.Empty;
 
-            return this.reference.Syntax.TrimAttributeValue(this.Value).ToString();
+            return this.Value.ToString();
         }
 
         public override bool TryGetValue<T>([MaybeNullWhen(false)] out T value)
