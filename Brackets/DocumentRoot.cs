@@ -16,7 +16,7 @@ namespace Brackets
 
         internal bool? IsWellFormed { get; set; }
 
-        public override string? ToString()
+        public override string ToString()
         {
             return String.Concat(this);
         }
