@@ -25,20 +25,20 @@
 
         public TValue GetOrAdd(TKey key, Func<TKey, TValue> valueFactory)
         {
-            return this.cache.GetOrAdd(key, k =>
+            return this.cache.GetOrAdd(key, (k, self) =>
             {
                 TValue value = valueFactory(k);
-                lock (this.syncRoot)
+                lock (self.syncRoot)
                 {
-                    this.accessOrder.Enqueue(k);
-                    while (this.accessOrder.Count > this.maxCapacity)
+                    self.accessOrder.Enqueue(k);
+                    while (self.accessOrder.Count > self.maxCapacity)
                     {
-                        TKey oldestKey = this.accessOrder.Dequeue();
-                        this.cache.TryRemove(oldestKey, out _);
+                        TKey oldestKey = self.accessOrder.Dequeue();
+                        self.cache.TryRemove(oldestKey, out _);
                     }
                 }
                 return value;
-            });
+            }, this);
         }
     }
 }
