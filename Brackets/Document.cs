@@ -28,6 +28,8 @@
 
         public bool IsWellFormed => this.root.IsWellFormed == true;
 
+        public int Length => this.root.Length;
+
 #if DEBUG
         internal DocumentRoot Root => this.root;
 #endif

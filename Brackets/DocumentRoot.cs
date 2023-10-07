@@ -7,7 +7,7 @@ namespace Brackets
         private readonly ReadOnlyMemory<char> text;
 
         public DocumentRoot(RootReference rootReference, ReadOnlyMemory<char> text)
-            : base(rootReference, -1, -1)
+            : base(rootReference, 0, text.Length)
         {
             this.text = text;
         }
