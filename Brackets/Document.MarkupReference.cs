@@ -54,10 +54,6 @@
 
                 foreach (var token in Lexer.TokenizeElements(span, this.lexer))
                 {
-                    // skip comments
-                    if (token.Category == TokenCategory.Comment)
-                        continue;
-
                     var parent = tree.Peek();
 
                     if (parent.HasRawContent)
@@ -95,6 +91,10 @@
                             case TokenCategory.Section:
                                 ParseSection(token, parent);
                                 break;
+
+                            case TokenCategory.Comment:
+                                ParseComment(token, parent);
+                                break;
                         }
                     }
                 }
@@ -117,6 +117,11 @@
                 var root = (DocumentRoot)tree.Pop();
                 root.IsWellFormed = wellFormed;
                 return root;
+            }
+
+            private static void ParseComment(in Token token, ParentTag parent)
+            {
+                parent.Add(new Comment(token.Offset, token.Length));
             }
 
             private static void ParseSection(in Token token, ParentTag parent)

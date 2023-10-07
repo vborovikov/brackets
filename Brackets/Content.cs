@@ -61,4 +61,14 @@
 
         internal override bool TryAdd(Content content) => false;
     }
+
+    public sealed class Comment : Content
+    {
+        public Comment(int start, int length)
+            : base(start, length)
+        {
+        }
+
+        internal override bool TryAdd(Content content) => false;
+    }
 }

@@ -290,5 +290,91 @@
                 }
                 """, content.ToString());
         }
+
+        [TestMethod]
+        public void Parse_CodeTagRazor_SingleContent()
+        {
+            var document = Document.Html.Parse(
+                """
+                <pre><code class="language-razor"><EditForm Model="Customer" method="post" OnSubmit="DisplayCustomer" FormName="customer">
+                    <div>
+                        <label>Name</label>
+                        <InputText @bind-Value="Customer.Name" />
+                    </div>
+                    <AddressEditor @bind-Value="Customer.BillingAddress" />
+                    <button>Send</button>
+                </EditForm>
+
+                @if (submitted)
+                {
+                    <!-- Display customer data -->
+                    <h3>Customer</h3>
+                    <p>Name: @Customer.Name</p>
+                    <p>Street: @Customer.BillingAddress.Street</p>
+                    <p>City: @Customer.BillingAddress.City</p>
+                    <p>State: @Customer.BillingAddress.State</p>
+                    <p>Zip: @Customer.BillingAddress.Zip</p>
+                }
+
+                @code {
+                    public void DisplayCustomer()
+                    {
+                        submitted = true;
+                    }
+
+                    [SupplyParameterFromForm] Customer? Customer { get; set; }
+
+                    protected override void OnInitialized() => Customer ??= new();
+
+                    bool submitted = false;
+                    public void Submit() => submitted = true;
+                }</code></pre>
+                """
+                );
+
+            var pre = document.SingleOrDefault() as ParentTag;
+            Assert.IsNotNull(pre);
+            var code = pre.SingleOrDefault() as ParentTag;
+            Assert.IsNotNull(code);
+            var content = code.SingleOrDefault() as Content;
+            Assert.IsNotNull(content);
+
+            Assert.AreEqual(
+                """
+                <EditForm Model="Customer" method="post" OnSubmit="DisplayCustomer" FormName="customer">
+                    <div>
+                        <label>Name</label>
+                        <InputText @bind-Value="Customer.Name" />
+                    </div>
+                    <AddressEditor @bind-Value="Customer.BillingAddress" />
+                    <button>Send</button>
+                </EditForm>
+                
+                @if (submitted)
+                {
+                    <!-- Display customer data -->
+                    <h3>Customer</h3>
+                    <p>Name: @Customer.Name</p>
+                    <p>Street: @Customer.BillingAddress.Street</p>
+                    <p>City: @Customer.BillingAddress.City</p>
+                    <p>State: @Customer.BillingAddress.State</p>
+                    <p>Zip: @Customer.BillingAddress.Zip</p>
+                }
+                
+                @code {
+                    public void DisplayCustomer()
+                    {
+                        submitted = true;
+                    }
+                
+                    [SupplyParameterFromForm] Customer? Customer { get; set; }
+                
+                    protected override void OnInitialized() => Customer ??= new();
+                
+                    bool submitted = false;
+                    public void Submit() => submitted = true;
+                }
+                """, content.ToString());
+        }
     }
 }
