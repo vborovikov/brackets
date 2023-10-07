@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Title>Brackets</Title>
-    <Description>Markup parser library</Description>
+    <Description>Resilient markup parser library</Description>
   </PropertyGroup>
 
   <ItemGroup>

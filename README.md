@@ -1,2 +1,2 @@
-# brackets
-Markup parser library
+# Brackets
+Resilient markup parser library
