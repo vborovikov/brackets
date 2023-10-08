@@ -79,6 +79,14 @@
             Assert.AreEqual(2, links.Count());
         }
 
+        [TestMethod]
+        public void XPath_FeedLinks2_Found()
+        {
+            var document = LoadSample("japantimes.html");
+            var links = document.Find("/html/head/link[@rel='alternate']");
+            Assert.AreEqual(1, links.Count());
+        }
+
         private static Document LoadSample(string fileName)
         {
             using var htmlStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Brackets.Tests.Samples." + fileName);

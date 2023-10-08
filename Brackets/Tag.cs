@@ -165,24 +165,29 @@
 
         private Element? Prune()
         {
-            if (this.child is null || this.child is Tag)
-            {
-                // if the child element is a tag we don't prune it
-                //todo: or maybe we want to find the first content element amoung children and prune the tag from there
+            if (this.child is null)
                 return null;
-            }
 
-            var tag = this.child;
+            var element = this.child;
+            var hasContentBeforeTags = false;
             do
             {
-                if (tag is Tag)
+                if (element is Tag tag)
                 {
+                    if (!hasContentBeforeTags)
+                    {
+                        // a first non-comment child element is a tag, we don't prune it
+                        //todo: or maybe we want to find the first content element amoung children and prune the element from there
+                        break;
+                    }
+
                     this.child = Prune(tag, this.child);
                     return tag;
                 }
-                tag = tag.Next;
+                hasContentBeforeTags = hasContentBeforeTags || element is not Comment; // and not a Tag
+                element = element.Next;
             }
-            while (tag != this.child);
+            while (element != this.child);
 
             return null;
         }

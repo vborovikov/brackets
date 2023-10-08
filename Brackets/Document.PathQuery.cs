@@ -279,7 +279,7 @@ public partial class Document
                 XPathNodeType.All when this.axis == XPathAxis.Parent => "..",
                 XPathNodeType.All when this.axis == XPathAxis.Self => ".",
                 _ when this.skipNameTest => $"{this.axis}::{this.nodeType}",
-                _ when this.prefix is not null => $"{this.prefix}:{this.name}",
+                _ when this.prefix is { Length: > 0 } => $"{this.prefix}:{this.name}",
                 _ => this.name,
             };
         }
@@ -301,8 +301,7 @@ public partial class Document
 
                 case XPathNodeType.Element:
                     {
-                        var tag = element as Tag;
-                        if (tag is null)
+                        if (element is not Tag tag)
                             return false;
                         if (this.skipNameTest)
                             return true;
@@ -312,8 +311,7 @@ public partial class Document
 
                 case XPathNodeType.Attribute:
                     {
-                        var attr = element as Attribute;
-                        if (attr is null)
+                        if (element is not Attribute attr)
                             return false;
                         if (this.skipNameTest)
                             return true;
