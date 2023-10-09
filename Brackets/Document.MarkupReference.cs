@@ -159,7 +159,7 @@
                                 if (tag != parent)
                                 {
                                     var parentTag = tree.Peek();
-                                    parentTag.Graft(tag);
+                                    parentTag.Graft(tag, token.End);
                                 }
 
                                 tag.CloseAt(token.End);
@@ -168,7 +168,7 @@
                             else
                             {
                                 var parentTag = tree.Peek();
-                                parentTag.Graft(tag);
+                                parentTag.Graft(tag, token.End);
                             }
                         }
                     }

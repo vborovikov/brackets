@@ -154,12 +154,19 @@
             return ToString(this);
         }
 
-        internal void Graft(ParentTag other)
+        internal void Graft(ParentTag other, int unexpectedEndPos = -1)
         {
             var element = other.Prune();
             if (element is not null)
             {
-                Graft(element);
+                this.child = Graft(element, this, this.child);
+
+                var newEnd = unexpectedEndPos > 0 ? unexpectedEndPos :
+                    this.child is not null ? this.child.Prev.End : -1;
+                if (newEnd > 0)
+                {
+                    CloseAt(newEnd);
+                }
             }
         }
 
@@ -176,12 +183,17 @@
                 {
                     if (!hasContentBeforeTags)
                     {
-                        // a first non-comment child element is a tag, we don't prune it
+                        // a first non-comment element element is a tag, we don't prune it
                         //todo: or maybe we want to find the first content element amoung children and prune the element from there
                         break;
                     }
 
                     this.child = Prune(tag, this.child);
+                    if (this.child is not null)
+                    {
+                        CloseAt(this.child.Prev.End);
+                    }
+
                     return tag;
                 }
                 hasContentBeforeTags = hasContentBeforeTags || element is not Comment; // and not a Tag
@@ -190,17 +202,6 @@
             while (element != this.child);
 
             return null;
-        }
-
-        private void Graft(Element child)
-        {
-            this.child = Graft(child, this, this.child);
-
-            if (this.child is not null)
-            {
-                //todo: find the closing tag end position
-                CloseAt(this.child.Prev.End);
-            }
         }
 
         internal override string ToDebugString()
