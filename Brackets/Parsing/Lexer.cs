@@ -5,7 +5,7 @@ using System;
 static class Lexer
 {
     public static ElementTokenEnumerator<TMarkupLexer> TokenizeElements<TMarkupLexer>(in ReadOnlySpan<char> text, in TMarkupLexer syntax)
-    where TMarkupLexer : struct, IMarkupLexer => new(text, syntax);
+        where TMarkupLexer : struct, IMarkupLexer => new(text, syntax);
 
     public static AttributeTokenEnumerator<TMarkupLexer> TokenizeAttributes<TMarkupLexer>(in Token token, in TMarkupLexer syntax)
         where TMarkupLexer : struct, IMarkupLexer => new(token, syntax);
