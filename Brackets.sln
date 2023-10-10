@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParseXPath", "ParseXPath\ParseXPath.csproj", "{4C529E1F-4791-4DEF-9888-B7DEA7CF6EE7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,8 +30,15 @@ Global
 		{C66236E0-1415-4AA2-8AF0-4DAC639B9C7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C66236E0-1415-4AA2-8AF0-4DAC639B9C7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C66236E0-1415-4AA2-8AF0-4DAC639B9C7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C529E1F-4791-4DEF-9888-B7DEA7CF6EE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C529E1F-4791-4DEF-9888-B7DEA7CF6EE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C529E1F-4791-4DEF-9888-B7DEA7CF6EE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C529E1F-4791-4DEF-9888-B7DEA7CF6EE7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BE37A8D9-ED40-44B2-9165-AB2F87823C0B}
 	EndGlobalSection
 EndGlobal
