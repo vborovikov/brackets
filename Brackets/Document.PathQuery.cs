@@ -397,7 +397,7 @@ public partial class Document
             return AsSelf(element);
         }
 
-        private IEnumerable<Element> EnumeratePrecedingElements(Element element)
+        private static IEnumerable<Element> EnumeratePrecedingElements(Element element)
         {
             // this element siblings
             foreach (var elementSibling in EnumeratePrecedingSiblings(element))
@@ -420,7 +420,7 @@ public partial class Document
             }
         }
 
-        private IEnumerable<Element> EnumerateFollowingElements(Element element)
+        private static IEnumerable<Element> EnumerateFollowingElements(Element element)
         {
             // this element siblings
             foreach (var elementSibling in EnumerateFollowingSiblings(element))
