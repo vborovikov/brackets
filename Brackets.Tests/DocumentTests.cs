@@ -1,7 +1,6 @@
 ﻿namespace Brackets.Tests.Markup
 {
     using System.IO;
-    using System.Linq;
     using System.Reflection;
     using System.Text;
     using Microsoft.VisualStudio.TestTools.UnitTesting;

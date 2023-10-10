@@ -288,27 +288,4 @@
             readonly IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
     }
-
-    public static class ElementExtensions
-    {
-        public static bool Contains(this Element element, ReadOnlySpan<char> text)
-        {
-            if (element is Attribute attribute)
-                return attribute.HasValue && attribute.Value.Contains(text, StringComparison.CurrentCultureIgnoreCase);
-
-            if (element is Content content)
-                return content.Contains(text);
-
-            if (element is IEnumerable<Element> parent)
-            {
-                foreach (var child in parent)
-                {
-                    if (child is Content childContent && childContent.Contains(text))
-                        return true;
-                }
-            }
-
-            return false;
-        }
-    }
 }
