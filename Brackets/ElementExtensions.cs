@@ -191,7 +191,9 @@ public static class ElementExtensions
 
     public static Element? SingleOrDefault(this ParentTag root, Func<Element, bool> predicate)
     {
-        var first = root.Child ?? throw new InvalidOperationException("Sequence contains no elements.");
+        var first = root.Child;
+        if (first is null)
+            return null;
 
         var single = default(Element);
         var current = first;
