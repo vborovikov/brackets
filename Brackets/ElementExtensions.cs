@@ -1,7 +1,6 @@
 ﻿namespace Brackets;
 
 using System;
-using System.Collections.Generic;
 
 public static class ElementExtensions
 {
@@ -13,7 +12,7 @@ public static class ElementExtensions
         if (element is Content content)
             return content.Contains(text);
 
-        if (element is IEnumerable<Element> parent)
+        if (element is ParentTag parent)
         {
             foreach (var child in parent)
             {
@@ -29,27 +28,23 @@ public static class ElementExtensions
 
     public static Element First(this ParentTag root)
     {
-        if (root.Child is null)
-            throw new InvalidOperationException("Sequence contains no elements.");
-
-        return root.Child;
+        return root.Child ?? throw new InvalidOperationException("Sequence contains no elements.");
     }
 
     public static Element First(this Document document, Func<Element, bool> predicate) => document.Root.First(predicate);
 
     public static Element First(this ParentTag root, Func<Element, bool> predicate)
     {
-        if (root.Child is null)
-            throw new InvalidOperationException("Sequence contains no elements.");
+        var first = root.Child ?? throw new InvalidOperationException("Sequence contains no elements.");
 
-        var current = root.Child;
+        var current = first;
         do
         {
             if (predicate(current))
                 return current;
             current = current.Next;
         }
-        while (current != root.Child);
+        while (current != first);
 
         throw new InvalidOperationException("No element satisfies the condition.");
     }
@@ -63,27 +58,24 @@ public static class ElementExtensions
     /// <returns>The last child element of the root element, or null if the root has no children.</returns>
     public static Element Last(this ParentTag root)
     {
-        if (root.Child is null)
-            throw new InvalidOperationException("Sequence contains no elements.");
-
-        return root.Child.Prev;
+        var first = root.Child ?? throw new InvalidOperationException("Sequence contains no elements.");
+        return first.Prev;
     }
 
     public static Element Last(this Document document, Func<Element, bool> predicate) => document.Root.Last(predicate);
 
     public static Element Last(this ParentTag root, Func<Element, bool> predicate)
     {
-        if (root.Child is null)
-            throw new InvalidOperationException("Sequence contains no elements.");
+        var last = root.Child?.Prev ?? throw new InvalidOperationException("Sequence contains no elements.");
 
-        var current = root.Child.Prev;
+        var current = last;
         do
         {
             if (predicate(current))
                 return current;
             current = current.Prev;
         }
-        while (current != root.Child.Prev);
+        while (current != last);
 
         throw new InvalidOperationException("No element satisfies the condition.");
     }
@@ -96,17 +88,18 @@ public static class ElementExtensions
 
     public static Element? FirstOrDefault(this ParentTag root, Func<Element, bool> predicate)
     {
-        if (root.Child is null)
+        var first = root.Child;
+        if (first is null)
             return null;
 
-        var current = root.Child;
+        var current = first;
         do
         {
             if (predicate(current))
                 return current;
             current = current.Next;
         }
-        while (current != root.Child);
+        while (current != first);
 
         return null;
     }
@@ -119,17 +112,18 @@ public static class ElementExtensions
 
     public static Element? LastOrDefault(this ParentTag root, Func<Element, bool> predicate)
     {
-        if (root.Child is null)
+        var last = root.Child?.Prev;
+        if (last is null)
             return null;
 
-        var current = root.Child.Prev;
+        var current = last;
         do
         {
             if (predicate(current))
                 return current;
             current = current.Prev;
         }
-        while (current != root.Child.Prev);
+        while (current != last);
 
         return null;
     }
@@ -171,6 +165,28 @@ public static class ElementExtensions
         return single;
     }
 
+    public static Element? SingleOrDefault(this Document document) => document.Root.SingleOrDefault();
+
+    public static Element? SingleOrDefault(this ParentTag root)
+    {
+        var first = root.Child;
+        if (first is null)
+            return null;
+
+        var single = default(Element);
+        var current = first;
+        do
+        {
+            if (single is not null)
+                throw new InvalidOperationException("Sequence contains more than one element.");
+            single = current;
+            current = current.Next;
+        }
+        while (current != first);
+
+        return single;
+    }
+
     public static Element? SingleOrDefault(this Document document, Func<Element, bool> predicate) => document.Root.SingleOrDefault(predicate);
 
     public static Element? SingleOrDefault(this ParentTag root, Func<Element, bool> predicate)
@@ -198,17 +214,18 @@ public static class ElementExtensions
 
     public static bool All(this ParentTag root, Func<Element, bool> predicate)
     {
-        if (root.Child is null)
+        var first = root.Child;
+        if (first is null)
             return true;
 
-        var current = root.Child;
+        var current = first;
         do
         {
             if (!predicate(current))
                 return false;
             current = current.Next;
         }
-        while (current != root.Child);
+        while (current != first);
 
         return true;
     }
@@ -217,17 +234,18 @@ public static class ElementExtensions
 
     public static bool Any(this ParentTag root, Func<Element, bool> predicate)
     {
-        if (root.Child is null)
+        var first = root.Child;
+        if (first is null)
             return false;
 
-        var current = root.Child;
+        var current = first;
         do
         {
             if (predicate(current))
                 return true;
             current = current.Next;
         }
-        while (current != root.Child);
+        while (current != first);
 
         return false;
     }
@@ -240,10 +258,11 @@ public static class ElementExtensions
 
     public static int Count(this ParentTag root, Func<Element, bool> predicate)
     {
-        if (root.Child is null)
+        var first = root.Child;
+        if (first is null)
             return 0;
 
-        var current = root.Child;
+        var current = first;
         int count = 0;
         do
         {
@@ -251,7 +270,7 @@ public static class ElementExtensions
                 count++;
             current = current.Next;
         }
-        while (current != root.Child);
+        while (current != first);
 
         return count;
     }
@@ -260,17 +279,18 @@ public static class ElementExtensions
 
     public static int Count(this ParentTag root)
     {
-        if (root.Child is null)
+        var first = root.Child;
+        if (first is null)
             return 0;
 
-        var current = root.Child;
+        var current = first;
         int count = 0;
         do
         {
             count++;
             current = current.Next;
         }
-        while (current != root.Child);
+        while (current != first);
 
         return count;
     }

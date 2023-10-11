@@ -12,7 +12,7 @@
 
     public partial class Document : IEnumerable<Element>
     {
-        private static readonly LRUCache<string, PathQuery> pathQueryCache = new(10);
+        private static readonly LRUCache<string, PathQuery> pathQueryCache = new(16);
         private readonly DocumentRoot root;
 
         private Document(DocumentRoot root)
@@ -30,9 +30,7 @@
 
         public int Length => this.root.Length;
 
-#if DEBUG
         internal DocumentRoot Root => this.root;
-#endif
 
         public override string? ToString()
         {

@@ -49,11 +49,10 @@ public class ElementTests
     }
 
     [TestMethod]
-    [ExpectedException(typeof(InvalidOperationException))]
     public void Last_MultipleTags_ThrowsWhenNoElementSatisfiesCondition()
     {
         var document = Document.Html.Parse("<span>Value1</span><span>Value2</span><span>Value3</span>");
-        var result = document.Last(element => element is Tag { Name: "div" });
+        Assert.ThrowsException<InvalidOperationException>(() => document.Last(element => element is Tag { Name: "div" }));
     }
 
     [TestMethod]
@@ -71,5 +70,58 @@ public class ElementTests
         var document = Document.Html.Parse("<span>Value1</span><span>Value2</span><span>Value3</span>");
         var result = document.LastOrDefault(element => element is Tag { Name: "div" });
         Assert.IsNull(result);
+    }
+
+    [TestMethod]
+    public void Contains_MultipleTags_ReturnsTrue()
+    {
+        var document = Document.Html.Parse("<span>Value1</span><span>Value2</span><span>Value3</span>");
+        Assert.IsTrue(document.First().Contains("Value1"));
+    }
+
+    [TestMethod]
+    public void Single_EmptyDocument_Throws()
+    {
+        var document = Document.Html.Parse("");
+        Assert.ThrowsException<InvalidOperationException>(() => document.Single());
+    }
+
+    [TestMethod]
+    public void Single_SingleTag_ReturnsSingleElement()
+    {
+        var document = Document.Html.Parse("<span>Value1</span>");
+        var result = document.Single() as Tag;
+        Assert.IsNotNull(result);
+        Assert.AreEqual("span", result.Name);
+    }
+
+    [TestMethod]
+    public void Single_MultipleTags_Throws()
+    {
+        var document = Document.Html.Parse("<span>Value1</span><span>Value2</span><span>Value3</span>");
+        Assert.ThrowsException<InvalidOperationException>(() => document.Single());
+    }
+
+    [TestMethod]
+    public void SingleOrDefault_EmptyDocument_ReturnsNull()
+    {
+        var document = Document.Html.Parse("");
+        Assert.IsNull(document.SingleOrDefault());
+    }
+
+    [TestMethod]
+    public void SingleOrDefault_SingleTag_ReturnsSingleElement()
+    {
+        var document = Document.Html.Parse("<span>Value1</span>");
+        var result = document.SingleOrDefault() as Tag;
+        Assert.IsNotNull(result);
+        Assert.AreEqual("span", result.Name);
+    }
+
+    [TestMethod]
+    public void SingleOrDefault_MultipleTags_Throws()
+    {
+        var document = Document.Html.Parse("<span>Value1</span><span>Value2</span><span>Value3</span>");
+        Assert.ThrowsException<InvalidOperationException>(() => document.SingleOrDefault());
     }
 }
