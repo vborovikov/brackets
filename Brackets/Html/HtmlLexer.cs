@@ -44,7 +44,7 @@ public readonly struct HtmlLexer : IMarkupLexer
         var end = text.IndexOf(Closer) + 1;
         if (end <= 0)
         {
-            return new(TokenCategory.Content, text, globalOffset);
+            return new(TokenCategory.Discarded, text, globalOffset);
         }
 
         var category = TokenCategory.Content;
@@ -78,7 +78,7 @@ public readonly struct HtmlLexer : IMarkupLexer
                         span = text[start..end];
                     }
 
-                    return new(TokenCategory.Content, span, globalOffset + start);
+                    return new(TokenCategory.Discarded, span, globalOffset + start);
                 }
             }
 
@@ -90,7 +90,7 @@ public readonly struct HtmlLexer : IMarkupLexer
             if (dataPos <= 0)
             {
                 // section is incorrect
-                return new(TokenCategory.Content, span, globalOffset + start);
+                return new(TokenCategory.Discarded, span, globalOffset + start);
             }
 
             category = TokenCategory.Section;
@@ -117,6 +117,7 @@ public readonly struct HtmlLexer : IMarkupLexer
                 }
                 else
                 {
+                    //todo: Discarded?
                     end = text.Length;
                 }
 
@@ -191,7 +192,7 @@ public readonly struct HtmlLexer : IMarkupLexer
                 }
 
                 // discarded content token
-                return new(TokenCategory.Content, span, globalOffset + start);
+                return new(TokenCategory.Discarded, span, globalOffset + start);
             }
         }
     }

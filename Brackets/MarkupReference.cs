@@ -73,6 +73,7 @@
 
                     switch (token.Category)
                     {
+                        case TokenCategory.Discarded:
                         case TokenCategory.Content:
                             ParseContent(token, parent);
                             break;
