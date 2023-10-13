@@ -1,6 +1,6 @@
 ﻿namespace Brackets.Xml;
 
-public class XmlReference : Document.MarkupReference<XmlLexer>
+public class XmlReference : MarkupReference<XmlLexer>
 {
     public XmlReference()
     {
