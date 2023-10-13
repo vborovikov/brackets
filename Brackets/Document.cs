@@ -15,7 +15,7 @@
         private static readonly LRUCache<string, PathQuery> pathQueryCache = new(16);
         private readonly DocumentRoot root;
 
-        private Document(DocumentRoot root)
+        internal Document(DocumentRoot root)
         {
             this.root = root;
         }

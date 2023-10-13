@@ -1,6 +1,6 @@
 ﻿namespace Brackets.Html;
 
-public class HtmlReference : Document.MarkupReference<HtmlLexer>
+public class HtmlReference : MarkupReference<HtmlLexer>
 {
     public HtmlReference()
     {
