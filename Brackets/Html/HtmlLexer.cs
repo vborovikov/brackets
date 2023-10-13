@@ -24,6 +24,8 @@ public readonly struct HtmlLexer : IMarkupLexer
     private const string SectionCloser = "]]>";
 
     public StringComparison Comparison => cmp;
+    char IMarkupLexer.Opener => Opener;
+    char IMarkupLexer.Closer => Closer;
 
     public Token GetElementToken(ReadOnlySpan<char> text, int globalOffset)
     {
