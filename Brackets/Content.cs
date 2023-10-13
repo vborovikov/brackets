@@ -23,7 +23,7 @@
         }
     }
 
-    public class Content : Element
+    public class Content : CharacterData
     {
         private int end;
 
@@ -34,16 +34,6 @@
 
         public sealed override int End => this.end;
 
-        public override string ToString()
-        {
-            return this.Source[this.Start..this.End].ToString();
-        }
-
-        internal override string ToDebugString()
-        {
-            return String.Concat(this.Source[this.Start..].TrimStart()[..Math.Min(15, this.Length)], "\u2026");
-        }
-
         internal virtual bool TryAdd(Content content)
         {
             if (content.Start == this.End)
@@ -53,11 +43,6 @@
             }
 
             return false;
-        }
-
-        public bool Contains(ReadOnlySpan<char> text)
-        {
-            return this.Source[this.Start..this.End].Contains(text, StringComparison.CurrentCultureIgnoreCase);
         }
     }
 
