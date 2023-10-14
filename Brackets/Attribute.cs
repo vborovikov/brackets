@@ -9,33 +9,23 @@ namespace Brackets
     {
         private readonly AttributeReference reference;
         private readonly int length;
-        private readonly int valueStart;
-        private readonly int valueLength;
 
         public Attribute(AttributeReference reference, int start, int length)
-            : this(reference, start, length, start, length)
-        {
-        }
-
-        public Attribute(AttributeReference reference, int start, int length, int valueStart, int valueLength)
             : base(start)
         {
             this.reference = reference;
             this.length = length;
-            this.valueStart = valueStart;
-            this.valueLength = valueLength;
         }
 
-        public sealed override int End => this.valueStart + this.valueLength;
+        public sealed override int End => this.Start + this.length;
 
         public string Name => this.reference.Name;
 
         public bool IsFlag => this.reference.IsFlag || !this.HasValue;
 
-        public bool HasValue => this.Start < this.valueStart && this.valueLength > 0;
+        public virtual bool HasValue => false;
 
-        public ReadOnlySpan<char> Value =>
-            this.reference.Syntax.TrimValue(this.Source.Slice(this.valueStart, this.valueLength));
+        public virtual ReadOnlySpan<char> Value => this.Name;
 
         public override string ToString()
         {
@@ -58,8 +48,10 @@ namespace Brackets
 
         internal override string ToDebugString()
         {
-            return this.HasValue ? $"{this.reference.Name}={this.Value.ToString()}" : this.reference.Name;
+            return this.HasValue ? $"{this.Name}={this.Value}" : this.Name;
         }
+
+        protected ReadOnlySpan<char> TrimValue(ReadOnlySpan<char> value) => this.reference.Syntax.TrimValue(value);
 
         public new struct Enumerator : IEnumerable<Attribute>, IEnumerator<Attribute>
         {
@@ -107,15 +99,36 @@ namespace Brackets
         }
     }
 
+    public class ValueAttribute : Attribute
+    {
+        private readonly int valueStart;
+        private readonly int valueLength;
+
+        public ValueAttribute(AttributeReference reference, int start, int length, int valueStart, int valueLength)
+            : base(reference, start, length)
+        {
+            this.valueStart = valueStart;
+            this.valueLength = valueLength;
+        }
+
+        public override bool HasValue => true;
+
+        public override ReadOnlySpan<char> Value => TrimValue(this.Source.Slice(this.valueStart, this.valueLength));
+    }
+
     sealed class StreamAttribute : Attribute
     {
         private readonly string value;
 
-        public StreamAttribute(AttributeReference reference, string value)
-            : base(reference, -1, 0, 0, value.Length)
+        public StreamAttribute(AttributeReference reference, ReadOnlySpan<char> value, int offset, int length)
+            : base(reference, offset, length)
         {
-            this.value = value;
+            this.value = TrimValue(value).ToString();
         }
+
+        public override bool HasValue => !string.IsNullOrEmpty(this.value);
+
+        public override ReadOnlySpan<char> Value => this.value;
 
         protected override ReadOnlySpan<char> Source => this.value;
     }

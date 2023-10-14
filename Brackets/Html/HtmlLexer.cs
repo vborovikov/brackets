@@ -347,7 +347,7 @@ public readonly struct HtmlLexer : IMarkupLexer
 
     public ReadOnlySpan<char> TrimValue(ReadOnlySpan<char> value)
     {
-        if (value[0] == value[^1] && QuotationMarks.Contains(value[0]))
+        if (value.Length > 0 && value[0] == value[^1] && QuotationMarks.Contains(value[0]))
             value = value[1..^1];
 
         return value;

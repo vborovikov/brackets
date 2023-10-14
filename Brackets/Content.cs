@@ -52,8 +52,8 @@
     {
         private readonly string value;
 
-        public StreamContent(string value)
-            : base(0, value.Length)
+        public StreamContent(string value, int offset)
+            : base(offset, value.Length)
         {
             this.value = value;
         }

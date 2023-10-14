@@ -4,8 +4,8 @@ using System;
 
 static class Lexer
 {
-    public static ElementTokenEnumerator<TMarkupLexer> TokenizeElements<TMarkupLexer>(in ReadOnlySpan<char> text, in TMarkupLexer syntax)
-        where TMarkupLexer : struct, IMarkupLexer => new(text, syntax);
+    public static ElementTokenEnumerator<TMarkupLexer> TokenizeElements<TMarkupLexer>(in ReadOnlySpan<char> text, in TMarkupLexer syntax, int globalOffset = 0)
+        where TMarkupLexer : struct, IMarkupLexer => new(text, syntax, globalOffset);
 
     public static AttributeTokenEnumerator<TMarkupLexer> TokenizeAttributes<TMarkupLexer>(in Token token, in TMarkupLexer syntax)
         where TMarkupLexer : struct, IMarkupLexer => new(token, syntax);
@@ -13,15 +13,17 @@ static class Lexer
     public ref struct ElementTokenEnumerator<TMarkupLexer>
         where TMarkupLexer : struct, IMarkupLexer
     {
-        private readonly ref readonly TMarkupLexer lexer;
         private readonly ReadOnlySpan<char> text;
+        private readonly ref readonly TMarkupLexer lexer;
+        private readonly int globalOffset;
         private int offset;
         private Token current;
 
-        public ElementTokenEnumerator(in ReadOnlySpan<char> text, in TMarkupLexer lexer)
+        public ElementTokenEnumerator(in ReadOnlySpan<char> text, in TMarkupLexer lexer, int globalOffset)
         {
-            this.lexer = ref lexer;
             this.text = text;
+            this.lexer = ref lexer;
+            this.globalOffset = globalOffset;
         }
 
         public readonly Token Current => this.current;
@@ -38,14 +40,14 @@ static class Lexer
             if (this.offset >= this.text.Length)
                 return false;
 
-            this.current = this.lexer.GetElementToken(this.text[this.offset..], this.offset);
+            this.current = this.lexer.GetElementToken(this.text[this.offset..], this.globalOffset + this.offset);
             if (this.current.Span.Length == 0)
             {
                 this.offset = this.text.Length;
                 return false;
             }
 
-            this.offset = this.current.Offset + this.current.Span.Length;
+            this.offset = this.current.Offset + this.current.Span.Length - this.globalOffset;
             return true;
         }
     }

@@ -85,9 +85,10 @@
             return root;
         }
 
-        private void ParsePartial(ReadOnlySpan<char> span, Stack<ParentTag> tree, bool fromStream = false)
+        private void ParsePartial(ReadOnlySpan<char> span, Stack<ParentTag> tree, int? globalOffset = null)
         {
-            foreach (var token in Lexer.TokenizeElements(span, this.lexer))
+            var fromStream = globalOffset.HasValue;
+            foreach (var token in Lexer.TokenizeElements(span, this.lexer, globalOffset ?? 0))
             {
                 var parent = tree.Peek();
 
@@ -198,7 +199,7 @@
         private static Content CreateContent(in Token token, bool fromStream)
         {
             return fromStream ?
-                new StreamContent(token.Span.ToString()) :
+                new StreamContent(token.Span.ToString(), token.Start) :
                 new Content(token.Start, token.Length);
         }
 
@@ -231,10 +232,10 @@
             var reference = CreateOrFindAttributeReference(token.Name);
             return
                 fromStream ?
-                    new StreamAttribute(reference, token.Data.ToString()) :
+                    new StreamAttribute(reference, token.Data.ToString(), token.Offset, token.Length) :
                     token.Data.IsEmpty ?
                         new Attribute(reference, token.Offset, token.Length) :
-                        new Attribute(reference, token.Offset, token.Length, token.DataOffset, token.Data.Length);
+                        new ValueAttribute(reference, token.Offset, token.Length, token.DataOffset, token.Data.Length);
         }
 
         private TagReference CreateOrFindTagReference(ReadOnlySpan<char> tagName)
@@ -290,7 +291,7 @@
 
             public ValueTask BuildAsync(ReadOnlySpan<char> recordSpan, CancellationToken cancellationToken)
             {
-                this.parser.ParsePartial(recordSpan, this.tree, fromStream: true);
+                this.parser.ParsePartial(recordSpan, this.tree, this.contentLength);
                 this.contentLength += recordSpan.Length;
                 return ValueTask.CompletedTask;
             }
