@@ -117,9 +117,11 @@ static class RecordScanner
         {
             exception = x;
         }
-
-        await reader.CompleteAsync(exception);
-        await builder.StopAsync();
+        finally
+        {
+            await reader.CompleteAsync(exception);
+            await builder.StopAsync();
+        }
     }
 
     private static async Task ReadLinesAsync(PipeReader reader, IRecordBuilder builder, CancellationToken cancellationToken)
@@ -170,8 +172,10 @@ static class RecordScanner
         {
             exception = x;
         }
-
-        await reader.CompleteAsync(exception);
-        await builder.StopAsync();
+        finally
+        {
+            await reader.CompleteAsync(exception);
+            await builder.StopAsync();
+        }
     }
 }

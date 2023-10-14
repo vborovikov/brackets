@@ -2,8 +2,12 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Text;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Collections;
     using Parsing;
+    using Streaming;
 
     public interface ISyntaxReference
     {
@@ -34,6 +38,13 @@
             return new Document(root);
         }
 
+        public async Task<Document> ParseAsync(Stream stream, CancellationToken cancellationToken)
+        {
+            var builder = new DocumentBuilder(this);
+            await RecordScanner.ScanAsync(stream, builder, cancellationToken).ConfigureAwait(false);
+            return builder.Document;
+        }
+
         protected void AddReference(TagReference reference)
         {
             this.tagReferences.Add(reference.Name, reference);
@@ -47,22 +58,11 @@
         private DocumentRoot Parse(ReadOnlyMemory<char> text)
         {
             var span = text.Span;
-            var tree = StartParsing(text);
+            var tree = new Stack<ParentTag>();
+            tree.Push(new TextDocumentRoot(text, this.rootReference));
 
             ParsePartial(span, tree);
 
-            return CompleteParsing(span, tree);
-        }
-
-        private Stack<ParentTag> StartParsing(ReadOnlyMemory<char> text)
-        {
-            var tree = new Stack<ParentTag>();
-            tree.Push(new DocumentRoot(this.rootReference, text));
-            return tree;
-        }
-
-        private DocumentRoot CompleteParsing(ReadOnlySpan<char> span, Stack<ParentTag> tree)
-        {
             // close unclosed tags
             var wellFormed = tree.Count > 0 && tree.Count == 1;
             while (tree.Count > 1)
@@ -255,6 +255,47 @@
         ReadOnlySpan<char> ISyntaxReference.TrimAttributeValue(ReadOnlySpan<char> value)
         {
             return this.lexer.TrimValue(value);
+        }
+
+        private class DocumentBuilder : IRecordBuilder
+        {
+            private readonly MarkupReference<TMarkupLexer> parser;
+            private readonly Stack<ParentTag> tree;
+            private int contentLength;
+
+            public DocumentBuilder(MarkupReference<TMarkupLexer> parser)
+            {
+                this.parser = parser;
+                this.Document = new Document(new EmptyDocumentRoot(this.parser.rootReference));
+                this.tree = new Stack<ParentTag>();
+            }
+
+            public Encoding Encoding => Encoding.UTF8;
+            public char Opener => this.parser.lexer.Opener;
+            public char Closer => this.parser.lexer.Closer;
+            public char Encloser => '"';
+            public Document Document { get; }
+
+            public ValueTask StartAsync()
+            {
+                this.tree.Push(this.Document.Root);
+                return ValueTask.CompletedTask;
+            }
+
+            public ValueTask BuildAsync(ReadOnlySpan<char> recordSpan, CancellationToken cancellationToken)
+            {
+                this.parser.ParsePartial(recordSpan, this.tree);
+                this.contentLength += recordSpan.Length;
+                return ValueTask.CompletedTask;
+            }
+
+            public ValueTask StopAsync()
+            {
+                this.Document.Root.IsWellFormed = this.tree.Count > 0 && this.tree.Count == 1;
+                this.Document.Root.CloseAt(this.contentLength);
+                this.tree.Clear();
+                return ValueTask.CompletedTask;
+            }
         }
     }
 }
