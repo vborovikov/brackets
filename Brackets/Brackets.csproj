@@ -8,6 +8,19 @@
     <Description>Resilient markup parser library</Description>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <PackageId>Brackets</PackageId>
+    <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/vborovikov/brackets</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/vborovikov/brackets.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>html-parser;xml-parser;parser</PackageTags>
+    <PackageReleaseNotes></PackageReleaseNotes>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>Brackets.Tests</_Parameter1>
@@ -19,6 +32,10 @@
 
   <ItemGroup>
     <PackageReference Include="System.IO.Pipelines" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>
