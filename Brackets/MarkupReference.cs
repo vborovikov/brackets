@@ -126,7 +126,7 @@
                             break;
 
                         case TokenCategory.Section:
-                            ParseSection(token, parent);
+                            ParseSection(token, parent, fromStream);
                             break;
 
                         case TokenCategory.Comment:
@@ -142,9 +142,11 @@
             parent.Add(new Comment(token.Offset, token.Length));
         }
 
-        private static void ParseSection(in Token token, ParentTag parent)
+        private static void ParseSection(in Token token, ParentTag parent, bool fromStream)
         {
-            parent.Add(new Section(token.Offset, token.Length, token.DataOffset, token.Data.Length));
+            parent.Add(fromStream ?
+                new StreamSection(token.Name.ToString(), token.Offset, token.Length, token.Data.ToString(), token.DataOffset) :
+                new Section(token.Offset, token.Length, token.DataOffset, token.Data.Length));
         }
 
         private static void ParseContent(in Token token, ParentTag parent, bool fromStream)
