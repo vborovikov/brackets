@@ -20,8 +20,8 @@
         where TMarkupLexer : struct, IMarkupLexer
     {
         private readonly TMarkupLexer lexer;
-        private readonly StringDir<TagReference> tagReferences;
-        private readonly StringDir<AttributeReference> attributeReferences;
+        private readonly StringSet<TagReference> tagReferences;
+        private readonly StringSet<AttributeReference> attributeReferences;
         private readonly RootReference rootReference;
 
         protected MarkupReference()

@@ -8,7 +8,7 @@ namespace Brackets.Collections
     using System.Diagnostics.CodeAnalysis;
     using System.Runtime.CompilerServices;
 
-    sealed class StringDir<T> : IEnumerable<T>
+    sealed class StringSet<T> : IEnumerable<T>
         where T : notnull
     {
         private const int StartOfFreeList = -3;
@@ -25,7 +25,7 @@ namespace Brackets.Collections
         private int freeCount;
         private int version;
 
-        public StringDir(StringComparison comparison)
+        public StringSet(StringComparison comparison)
         {
             this.comparison = comparison;
         }
@@ -313,12 +313,12 @@ namespace Brackets.Collections
 
         public struct Enumerator : IEnumerator<T>
         {
-            private readonly StringDir<T> stringDir;
+            private readonly StringSet<T> stringDir;
             private readonly int version;
             private int index;
             private T current;
 
-            internal Enumerator(StringDir<T> stringDir)
+            internal Enumerator(StringSet<T> stringDir)
             {
                 this.stringDir = stringDir;
                 this.version = stringDir.version;
