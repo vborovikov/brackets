@@ -28,6 +28,38 @@
             return assembly.GetManifestResourceStream($"Brackets.Tests.Samples.{fileName}");
         }
 
+        [DataTestMethod]
+        [DataRow("benq.html")]
+        [DataRow("broken.xml")]
+        [DataRow("dotnet8perf.html")]
+        [DataRow("google.html")]
+        [DataRow("head_script.html")]
+        [DataRow("japantimes.html")]
+        [DataRow("newsde.html")]
+        public async Task ParseAsync_AsyncSyncParsing_Equal(string fileName)
+        {
+            using var stream = GetSampleStream(fileName);
+            var asyncDoc = await Document.Html.ParseAsync(stream, default);
+            var asyncElements = asyncDoc.FindAll(_ => true).GetEnumerator();
+
+            var sample = GetSample(fileName);
+            var syncDoc = Document.Html.Parse(sample);
+            var syncElements = syncDoc.FindAll(_ => true).GetEnumerator();
+
+            while (asyncElements.MoveNext() && syncElements.MoveNext())
+            {
+                Assert.AreEqual(asyncElements.Current.Offset, syncElements.Current.Offset);
+                Assert.AreEqual(asyncElements.Current.Length, syncElements.Current.Length);
+                if (asyncElements.Current is not Comment && syncElements.Current is not Comment)
+                {
+                    Assert.AreEqual(asyncElements.Current.ToDebugString(), syncElements.Current.ToDebugString());
+                }
+            }
+
+            Assert.IsFalse(asyncElements.MoveNext());
+            Assert.IsFalse(syncElements.MoveNext());
+        }
+
         [TestMethod]
         public async Task ParseAsync_LargeFile_Parsed()
         {
