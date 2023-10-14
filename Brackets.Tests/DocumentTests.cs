@@ -18,9 +18,25 @@
 
         private static string GetSample(string fileName)
         {
-            using var fileStream = assembly.GetManifestResourceStream($"Brackets.Tests.Samples.{fileName}");
+            using var fileStream = GetSampleStream(fileName);
             using var fileReader = new StreamReader(fileStream, Encoding.UTF8);
             return fileReader.ReadToEnd();
+        }
+
+        private static Stream GetSampleStream(string fileName)
+        {
+            return assembly.GetManifestResourceStream($"Brackets.Tests.Samples.{fileName}");
+        }
+
+        [TestMethod]
+        public async Task ParseAsync_LargeFile_Parsed()
+        {
+            using var stream = GetSampleStream("newsde.html");
+            var document = await Document.Html.ParseAsync(stream, default);
+            Assert.IsNotNull(document);
+            Assert.AreEqual(6, document.Count());
+            var links = document.Find("/html/head/link[@rel='alternate']");
+            Assert.AreEqual(2, links.Count());
         }
 
         [TestMethod]
