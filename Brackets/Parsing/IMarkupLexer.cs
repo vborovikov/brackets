@@ -57,6 +57,10 @@ public interface IMarkupLexer
     /// </summary>
     StringComparison Comparison { get; }
 
+    char Opener { get; }
+
+    char Closer { get; }
+
     Token GetElementToken(ReadOnlySpan<char> text, int globalOffset);
 
     Token GetAttributeToken(ReadOnlySpan<char> text, int globalOffset);

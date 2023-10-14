@@ -24,6 +24,8 @@ public readonly struct HtmlLexer : IMarkupLexer
     private const string SectionCloser = "]]>";
 
     public StringComparison Comparison => cmp;
+    char IMarkupLexer.Opener => Opener;
+    char IMarkupLexer.Closer => Closer;
 
     public Token GetElementToken(ReadOnlySpan<char> text, int globalOffset)
     {
@@ -42,7 +44,7 @@ public readonly struct HtmlLexer : IMarkupLexer
         var end = text.IndexOf(Closer) + 1;
         if (end <= 0)
         {
-            return new(TokenCategory.Content, text, globalOffset);
+            return new(TokenCategory.Discarded, text, globalOffset);
         }
 
         var category = TokenCategory.Content;
@@ -76,7 +78,7 @@ public readonly struct HtmlLexer : IMarkupLexer
                         span = text[start..end];
                     }
 
-                    return new(TokenCategory.Content, span, globalOffset + start);
+                    return new(TokenCategory.Discarded, span, globalOffset + start);
                 }
             }
 
@@ -88,7 +90,7 @@ public readonly struct HtmlLexer : IMarkupLexer
             if (dataPos <= 0)
             {
                 // section is incorrect
-                return new(TokenCategory.Content, span, globalOffset + start);
+                return new(TokenCategory.Discarded, span, globalOffset + start);
             }
 
             category = TokenCategory.Section;
@@ -115,6 +117,7 @@ public readonly struct HtmlLexer : IMarkupLexer
                 }
                 else
                 {
+                    //todo: Discarded?
                     end = text.Length;
                 }
 
@@ -145,7 +148,7 @@ public readonly struct HtmlLexer : IMarkupLexer
                 // tag name
                 name = tagName;
                 nameOffset = start + nameStart + 1;
-                
+
                 // token category
                 category = terminatorPos switch
                 {
@@ -189,7 +192,7 @@ public readonly struct HtmlLexer : IMarkupLexer
                 }
 
                 // discarded content token
-                return new(TokenCategory.Content, span, globalOffset + start);
+                return new(TokenCategory.Discarded, span, globalOffset + start);
             }
         }
     }
@@ -327,9 +330,19 @@ public readonly struct HtmlLexer : IMarkupLexer
 
     public ReadOnlySpan<char> TrimData(ReadOnlySpan<char> section)
     {
-        // <![CDATA[...]]> -> ...
-        section = section[SectionOpener.Length..^SectionCloser.Length];
-        return section[(section.IndexOf(DataOpener) + 1)..];
+        if (section.StartsWith(SectionOpener, cmp))
+        {
+            // <![CDATA[...]]> -> ...
+            section = section[SectionOpener.Length..^SectionCloser.Length];
+            section = section[(section.IndexOf(DataOpener) + 1)..];
+        }
+        else if (section.StartsWith(CommentOpener, cmp))
+        {
+            // <!--...--> -> ...
+            section = section[CommentOpener.Length..^CommentCloser.Length];
+        }
+
+        return section;
     }
 
     public ReadOnlySpan<char> TrimValue(ReadOnlySpan<char> value)

@@ -2,23 +2,37 @@ namespace Brackets
 {
     using System;
 
-    sealed class DocumentRoot : ParentTag
+    abstract class DocumentRoot : ParentTag
     {
-        private readonly ReadOnlyMemory<char> text;
-
-        public DocumentRoot(RootReference rootReference, ReadOnlyMemory<char> text)
-            : base(rootReference, 0, text.Length)
-        {
-            this.text = text;
-        }
-
-        protected override ReadOnlySpan<char> Source => this.text.Span;
+        protected DocumentRoot(RootReference rootReference, int length)
+            : base(rootReference, 0, length) { }
 
         internal bool? IsWellFormed { get; set; }
 
         public override string ToString()
         {
-            return String.Concat(this);
+            return string.Concat(this);
         }
+    }
+
+    sealed class TextDocumentRoot : DocumentRoot
+    {
+        private readonly ReadOnlyMemory<char> text;
+
+        public TextDocumentRoot(ReadOnlyMemory<char> text, RootReference rootReference)
+            : base(rootReference, text.Length)
+        {
+            this.text = text;
+        }
+
+        protected override ReadOnlySpan<char> Source => this.text.Span;
+    }
+
+    sealed class EmptyDocumentRoot : DocumentRoot
+    {
+        public EmptyDocumentRoot(RootReference rootReference)
+            : base(rootReference, 0) { }
+
+        protected override ReadOnlySpan<char> Source => ReadOnlySpan<char>.Empty;
     }
 }

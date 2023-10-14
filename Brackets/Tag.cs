@@ -16,6 +16,8 @@
             this.end = start + length;
         }
 
+        internal TagReference Reference => this.reference;
+
         public string Name => this.reference.Name;
 
         public bool HasRawContent => this.reference.HasRawContent;
