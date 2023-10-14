@@ -47,9 +47,44 @@
         private DocumentRoot Parse(ReadOnlyMemory<char> text)
         {
             var span = text.Span;
+            var tree = StartParsing(text);
+
+            ParsePartial(span, tree);
+
+            return CompleteParsing(span, tree);
+        }
+
+        private Stack<ParentTag> StartParsing(ReadOnlyMemory<char> text)
+        {
             var tree = new Stack<ParentTag>();
             tree.Push(new DocumentRoot(this.rootReference, text));
+            return tree;
+        }
 
+        private DocumentRoot CompleteParsing(ReadOnlySpan<char> span, Stack<ParentTag> tree)
+        {
+            // close unclosed tags
+            var wellFormed = tree.Count > 0 && tree.Count == 1;
+            while (tree.Count > 1)
+            {
+                var unclosedTag = tree.Pop();
+                if (!this.lexer.TagIsClosed(span[unclosedTag.Start..unclosedTag.End]))
+                {
+                    var parentTag = tree.Peek();
+                    if (parentTag is DocumentRoot)
+                        continue;
+
+                    parentTag.Graft(unclosedTag);
+                }
+            }
+
+            var root = (DocumentRoot)tree.Pop();
+            root.IsWellFormed = wellFormed;
+            return root;
+        }
+
+        private void ParsePartial(ReadOnlySpan<char> span, Stack<ParentTag> tree)
+        {
             foreach (var token in Lexer.TokenizeElements(span, this.lexer))
             {
                 var parent = tree.Peek();
@@ -97,25 +132,6 @@
                     }
                 }
             }
-
-            // close unclosed tags
-            var wellFormed = tree.Count > 0 && tree.Count == 1;
-            while (tree.Count > 1)
-            {
-                var unclosedTag = tree.Pop();
-                if (!this.lexer.TagIsClosed(span[unclosedTag.Start..unclosedTag.End]))
-                {
-                    var parentTag = tree.Peek();
-                    if (parentTag is DocumentRoot)
-                        continue;
-
-                    parentTag.Graft(unclosedTag);
-                }
-            }
-
-            var root = (DocumentRoot)tree.Pop();
-            root.IsWellFormed = wellFormed;
-            return root;
         }
 
         private static void ParseComment(in Token token, ParentTag parent)
