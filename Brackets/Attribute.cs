@@ -21,7 +21,6 @@ namespace Brackets
             : base(start)
         {
             this.reference = reference;
-            //todo: should be the length of the whole attribute span including the value
             this.length = length;
             this.valueStart = valueStart;
             this.valueLength = valueLength;
@@ -33,10 +32,10 @@ namespace Brackets
 
         public bool IsFlag => this.reference.IsFlag || !this.HasValue;
 
-        public bool HasValue => this.Start < this.valueStart;
+        public bool HasValue => this.Start < this.valueStart && this.valueLength > 0;
 
         public ReadOnlySpan<char> Value =>
-            this.reference.Syntax.TrimAttributeValue(this.Source.Slice(this.valueStart, this.valueLength));
+            this.reference.Syntax.TrimValue(this.Source.Slice(this.valueStart, this.valueLength));
 
         public override string ToString()
         {
@@ -106,5 +105,18 @@ namespace Brackets
             readonly IEnumerator<Attribute> IEnumerable<Attribute>.GetEnumerator() => GetEnumerator();
             readonly IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
+    }
+
+    sealed class StreamAttribute : Attribute
+    {
+        private readonly string value;
+
+        public StreamAttribute(AttributeReference reference, string value)
+            : base(reference, -1, 0, 0, value.Length)
+        {
+            this.value = value;
+        }
+
+        protected override ReadOnlySpan<char> Source => this.value;
     }
 }

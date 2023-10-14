@@ -331,9 +331,19 @@ public readonly struct XmlLexer : IMarkupLexer
 
     public ReadOnlySpan<char> TrimData(ReadOnlySpan<char> section)
     {
-        // <![CDATA[...]]> -> ...
-        section = section[SectionOpener.Length..^SectionCloser.Length];
-        return section[(section.IndexOf(DataOpener) + 1)..];
+        if (section.StartsWith(SectionOpener, cmp))
+        {
+            // <![CDATA[...]]> -> ...
+            section = section[SectionOpener.Length..^SectionCloser.Length];
+            section = section[(section.IndexOf(DataOpener) + 1)..];
+        }
+        else if (section.StartsWith(CommentOpener, cmp))
+        {
+            // <!--...--> -> ...
+            section = section[CommentOpener.Length..^CommentCloser.Length];
+        }
+
+        return section;
     }
 
     public ReadOnlySpan<char> TrimValue(ReadOnlySpan<char> value)

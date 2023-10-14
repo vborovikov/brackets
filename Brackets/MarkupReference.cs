@@ -11,7 +11,9 @@
 
     public interface ISyntaxReference
     {
-        ReadOnlySpan<char> TrimAttributeValue(ReadOnlySpan<char> value);
+        ReadOnlySpan<char> TrimName(ReadOnlySpan<char> span);
+        ReadOnlySpan<char> TrimData(ReadOnlySpan<char> span);
+        ReadOnlySpan<char> TrimValue(ReadOnlySpan<char> span);
     }
 
     public abstract class MarkupReference<TMarkupLexer> : ISyntaxReference
@@ -252,10 +254,9 @@
             return reference;
         }
 
-        ReadOnlySpan<char> ISyntaxReference.TrimAttributeValue(ReadOnlySpan<char> value)
-        {
-            return this.lexer.TrimValue(value);
-        }
+        ReadOnlySpan<char> ISyntaxReference.TrimName(ReadOnlySpan<char> span) => this.lexer.TrimName(span);
+        ReadOnlySpan<char> ISyntaxReference.TrimData(ReadOnlySpan<char> span) => this.lexer.TrimData(span);
+        ReadOnlySpan<char> ISyntaxReference.TrimValue(ReadOnlySpan<char> span) => this.lexer.TrimValue(span);
 
         private class DocumentBuilder : IRecordBuilder
         {

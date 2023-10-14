@@ -7,19 +7,21 @@
         protected CharacterData(int start)
             : base(start) { }
 
+        public virtual ReadOnlySpan<char> Data => this.Source[this.Start..this.End];
+
         public override string ToString()
         {
-            return this.Source[this.Start..this.End].ToString();
+            return this.Data.ToString();
         }
 
         internal override string ToDebugString()
         {
-            return String.Concat(this.Source[this.Start..].TrimStart()[..Math.Min(15, this.Length)], "\u2026");
+            return String.Concat(this.Data.TrimStart()[..Math.Min(15, this.Length)], "\u2026");
         }
 
         public bool Contains(ReadOnlySpan<char> text)
         {
-            return this.Source[this.Start..this.End].Contains(text, StringComparison.CurrentCultureIgnoreCase);
+            return this.Data.Contains(text, StringComparison.CurrentCultureIgnoreCase);
         }
     }
 
@@ -46,6 +48,20 @@
         }
     }
 
+    sealed class StreamContent : Content
+    {
+        private readonly string value;
+
+        public StreamContent(string value)
+            : base(0, value.Length)
+        {
+            this.value = value;
+        }
+
+        protected override ReadOnlySpan<char> Source => this.value;
+        public override ReadOnlySpan<char> Data => this.value;
+    }
+
     public class Section : CharacterData
     {
         private readonly int dataStart;
@@ -61,11 +77,12 @@
 
         public override int End { get; }
 
-        public ReadOnlySpan<char> Data => this.Source.Slice(this.dataStart, this.dataLength);
+        public override ReadOnlySpan<char> Data => this.Source.Slice(this.dataStart, this.dataLength);
 
-        public override string ToString()
+        internal override string ToDebugString()
         {
-            return this.Data.ToString();
+            var name = this.Parent is ParentTag parent ? parent.Reference.Syntax.TrimName(base.Data) : ReadOnlySpan<char>.Empty;
+            return $"<[{name}[{base.ToDebugString()}]]>";
         }
     }
 
@@ -77,5 +94,13 @@
         }
 
         public override int End { get; }
+
+        public override ReadOnlySpan<char> Data =>
+            this.Parent is ParentTag parent ? parent.Reference.Syntax.TrimData(base.Data) : base.Data;
+
+        internal override string ToDebugString()
+        {
+            return $"<!--{base.ToDebugString()}-->";
+        }
     }
 }
