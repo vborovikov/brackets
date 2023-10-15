@@ -48,11 +48,11 @@
 
             while (asyncElements.MoveNext() && syncElements.MoveNext())
             {
-                Assert.AreEqual(asyncElements.Current.Offset, syncElements.Current.Offset);
-                Assert.AreEqual(asyncElements.Current.Length, syncElements.Current.Length);
+                Assert.AreEqual(syncElements.Current.Offset, asyncElements.Current.Offset);
+                Assert.AreEqual(syncElements.Current.Length, asyncElements.Current.Length);
                 if (asyncElements.Current is not Comment && syncElements.Current is not Comment)
                 {
-                    Assert.AreEqual(asyncElements.Current.ToDebugString(), syncElements.Current.ToDebugString());
+                    Assert.AreEqual(syncElements.Current.ToDebugString(), asyncElements.Current.ToDebugString());
                 }
             }
 
