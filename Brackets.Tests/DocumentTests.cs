@@ -36,7 +36,7 @@
         [DataRow("head_script.html")]
         [DataRow("japantimes.html")]
         [DataRow("newsde.html")]
-        public async Task ParseAsync_AsyncSyncParsing_Equal(string fileName)
+        public async Task ParseAsync_AsyncSyncHtmlParsing_Equal(string fileName)
         {
             using var stream = GetSampleStream(fileName);
             var asyncDoc = await Document.Html.ParseAsync(stream, default);
@@ -46,13 +46,45 @@
             var syncDoc = Document.Html.Parse(sample);
             var syncElements = syncDoc.FindAll(_ => true).GetEnumerator();
 
-            while (asyncElements.MoveNext() && syncElements.MoveNext())
+            while (syncElements.MoveNext() && asyncElements.MoveNext())
             {
-                Assert.AreEqual(syncElements.Current.Offset, asyncElements.Current.Offset);
-                Assert.AreEqual(syncElements.Current.Length, asyncElements.Current.Length);
+                var elemStr = $"{asyncElements.Current.GetType().Name}: {asyncElements.Current.ToDebugString()}";
+
+                Assert.IsInstanceOfType(asyncElements.Current, syncElements.Current.GetType(), elemStr);
+                Assert.AreEqual(syncElements.Current.Offset, asyncElements.Current.Offset, elemStr);
+                Assert.AreEqual(syncElements.Current.Length, asyncElements.Current.Length, elemStr);
                 if (asyncElements.Current is not Comment && syncElements.Current is not Comment)
                 {
-                    Assert.AreEqual(syncElements.Current.ToDebugString(), asyncElements.Current.ToDebugString());
+                    Assert.AreEqual(syncElements.Current.ToDebugString(), asyncElements.Current.ToDebugString(), elemStr);
+                }
+            }
+
+            Assert.IsFalse(asyncElements.MoveNext());
+            Assert.IsFalse(syncElements.MoveNext());
+        }
+
+        [DataTestMethod]
+        [DataRow("broken.xml")]
+        public async Task ParseAsync_AsyncSyncXmlParsing_Equal(string fileName)
+        {
+            using var stream = GetSampleStream(fileName);
+            var asyncDoc = await Document.Xml.ParseAsync(stream, default);
+            var asyncElements = asyncDoc.FindAll(_ => true).GetEnumerator();
+
+            var sample = GetSample(fileName);
+            var syncDoc = Document.Xml.Parse(sample);
+            var syncElements = syncDoc.FindAll(_ => true).GetEnumerator();
+
+            while (syncElements.MoveNext() && asyncElements.MoveNext())
+            {
+                var elemStr = $"{asyncElements.Current.GetType().Name}: {asyncElements.Current.ToDebugString()}";
+
+                Assert.IsInstanceOfType(asyncElements.Current, syncElements.Current.GetType(), elemStr);
+                Assert.AreEqual(syncElements.Current.Offset, asyncElements.Current.Offset, elemStr);
+                Assert.AreEqual(syncElements.Current.Length, asyncElements.Current.Length, elemStr);
+                if (asyncElements.Current is not Comment && syncElements.Current is not Comment)
+                {
+                    Assert.AreEqual(syncElements.Current.ToDebugString(), asyncElements.Current.ToDebugString(), elemStr);
                 }
             }
 
