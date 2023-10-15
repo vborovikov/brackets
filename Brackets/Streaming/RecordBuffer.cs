@@ -32,6 +32,11 @@ struct RecordBuffer : IDisposable
         }
     }
 
+    public void Clear()
+    {
+        this.offset = 0;
+    }
+
     public int Offset(int requestedOffset)
     {
         if (requestedOffset < 0)
@@ -57,6 +62,11 @@ struct RecordBuffer : IDisposable
     public readonly Span<char> AsSpan()
     {
         return this.buffer.AsSpan(this.offset..);
+    }
+
+    public readonly ReadOnlySpan<char> PreviewRecord(int length)
+    {
+        return this.buffer.AsSpan(..Math.Min(length + this.offset, this.buffer.Length));
     }
 
     public ReadOnlySpan<char> MakeRecord(int length = -1)

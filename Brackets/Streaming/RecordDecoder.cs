@@ -177,7 +177,7 @@ sealed class RecordDecoder
     {
         var pos = 0;
         var enclosed = false;
-        var fillThreshold = (buffer.Length >> 5) * 31;
+        var fillThreshold = (buffer.Length >> 5) * 31; // 97%
         while (pos < buffer.Length)
         {
             var ch = Read();
