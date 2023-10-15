@@ -35,7 +35,7 @@
         {
             var tags = Lexer.TokenizeElements("<tag></ta<g/>", Document.Html.Syntax);
             AssertTokens(tags, "<tag>", "</ta", "<g/>");
-            AssertCategories(tags, TokenCategory.OpeningTag, TokenCategory.Discarded, TokenCategory.UnpairedTag);
+            AssertCategories(tags, TokenCategory.OpeningTag, TokenCategory.Discarded | TokenCategory.ClosingTag, TokenCategory.UnpairedTag);
         }
 
         [TestMethod]
@@ -159,7 +159,7 @@
                 TokenCategory.ClosingTag,   // </generator>
                 TokenCategory.OpeningTag,   // <docs>
                 TokenCategory.Content,      // http://blogs.law.harvard.edu/tech/rss
-                TokenCategory.Discarded,      // </x.html
+                TokenCategory.Discarded | TokenCategory.ClosingTag, // </x.html
                 TokenCategory.ClosingTag,   // </link>
                 TokenCategory.OpeningTag,   // <description>
                 TokenCategory.ClosingTag,   // </description>

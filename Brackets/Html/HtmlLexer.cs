@@ -44,7 +44,7 @@ public readonly struct HtmlLexer : IMarkupLexer
         var end = text.IndexOf(Closer) + 1;
         if (end <= 0)
         {
-            return new(TokenCategory.Discarded, text, globalOffset);
+            return new(TokenCategory.Discarded | TokenCategory.Content, text, globalOffset);
         }
 
         var category = TokenCategory.Content;
@@ -78,7 +78,7 @@ public readonly struct HtmlLexer : IMarkupLexer
                         span = text[start..end];
                     }
 
-                    return new(TokenCategory.Discarded, span, globalOffset + start);
+                    return new(TokenCategory.Discarded | TokenCategory.Section, span, globalOffset + start);
                 }
             }
 
@@ -90,7 +90,7 @@ public readonly struct HtmlLexer : IMarkupLexer
             if (dataPos <= 0)
             {
                 // section is incorrect
-                return new(TokenCategory.Discarded, span, globalOffset + start);
+                return new(TokenCategory.Discarded | TokenCategory.Section, span, globalOffset + start);
             }
 
             category = TokenCategory.Section;
@@ -142,20 +142,19 @@ public readonly struct HtmlLexer : IMarkupLexer
                 terminatorPos > 0 ? terminatorPos :
                 ^0;
             var tagName = tag[nameStart..nameEnd];
+            // token category
+            category = terminatorPos switch
+            {
+                0 => TokenCategory.ClosingTag,
+                > 0 => TokenCategory.UnpairedTag,
+                _ => TokenCategory.OpeningTag,
+            };
 
             if (IsElementName(tagName) || (tagName[0] == AltOpener && IsElementName(tagName[1..])))
             {
                 // tag name
                 name = tagName;
                 nameOffset = start + nameStart + 1;
-
-                // token category
-                category = terminatorPos switch
-                {
-                    0 => TokenCategory.ClosingTag,
-                    > 0 => TokenCategory.UnpairedTag,
-                    _ => TokenCategory.OpeningTag,
-                };
 
                 // tag attributes
                 if (category != TokenCategory.ClosingTag && separatorPos > 0)
@@ -191,8 +190,8 @@ public readonly struct HtmlLexer : IMarkupLexer
                     span = text[start..end];
                 }
 
-                // discarded content token
-                return new(TokenCategory.Discarded, span, globalOffset + start);
+                // discarded tag token
+                return new(TokenCategory.Discarded | category, span, globalOffset + start);
             }
         }
     }

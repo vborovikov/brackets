@@ -1,15 +1,17 @@
 ﻿namespace Brackets.Parsing;
 
+[Flags]
 public enum TokenCategory
 {
-    Discarded,   // tokens discarded as content
-    Content,     // abc...
-    OpeningTag,  // <abc ...>
-    ClosingTag,  // </abc>
-    UnpairedTag, // <abc ... />
-    Comment,     // <!--...-->
-    Section,     // <![ABC[...]]>
-    Attribute,   // abc="123"
+    Unknown,
+    Discarded   = 1 << 0, // tokens discarded as content
+    Content     = 1 << 1, // abc...
+    OpeningTag  = 1 << 2, // <abc ...>
+    ClosingTag  = 1 << 3, // </abc>
+    UnpairedTag = 1 << 4, // <abc ... />
+    Comment     = 1 << 5, // <!--...-->
+    Section     = 1 << 6, // <![ABC[...]]>
+    Attribute   = 1 << 7, // abc="123"
 }
 
 public readonly ref struct Token
