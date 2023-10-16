@@ -19,6 +19,8 @@
 
         public ElementLevel Level { get; init; }
 
+        public bool IsProcessingInstruction { get; init; }
+
         public virtual bool IsRoot => false;
 
         public virtual string ToString(Tag tag) => String.Empty;
