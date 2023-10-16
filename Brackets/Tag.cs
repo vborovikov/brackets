@@ -78,7 +78,7 @@
                 do
                 {
                     childElement = childElement.Prev;
-                    if (childElement is Content childContent && childContent.TryAdd(content))
+                    if (childElement is Content childContent && childContent.TryConcat(content))
                     {
                         return;
                     }

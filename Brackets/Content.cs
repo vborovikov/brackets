@@ -40,7 +40,7 @@
 
         public sealed override int End => this.end;
 
-        internal virtual bool TryAdd(Content content)
+        internal virtual bool TryConcat(Content content)
         {
             if (content.Start == this.End)
             {
@@ -65,9 +65,9 @@
         protected override ReadOnlySpan<char> Source => this.value;
         public override ReadOnlySpan<char> Data => this.value;
 
-        internal override bool TryAdd(Content content)
+        internal override bool TryConcat(Content content)
         {
-            if (content is StringContent streamContent && base.TryAdd(streamContent))
+            if (content is StringContent streamContent && base.TryConcat(streamContent))
             {
                 this.value += streamContent.value;
                 return true;
