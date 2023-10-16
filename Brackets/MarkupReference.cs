@@ -2,7 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Text;
+    using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
     using Collections;
@@ -16,7 +16,7 @@
         ReadOnlySpan<char> TrimValue(ReadOnlySpan<char> span);
     }
 
-    public abstract class MarkupReference<TMarkupLexer> : ISyntaxReference
+    public abstract partial class MarkupReference<TMarkupLexer> : ISyntaxReference
         where TMarkupLexer : struct, IMarkupLexer
     {
         private readonly TMarkupLexer lexer;
@@ -40,13 +40,6 @@
             return new Document(root);
         }
 
-        public async Task<Document> ParseAsync(Stream stream, CancellationToken cancellationToken)
-        {
-            var builder = new DocumentBuilder(this);
-            await RecordScanner.ScanAsync(stream, builder, cancellationToken).ConfigureAwait(false);
-            return builder.Document;
-        }
-
         protected void AddReference(TagReference reference)
         {
             this.tagReferences.Add(reference.Name, reference);
@@ -63,7 +56,52 @@
             var tree = new Stack<ParentTag>();
             tree.Push(new TextDocumentRoot(text, this.rootReference));
 
-            ParsePartial(span, tree);
+            foreach (var token in Lexer.TokenizeElements(span, this.lexer))
+            {
+                var parent = tree.Peek();
+
+                if (parent.HasRawContent)
+                {
+                    if (token.Category == TokenCategory.ClosingTag && this.lexer.ClosesTag(token, parent.Name))
+                    {
+                        ParseClosingTag(token, parent, tree);
+                    }
+                    else
+                    {
+                        ParseContent(token, parent);
+                    }
+                }
+                else
+                {
+                    // skip empty content
+                    if (token.IsEmpty)
+                        continue;
+
+                    switch (token.Category)
+                    {
+                        case TokenCategory.OpeningTag:
+                        case TokenCategory.UnpairedTag:
+                            ParseOpeningTag(token, parent, tree);
+                            break;
+
+                        case TokenCategory.ClosingTag:
+                            ParseClosingTag(token, parent, tree);
+                            break;
+
+                        case TokenCategory.Section:
+                            ParseSection(token, parent);
+                            break;
+
+                        case TokenCategory.Comment:
+                            ParseComment(token, parent);
+                            break;
+
+                        default:
+                            ParseContent(token, parent);
+                            break;
+                    }
+                }
+            }
 
             // close unclosed tags
             var wellFormed = tree.Count > 0 && tree.Count == 1;
@@ -85,85 +123,33 @@
             return root;
         }
 
-        private void ParsePartial(ReadOnlySpan<char> span, Stack<ParentTag> tree, int? globalOffset = null)
-        {
-            var fromStream = globalOffset.HasValue;
-            foreach (var token in Lexer.TokenizeElements(span, this.lexer, globalOffset ?? 0))
-            {
-                var parent = tree.Peek();
-
-                if (parent.HasRawContent)
-                {
-                    if (token.Category == TokenCategory.ClosingTag && this.lexer.ClosesTag(token, parent.Name))
-                    {
-                        ParseClosingTag(token, parent, tree, fromStream);
-                    }
-                    else
-                    {
-                        ParseContent(token, parent, fromStream);
-                    }
-                }
-                else
-                {
-                    // skip empty content
-                    if (token.IsEmpty)
-                        continue;
-
-                    switch (token.Category)
-                    {
-                        case TokenCategory.Discarded:
-                        case TokenCategory.Content:
-                            ParseContent(token, parent, fromStream);
-                            break;
-
-                        case TokenCategory.OpeningTag:
-                        case TokenCategory.UnpairedTag:
-                            ParseOpeningTag(token, parent, tree, fromStream);
-                            break;
-
-                        case TokenCategory.ClosingTag:
-                            ParseClosingTag(token, parent, tree, fromStream);
-                            break;
-
-                        case TokenCategory.Section:
-                            ParseSection(token, parent, fromStream);
-                            break;
-
-                        case TokenCategory.Comment:
-                            ParseComment(token, parent);
-                            break;
-                    }
-                }
-            }
-        }
-
         private static void ParseComment(in Token token, ParentTag parent)
         {
             parent.Add(new Comment(token.Offset, token.Length));
         }
 
-        private static void ParseSection(in Token token, ParentTag parent, bool fromStream)
+        private static void ParseSection(in Token token, ParentTag parent, bool toString = false)
         {
-            parent.Add(fromStream ?
+            parent.Add(toString ?
                 new StreamSection(token.Name.ToString(), token.Offset, token.Length, token.Data.ToString(), token.DataOffset) :
                 new Section(token.Offset, token.Length, token.DataOffset, token.Data.Length));
         }
 
-        private static void ParseContent(in Token token, ParentTag parent, bool fromStream)
+        private static void ParseContent(in Token token, ParentTag parent, bool toString = false)
         {
-            parent.Add(CreateContent(token, fromStream));
+            parent.Add(CreateContent(token, toString));
         }
 
-        private void ParseOpeningTag(in Token token, ParentTag parent, Stack<ParentTag> tree, bool fromStream)
+        private void ParseOpeningTag(in Token token, ParentTag parent, Stack<ParentTag> tree, bool toString = false)
         {
-            var tag = CreateTag(token, fromStream);
+            var tag = CreateTag(token, toString);
             parent.Add(tag);
 
             if (tag is ParentTag pairedTag)
                 tree.Push(pairedTag);
         }
 
-        private void ParseClosingTag(in Token token, ParentTag parent, Stack<ParentTag> tree, bool fromStream)
+        private void ParseClosingTag(in Token token, ParentTag parent, Stack<ParentTag> tree, bool toString = false)
         {
             // close the current tag
             // also special handling for a misplaced closing tag
@@ -195,46 +181,46 @@
             }
 
             // there was no opening tag for this closing tag, turn it into content
-            parent.Add(CreateContent(token, fromStream));
+            parent.Add(CreateContent(token, toString));
         }
 
-        private static Content CreateContent(in Token token, bool fromStream)
+        private static Content CreateContent(in Token token, bool toString)
         {
-            return fromStream ?
-                new StreamContent(token.Span.ToString(), token.Start) :
+            return toString ?
+                new StringContent(token.Span.ToString(), token.Start) :
                 new Content(token.Start, token.Length);
         }
 
-        private Tag CreateTag(in Token token, bool fromStream)
+        private Tag CreateTag(in Token token, bool toString)
         {
             var reference = CreateOrFindTagReference(token.Name);
             var tag = token.Category != TokenCategory.UnpairedTag && reference.IsParent ?
                 new ParentTag(reference, token.Start, token.Length) :
                 new Tag(reference, token.Start, token.Length);
 
-            ParseAttributes(tag, token, fromStream);
+            ParseAttributes(tag, token, toString);
 
             return tag;
         }
 
-        private void ParseAttributes(Tag tag, in Token token, bool fromStream)
+        private void ParseAttributes(Tag tag, in Token token, bool toString)
         {
             if (token.Data.IsEmpty)
                 return;
 
             foreach (var attr in Lexer.TokenizeAttributes(token, this.lexer))
             {
-                var attribute = CreateAttribute(attr, fromStream);
+                var attribute = CreateAttribute(attr, toString);
                 tag.Add(attribute);
             }
         }
 
-        private Attribute CreateAttribute(in Token token, bool fromStream)
+        private Attribute CreateAttribute(in Token token, bool toString)
         {
             var reference = CreateOrFindAttributeReference(token.Name);
             return
-                fromStream ?
-                    new StreamAttribute(reference, token.Data.ToString(), token.Offset, token.Length) :
+                toString ?
+                    new StringAttribute(reference, token.Data.ToString(), token.Offset, token.Length) :
                     token.Data.IsEmpty ?
                         new Attribute(reference, token.Offset, token.Length) :
                         new ValueAttribute(reference, token.Offset, token.Length, token.DataOffset, token.Data.Length);
@@ -265,46 +251,5 @@
         ReadOnlySpan<char> ISyntaxReference.TrimName(ReadOnlySpan<char> span) => this.lexer.TrimName(span);
         ReadOnlySpan<char> ISyntaxReference.TrimData(ReadOnlySpan<char> span) => this.lexer.TrimData(span);
         ReadOnlySpan<char> ISyntaxReference.TrimValue(ReadOnlySpan<char> span) => this.lexer.TrimValue(span);
-
-        private class DocumentBuilder : IRecordBuilder
-        {
-            private readonly MarkupReference<TMarkupLexer> parser;
-            private readonly Stack<ParentTag> tree;
-            private int contentLength;
-
-            public DocumentBuilder(MarkupReference<TMarkupLexer> parser)
-            {
-                this.parser = parser;
-                this.Document = new Document(new EmptyDocumentRoot(this.parser.rootReference));
-                this.tree = new Stack<ParentTag>();
-            }
-
-            public Encoding Encoding => Encoding.UTF8;
-            public char Opener => this.parser.lexer.Opener;
-            public char Closer => this.parser.lexer.Closer;
-            public char Encloser => '"';
-            public Document Document { get; }
-
-            public ValueTask StartAsync()
-            {
-                this.tree.Push(this.Document.Root);
-                return ValueTask.CompletedTask;
-            }
-
-            public ValueTask BuildAsync(ReadOnlySpan<char> recordSpan, CancellationToken cancellationToken)
-            {
-                this.parser.ParsePartial(recordSpan, this.tree, this.contentLength);
-                this.contentLength += recordSpan.Length;
-                return ValueTask.CompletedTask;
-            }
-
-            public ValueTask StopAsync()
-            {
-                this.Document.Root.IsWellFormed = this.tree.Count > 0 && this.tree.Count == 1;
-                this.Document.Root.CloseAt(this.contentLength);
-                this.tree.Clear();
-                return ValueTask.CompletedTask;
-            }
-        }
     }
 }

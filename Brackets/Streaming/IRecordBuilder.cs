@@ -19,5 +19,5 @@ public interface IRecordBuilder
 
     ValueTask StopAsync();
 
-    ValueTask BuildAsync(ReadOnlySpan<char> recordSpan, CancellationToken cancellationToken);
+    ValueTask<int> BuildAsync(ReadOnlySpan<char> recordSpan, CancellationToken cancellationToken);
 }

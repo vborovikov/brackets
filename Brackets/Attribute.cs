@@ -116,11 +116,11 @@ namespace Brackets
         public override ReadOnlySpan<char> Value => TrimValue(this.Source.Slice(this.valueStart, this.valueLength));
     }
 
-    sealed class StreamAttribute : Attribute
+    sealed class StringAttribute : Attribute
     {
         private readonly string value;
 
-        public StreamAttribute(AttributeReference reference, ReadOnlySpan<char> value, int offset, int length)
+        public StringAttribute(AttributeReference reference, ReadOnlySpan<char> value, int offset, int length)
             : base(reference, offset, length)
         {
             this.value = TrimValue(value).ToString();

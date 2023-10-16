@@ -52,11 +52,11 @@
         }
     }
 
-    sealed class StreamContent : Content
+    sealed class StringContent : Content
     {
         private string value;
 
-        public StreamContent(string value, int offset)
+        public StringContent(string value, int offset)
             : base(offset, value.Length)
         {
             this.value = value;
@@ -67,7 +67,7 @@
 
         internal override bool TryAdd(Content content)
         {
-            if (content is StreamContent streamContent && base.TryAdd(streamContent))
+            if (content is StringContent streamContent && base.TryAdd(streamContent))
             {
                 this.value += streamContent.value;
                 return true;

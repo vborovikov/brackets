@@ -173,10 +173,9 @@ sealed class RecordDecoder
         return result;
     }
 
-    public RecordReadResult TryReadRecord(Span<char> buffer, char opener, char closer, out int length)
+    public RecordReadResult TryReadRecord(Span<char> buffer, char opener, char closer, ref bool enclosed, out int length)
     {
         var pos = 0;
-        var enclosed = false;
         var fillThreshold = (buffer.Length >> 5) * 31; // 97%
         while (pos < buffer.Length)
         {
@@ -189,14 +188,13 @@ sealed class RecordDecoder
 
             if (enclosed && ch == closer)
             {
+                enclosed = false;
                 if (pos > fillThreshold)
                 {
                     // buffer is almost full
                     length = pos;
                     return RecordReadResult.EndOfRecord;
                 }
-
-                enclosed = false;
             }
         }
 

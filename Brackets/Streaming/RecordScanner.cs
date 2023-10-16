@@ -79,6 +79,7 @@ static class RecordScanner
         {
             using var recordBuffer = new RecordBuffer();
             var recordDecoder = new RecordDecoder(builder.Encoding);
+            var enclosed = false;
 
             while (true)
             {
@@ -90,10 +91,11 @@ static class RecordScanner
                 var recordRead = RecordReadResult.Empty;
                 do
                 {
-                    recordRead = recordDecoder.TryReadRecord(recordBuffer, builder.Opener, builder.Closer, out var recordLength);
+                    recordRead = recordDecoder.TryReadRecord(recordBuffer, builder.Opener, builder.Closer, ref enclosed, out var recordLength);
                     if (recordRead == RecordReadResult.EndOfRecord)
                     {
-                        await builder.BuildAsync(recordBuffer.MakeRecord(recordLength), cancellationToken);
+                        var charsConsumed = await builder.BuildAsync(recordBuffer.PreviewRecord(recordLength), cancellationToken);
+                        recordBuffer.Offset(recordLength, charsConsumed);
                     }
                     else
                     {

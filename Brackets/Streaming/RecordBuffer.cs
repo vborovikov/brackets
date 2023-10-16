@@ -11,6 +11,7 @@ struct RecordBuffer : IDisposable
 
     private char[] buffer;
     private int offset;
+    private int clear;
 
     public RecordBuffer()
         : this(DefaultBufferLength) { }
@@ -19,9 +20,10 @@ struct RecordBuffer : IDisposable
     {
         this.buffer = ArrayPool<char>.Shared.Rent(bufferLength);
         this.offset = 0;
+        this.clear = 0;
     }
 
-    public readonly bool CanMakeRecord => this.offset > 0;
+    public readonly bool CanMakeRecord => this.offset > this.clear;
 
     public readonly void Dispose()
     {
@@ -32,31 +34,45 @@ struct RecordBuffer : IDisposable
         }
     }
 
-    public void Clear()
+    public void Offset(int requestedOffset, int requestedClear)
     {
-        this.offset = 0;
+        if (requestedClear < 0 || requestedOffset < 0)
+            throw new ArgumentOutOfRangeException(nameof(requestedClear));
+
+        // clear + requestedClear .. offset + requestedOffset
+
+        var newClear = this.clear + requestedClear;
+        var newOffset = this.offset + requestedOffset;
+        if (newClear > newOffset)
+            throw new ArgumentOutOfRangeException(nameof(requestedClear));
+
+        if (newClear == newOffset)
+        {
+            this.offset = 0;
+            this.clear = 0;
+        }
+        else
+        {
+            Offset(requestedOffset);
+            this.clear = newClear;
+            Debug.WriteLine($"Record buffer start shifted to position {this.clear}");
+        }
     }
 
-    public int Offset(int requestedOffset)
+    public void Offset(int requestedOffset)
     {
         if (requestedOffset < 0)
             throw new ArgumentOutOfRangeException(nameof(requestedOffset));
-
         if (requestedOffset == 0)
-            return this.offset;
+            return;
 
-        var newOffset = 0;
-        if (requestedOffset > 0)
+        var newOffset = this.offset + requestedOffset;
+        if (newOffset >= this.buffer.Length)
         {
-            newOffset = this.offset + requestedOffset;
-            if (newOffset >= this.buffer.Length)
-            {
-                Grow(DefaultBufferLength);
-            }
+            Grow(DefaultBufferLength);
         }
 
         this.offset = newOffset;
-        return this.offset;
     }
 
     public readonly Span<char> AsSpan()
@@ -66,7 +82,7 @@ struct RecordBuffer : IDisposable
 
     public readonly ReadOnlySpan<char> PreviewRecord(int length)
     {
-        return this.buffer.AsSpan(..Math.Min(length + this.offset, this.buffer.Length));
+        return this.buffer.AsSpan(this.clear..Math.Min(length + this.offset, this.buffer.Length));
     }
 
     public ReadOnlySpan<char> MakeRecord(int length = -1)
@@ -80,8 +96,10 @@ struct RecordBuffer : IDisposable
             length += this.offset;
         }
 
+        var start = this.clear;
+        this.clear = 0;
         this.offset = 0;
-        return this.buffer.AsSpan(..Math.Min(length, this.buffer.Length));
+        return this.buffer.AsSpan(start..Math.Min(length, this.buffer.Length));
     }
 
     public static implicit operator Span<char>(RecordBuffer buffer) => buffer.AsSpan();
@@ -112,6 +130,6 @@ struct RecordBuffer : IDisposable
             ArrayPool<char>.Shared.Return(toReturn);
         }
 
-        Debug.WriteLine($"Record buffer grown to {this.buffer.Length} characters.");
+        Debug.WriteLine($"Record buffer grown to {this.buffer.Length} characters");
     }
 }
