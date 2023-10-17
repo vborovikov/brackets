@@ -4,7 +4,11 @@
     using System.Collections;
     using System.Collections.Generic;
 
-    public class Tag : Element
+    public interface ITagAttributes
+    {
+    }
+
+    public class Tag : Element, ITagAttributes
     {
         protected readonly TagReference reference;
         private Attribute? attribute;
@@ -18,6 +22,8 @@
 
         internal TagReference Reference => this.reference;
 
+        internal Attribute? FirstAttribute => this.attribute;
+
         public string Name => this.reference.Name;
 
         public bool HasRawContent => this.reference.HasRawContent;
@@ -27,6 +33,8 @@
         public bool IsProcessingInstruction => this.reference.IsProcessingInstruction;
 
         public bool HasAttributes => this.attribute is not null;
+
+        public ITagAttributes Attributes => this;
 
         public Attribute.Enumerator EnumerateAttributes() => new(this.attribute);
 
