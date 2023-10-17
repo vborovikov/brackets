@@ -27,13 +27,7 @@ namespace Brackets
 
         public virtual ReadOnlySpan<char> Value => this.Name;
 
-        public override string ToString()
-        {
-            if (!this.HasValue)
-                return String.Empty;
-
-            return this.Value.ToString();
-        }
+        public override string ToString() => this.Name;
 
         public override bool TryGetValue<T>([MaybeNullWhen(false)] out T value)
         {
@@ -114,6 +108,8 @@ namespace Brackets
         public override bool HasValue => true;
 
         public override ReadOnlySpan<char> Value => TrimValue(this.Source.Slice(this.valueStart, this.valueLength));
+
+        public override string ToString() => this.Value.ToString();
     }
 
     sealed class StringAttribute : Attribute
@@ -131,5 +127,7 @@ namespace Brackets
         public override ReadOnlySpan<char> Value => this.value;
 
         protected override ReadOnlySpan<char> Source => this.value;
+
+        public override string ToString() => this.value;
     }
 }
