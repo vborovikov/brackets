@@ -11,9 +11,12 @@ using Streaming;
 
 public abstract partial class MarkupReference<TMarkupLexer> where TMarkupLexer : struct, IMarkupLexer
 {
-    public async Task<Document> ParseAsync(Stream stream, CancellationToken cancellationToken)
+    public Task<Document> ParseAsync(Stream stream, CancellationToken cancellationToken) =>
+        ParseAsync(stream, Encoding.UTF8, cancellationToken);
+
+    public async Task<Document> ParseAsync(Stream stream, Encoding encoding, CancellationToken cancellationToken)
     {
-        var builder = new DocumentBuilder(this);
+        var builder = new DocumentBuilder(this, encoding);
         await RecordScanner.ScanAsync(stream, builder, cancellationToken).ConfigureAwait(false);
         return builder.Document;
     }
@@ -88,14 +91,15 @@ public abstract partial class MarkupReference<TMarkupLexer> where TMarkupLexer :
         private readonly Stack<ParentTag> tree;
         private int contentLength;
 
-        public DocumentBuilder(MarkupReference<TMarkupLexer> parser)
+        public DocumentBuilder(MarkupReference<TMarkupLexer> parser, Encoding encoding)
         {
             this.parser = parser;
+            this.Encoding = encoding;
             this.Document = new Document(new EmptyDocumentRoot(this.parser.rootReference));
             this.tree = new Stack<ParentTag>();
         }
 
-        public Encoding Encoding => Encoding.UTF8;
+        public Encoding Encoding { get; private set; }
         public char Opener => this.parser.lexer.Opener;
         public char Closer => this.parser.lexer.Closer;
         public char Encloser => '"';
@@ -110,13 +114,31 @@ public abstract partial class MarkupReference<TMarkupLexer> where TMarkupLexer :
         public ValueTask<int> BuildAsync(ReadOnlySpan<char> recordSpan, CancellationToken cancellationToken)
         {
             var charsParsed = this.parser.TryParseFragment(recordSpan, this.tree, this.contentLength);
+
+            if (this.contentLength == 0 && charsParsed > 0 &&
+                this.Document.Root.Child is Tag { Name: "?xml", IsProcessingInstruction: true, HasAttributes: true } xmlInstruction)
+            {
+                // update encoding if needed
+                if (xmlInstruction.Attributes.FirstOrDefault(a => a is { Name: "encoding", HasValue: true }) is Attribute encodingAttr)
+                {
+                    try
+                    {
+                        this.Encoding = Encoding.GetEncoding(encodingAttr.ToString());
+                    }
+                    catch (Exception)
+                    {
+                        this.Encoding = Encoding.UTF8;
+                    }
+                }
+            }
+
             this.contentLength += charsParsed;
             return ValueTask.FromResult(charsParsed);
         }
 
         public ValueTask StopAsync()
         {
-            this.Document.Root.IsWellFormed = this.tree.Count > 0 && this.tree.Count == 1;
+            this.Document.Root.IsWellFormed = this.tree.Count == 1;
             this.Document.Root.CloseAt(this.contentLength);
             this.tree.Clear();
             return ValueTask.CompletedTask;
