@@ -2,7 +2,7 @@
 
 public class HtmlReference : MarkupReference<HtmlLexer>
 {
-    public HtmlReference()
+    public HtmlReference() : base(MarkupLanguage.Html)
     {
         // tags
         //

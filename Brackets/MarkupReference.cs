@@ -2,12 +2,15 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Collections;
     using Parsing;
-    using Streaming;
+
+    public enum MarkupLanguage
+    {
+        Html,
+        Xml,
+        Xhtml,
+    }
 
     public interface ISyntaxReference
     {
@@ -24,15 +27,18 @@
         private readonly StringSet<AttributeReference> attributeReferences;
         private readonly RootReference rootReference;
 
-        protected MarkupReference()
+        protected MarkupReference(MarkupLanguage language)
         {
             this.lexer = new();
             this.tagReferences = new(this.lexer.Comparison);
             this.attributeReferences = new(this.lexer.Comparison);
             this.rootReference = new RootReference(this);
+            this.Language = language;
         }
 
         internal ref readonly TMarkupLexer Syntax => ref this.lexer;
+
+        public MarkupLanguage Language { get; }
 
         public Document Parse(string text)
         {

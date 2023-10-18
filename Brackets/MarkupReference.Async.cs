@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -92,6 +93,7 @@ public abstract partial class MarkupReference<TMarkupLexer> where TMarkupLexer :
         private readonly MarkupReference<TMarkupLexer> parser;
         private readonly Stack<ParentTag> tree;
         private int contentLength;
+        private bool encodingParsed;
 
         public DocumentBuilder(MarkupReference<TMarkupLexer> parser, Encoding encoding)
         {
@@ -116,23 +118,10 @@ public abstract partial class MarkupReference<TMarkupLexer> where TMarkupLexer :
         public ValueTask<int> BuildAsync(ReadOnlySpan<char> recordSpan, CancellationToken cancellationToken)
         {
             var charsParsed = this.parser.TryParseFragment(recordSpan, this.tree, this.contentLength);
+            if (charsParsed <= 0)
+                return ValueTask.FromResult(0);
 
-            if (this.contentLength == 0 && charsParsed > 0 &&
-                this.Document.Root.Child is Instruction { Name: "xml", HasAttributes: true } xmlInstruction)
-            {
-                // update encoding if needed
-                if (xmlInstruction.Attributes.FirstOrDefault(a => a is { Name: "encoding", HasValue: true }) is Attribute encodingAttr)
-                {
-                    try
-                    {
-                        this.Encoding = Encoding.GetEncoding(encodingAttr.ToString());
-                    }
-                    catch (Exception)
-                    {
-                        this.Encoding = Encoding.UTF8;
-                    }
-                }
-            }
+            EnsureEncoding();
 
             this.contentLength += charsParsed;
             return ValueTask.FromResult(charsParsed);
@@ -144,6 +133,70 @@ public abstract partial class MarkupReference<TMarkupLexer> where TMarkupLexer :
             this.Document.Root.CloseAt(this.contentLength);
             this.tree.Clear();
             return ValueTask.CompletedTask;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void EnsureEncoding()
+        {
+            if (this.encodingParsed)
+                return;
+
+            if (this.contentLength == 0 && this.parser.Language == MarkupLanguage.Xml)
+            {
+                if (this.Document.FirstOrDefault() is Instruction { Name: "xml", HasAttributes: true } xmlInstruction &&
+                    xmlInstruction.Attributes.FirstOrDefault(a => a is { Name: "encoding", HasValue: true }) is ValueAttribute encodingAttr)
+                {
+                    SetEncoding(encodingAttr.ToString());
+                }
+            }
+            else if (this.contentLength < RecordBuffer.DefaultBufferLength && this.parser.Language == MarkupLanguage.Html)
+            {
+                if (this.Document.Find<ParentTag>(t => t.Name.Equals("head", StringComparison.OrdinalIgnoreCase)) is ParentTag head)
+                {
+                    if (head.Find<Tag>(IsMetaWithCharset) is Tag charsetMeta)
+                    {
+                        var charsetAttr = charsetMeta.Attributes.First(a => a.Name.Equals("charset", StringComparison.OrdinalIgnoreCase));
+                        SetEncoding(charsetAttr.ToString());
+                    }
+                    else if (head.Find<Tag>(IsMetaWithContentType) is Tag contentMeta)
+                    {
+                        var contentAttr = contentMeta.Attributes.First(a => a.Name.Equals("content", StringComparison.OrdinalIgnoreCase));
+                        var mimeType = contentAttr.Value;
+                        SetEncoding(mimeType[(mimeType.LastIndexOf('=') + 1)..].ToString());
+                    }
+                }
+                if (this.Document.Find<ParentTag>(t => t.Name.Equals("body", StringComparison.OrdinalIgnoreCase)) is not null)
+                {
+                    // stop searching further
+                    this.encodingParsed = true;
+                }
+            }
+
+            static bool IsMetaWithCharset(Tag t) =>
+                t.Name.Equals("meta", StringComparison.OrdinalIgnoreCase) && t.HasAttributes &&
+                t.Attributes.FirstOrDefault(a => a.Name.Equals("charset", StringComparison.OrdinalIgnoreCase) && a.HasValue) is not null;
+
+            static bool IsMetaWithContentType(Tag t) =>
+                t.Name.Equals("meta", StringComparison.OrdinalIgnoreCase) && t.HasAttributes &&
+                t.Attributes.FirstOrDefault(a =>
+                    a.Name.Equals("http-equiv", StringComparison.OrdinalIgnoreCase) &&
+                    a.HasValue && a.Value.Equals("Content-Type", StringComparison.OrdinalIgnoreCase)) is not null &&
+                t.Attributes.LastOrDefault(a =>
+                    a.Name.Equals("content", StringComparison.OrdinalIgnoreCase) && a.HasValue) is not null;
+        }
+
+        private void SetEncoding(string encodingName)
+        {
+            try
+            {
+                this.encodingParsed = true;
+                this.Encoding = Encoding.GetEncoding(encodingName);
+                Debug.WriteLine($"Updated {this.parser.Language} encoding: {encodingName}");
+            }
+            catch (Exception)
+            {
+                Debug.WriteLine($"Unrecognized {this.parser.Language} encoding: {encodingName}");
+            }
         }
     }
 }

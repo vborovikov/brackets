@@ -127,6 +127,12 @@
             }
         }
 
+        public TElement? Find<TElement>(Func<TElement, bool> match)
+            where TElement : Element
+        {
+            return Find(el => el is TElement element && match(element)) as TElement;
+        }
+
         public Element? Find(Predicate<Element> match)
         {
             foreach (var element in FindAll(match))

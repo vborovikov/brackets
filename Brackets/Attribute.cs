@@ -23,6 +23,7 @@ namespace Brackets
 
         public bool IsFlag => this.reference.IsFlag || !this.HasValue;
 
+        [MemberNotNullWhen(true, nameof(Value))]
         public virtual bool HasValue => false;
 
         public virtual ReadOnlySpan<char> Value => this.Name;

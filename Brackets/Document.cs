@@ -45,7 +45,7 @@
         public TElement? Find<TElement>(Func<TElement, bool> match)
             where TElement : Element
         {
-            return this.root.Find(el => el is TElement element && match(element)) as TElement;
+            return this.root.Find(match);
         }
 
         public IEnumerable<Element> FindAll(Predicate<Element> match)

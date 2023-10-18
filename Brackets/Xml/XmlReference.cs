@@ -2,7 +2,7 @@
 
 public class XmlReference : MarkupReference<XmlLexer>
 {
-    public XmlReference()
+    public XmlReference() : base(MarkupLanguage.Xml)
     {
         // void elements
         AddReference(new TagReference("xml", this) { IsParent = false, Level = ElementLevel.Inline, IsProcessingInstruction = true });
