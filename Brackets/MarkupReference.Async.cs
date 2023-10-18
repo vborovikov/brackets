@@ -60,6 +60,8 @@ public abstract partial class MarkupReference<TMarkupLexer> where TMarkupLexer :
                 {
                     case TokenCategory.OpeningTag:
                     case TokenCategory.UnpairedTag:
+                    case TokenCategory.Instruction:
+                    case TokenCategory.Declaration:
                         ParseOpeningTag(token, parent, tree, toString: true);
                         break;
 
@@ -116,7 +118,7 @@ public abstract partial class MarkupReference<TMarkupLexer> where TMarkupLexer :
             var charsParsed = this.parser.TryParseFragment(recordSpan, this.tree, this.contentLength);
 
             if (this.contentLength == 0 && charsParsed > 0 &&
-                this.Document.Root.Child is Tag { Name: "?xml", IsProcessingInstruction: true, HasAttributes: true } xmlInstruction)
+                this.Document.Root.Child is Instruction { Name: "xml", HasAttributes: true } xmlInstruction)
             {
                 // update encoding if needed
                 if (xmlInstruction.Attributes.FirstOrDefault(a => a is { Name: "encoding", HasValue: true }) is Attribute encodingAttr)

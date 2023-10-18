@@ -165,7 +165,7 @@
             Assert.IsTrue(document.IsComplete);
             Assert.IsTrue(document.IsWellFormed);
 
-            AssertTags(document, "?xml", "rss");
+            AssertTags(document, "xml", "rss");
             AssertTags(document.Find<ParentTag>(t => t.Name == "channel"),
                 "title", "link", "copyright", "lastBuildDate", "generator", "docs", "description");
 

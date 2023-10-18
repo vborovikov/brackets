@@ -70,4 +70,24 @@ public class XmlTests
         Assert.AreEqual("self", link.EnumerateAttributes().ElementAt(0).ToString());
         Assert.AreEqual("http://www.youtube.com/feeds/videos.xml?channel_id=UCmEN5ZnsHUXIxgpLitRTmWw", link.EnumerateAttributes().ElementAt(1).ToString());
     }
+
+    [TestMethod]
+    public void Parse_XhtmlInstructionDeclaration_Recognized()
+    {
+        var document = Document.Xml.Parse(
+            """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <!DOCTYPE html
+                PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+            <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+            </html>
+            """);
+
+        var first = document.First();
+        Assert.IsNotNull(first);
+        Assert.IsInstanceOfType(first, typeof(Instruction));
+        Assert.IsInstanceOfType(first.Next, typeof(Declaration));
+        Assert.IsInstanceOfType(first.Prev, typeof(ParentTag));
+    }
 }

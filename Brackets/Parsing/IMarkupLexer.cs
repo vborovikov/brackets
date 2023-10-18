@@ -4,7 +4,7 @@
 public enum TokenCategory
 {
     Unknown,
-    Discarded   = 1 << 0, // tokens discarded as content
+    Discarded   = 1 << 0, // anything discarded
     Content     = 1 << 1, // abc...
     OpeningTag  = 1 << 2, // <abc ...>
     ClosingTag  = 1 << 3, // </abc>
@@ -12,6 +12,8 @@ public enum TokenCategory
     Comment     = 1 << 5, // <!--...-->
     Section     = 1 << 6, // <![ABC[...]]>
     Attribute   = 1 << 7, // abc="123"
+    Instruction = 1 << 8, // <?abc ...?>
+    Declaration = 1 << 9, // <!abc ...>
 }
 
 public readonly ref struct Token

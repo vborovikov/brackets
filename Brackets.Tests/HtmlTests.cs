@@ -45,7 +45,7 @@
 
                 """);
             Assert.IsNotNull(document);
-            Assert.IsNotNull(document.Find<Tag>(tag => tag.Name == "!doctype"));
+            Assert.IsNotNull(document.Find<Declaration>(tag => tag.Name == "doctype"));
             Assert.IsNotNull(document.Find<ParentTag>(tag => tag.Name == "html"));
             Assert.IsNotNull(document.Find<ParentTag>(tag => tag.Name == "head"));
             var metaTags = document.FindAll<Tag>(tag => tag.Name == "meta").ToArray();

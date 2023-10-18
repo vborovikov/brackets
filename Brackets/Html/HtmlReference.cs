@@ -8,8 +8,8 @@ public class HtmlReference : MarkupReference<HtmlLexer>
         //
 
         // void elements
-        AddReference(new TagReference("?xml", this) { IsParent = false, Level = ElementLevel.Inline, IsProcessingInstruction = true });
-        AddReference(new TagReference("!doctype", this) { IsParent = false, IsProcessingInstruction = true });
+        AddReference(new TagReference("xml", this) { IsParent = false, Level = ElementLevel.Inline, IsProcessingInstruction = true });
+        AddReference(new TagReference("doctype", this) { IsParent = false, Level = ElementLevel.Inline, IsProcessingInstruction = true });
         AddReference(new TagReference("area", this) { IsParent = false });
         AddReference(new TagReference("base", this) { IsParent = false });
         AddReference(new BrTagReference(this));

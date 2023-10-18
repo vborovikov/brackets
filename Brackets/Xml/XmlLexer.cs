@@ -11,18 +11,21 @@ public readonly struct XmlLexer : IMarkupLexer
     private const char Opener = '<';
     private const char Closer = '>';
     private const char Terminator = '/';
-    private const char AltOpener = '?';
-    private const char AltCloser = '?';
     private const char DataOpener = '[';
     private const char ValueSeparator = '=';
     private const string QuotationMarks = "'\"";
     private const string Separators = " \r\n\t\xA0";
     private const string NameSeparators = "/" + Separators;
     private const string AttrSeparators = "=" + Separators;
+    private const string TermOpener = "</";
+    private const string TermCloser = "/>";
     private const string CommentOpener = "<!--";
     private const string CommentCloser = "-->";
     private const string SectionOpener = "<![";
     private const string SectionCloser = "]]>";
+    private const string InstrOpener = "<?";
+    private const string InstrCloser = "?>";
+    private const string DeclOpener = "<!";
 
     public StringComparison Comparison => cmp;
     char IMarkupLexer.Opener => Opener;
@@ -130,39 +133,45 @@ public readonly struct XmlLexer : IMarkupLexer
         }
         else
         {
-            // <?xml...?> | <tag .../> | <tag ...> | </tag>
-            var tag = span[1..^1];
-            var terminatorPos =
-                tag[0] == Terminator ? 0 :
-                tag[^1] == Terminator || tag[^1] == AltCloser ? tag.Length - 1 :
-                -1;
-            var separatorPos = tag.IndexOfAny(Separators);
-            var nameStart = terminatorPos == 0 ? 1 : 0;
-            var nameEnd =
-                separatorPos > 0 ? separatorPos :
-                terminatorPos > 0 ? terminatorPos :
-                ^0;
-            var tagName = tag[nameStart..nameEnd];
+            // <?tag...?> | <!tag ...> | <tag .../> | <tag ...> | </tag>
+
             // token category
-            category = terminatorPos switch
+            category = span.StartsWith(DeclOpener, cmp) ? TokenCategory.Declaration :
+                span.StartsWith(InstrOpener, cmp) && span.EndsWith(InstrCloser, cmp) ? TokenCategory.Instruction :
+                span.StartsWith(TermOpener, cmp) ? TokenCategory.ClosingTag :
+                span.EndsWith(TermCloser, cmp) ? TokenCategory.UnpairedTag :
+                TokenCategory.OpeningTag;
+
+            var tag = category switch
             {
-                0 => TokenCategory.ClosingTag,
-                > 0 => TokenCategory.UnpairedTag,
-                _ => TokenCategory.OpeningTag,
+                TokenCategory.Declaration or TokenCategory.ClosingTag => span[2..^1],
+                TokenCategory.Instruction => span[2..^2],
+                TokenCategory.UnpairedTag => span[1..^2],
+                _ => span[1..^1],
             };
 
-            if (IsElementName(tagName) || (tagName[0] == AltOpener && IsElementName(tagName[1..])))
+            var separatorPos = tag.IndexOfAny(Separators);
+            var tagName = separatorPos > 0 ? tag[..separatorPos] : tag;
+            if (IsElementName(tagName))
             {
                 // tag name
                 name = tagName;
-                nameOffset = start + nameStart + 1;
+                nameOffset = start + category switch
+                {
+                    TokenCategory.Declaration or TokenCategory.Instruction or TokenCategory.ClosingTag => 2,
+                    _ => 1,
+                };
 
                 // tag attributes
                 if (category != TokenCategory.ClosingTag && separatorPos > 0)
                 {
                     var offsetAfterTagName = start + separatorPos + 2;
                     var attr = span[offsetAfterTagName..];
-                    var attrEnd = attr.Length - (attr[^2] == Terminator || attr[^2] == AltCloser ? 2 : 1);
+                    var attrEnd = attr.Length - category switch
+                    {
+                        TokenCategory.Instruction or TokenCategory.UnpairedTag => 2,
+                        _ => 1,
+                    };
                     attr = attr[..attrEnd];
                     var leadingSpaceLength = attr.IndexOfAnyExcept(Separators);
                     if (leadingSpaceLength > -1)
@@ -275,7 +284,7 @@ public readonly struct XmlLexer : IMarkupLexer
             return false;
 
         var nameIdx = tagSpan.IndexOf(tagName, cmp);
-        return nameIdx == 0 || (nameIdx == 2 && tagSpan[0] == Opener && tagSpan[1] == Terminator);
+        return nameIdx == 0 || (nameIdx == 2 && tagSpan.StartsWith(TermOpener, cmp));
 
     }
 
@@ -304,10 +313,10 @@ public readonly struct XmlLexer : IMarkupLexer
 
     public ReadOnlySpan<char> TrimName(ReadOnlySpan<char> tag)
     {
-        if (tag.Length < 4 || tag[0] != Opener)
+        if (tag.Length < 4 || tag[0] != Opener || tag[^1] != Closer)
             return default;
 
-        if (tag.StartsWith(SectionOpener, cmp))
+        if (tag.StartsWith(SectionOpener, cmp) && tag.EndsWith(SectionCloser, cmp))
         {
             // <![CDATA[...
             tag = tag[SectionOpener.Length..];
@@ -318,14 +327,26 @@ public readonly struct XmlLexer : IMarkupLexer
             return tag[..dataPos];
         }
 
-        // <tag...
-        // <?xml...
-        tag = tag[1..^1];
-        var terminatorPos = tag[0] == Terminator ? 0 : tag[^1] == Terminator || tag[^1] == AltCloser ? tag.Length - 1 : -1;
+        if (tag.StartsWith(DeclOpener, cmp) || tag.StartsWith(TermOpener, cmp))
+        {
+            tag = tag[2..^1];
+        }
+        else if (tag.StartsWith(InstrOpener, cmp) && tag.EndsWith(InstrCloser, cmp))
+        {
+            tag = tag[2..^2];
+        }
+        else if (tag.EndsWith(TermCloser, cmp))
+        {
+            tag = tag[1..^2];
+        }
+        else
+        {
+            tag = tag[1..^1];
+        }
+
         var separatorPos = tag.IndexOfAny(NameSeparators);
-        var nameStart = terminatorPos == 0 ? 1 : 0;
-        var nameEnd = separatorPos > 0 ? separatorPos : terminatorPos > 0 ? terminatorPos : ^0;
-        return tag[nameStart..nameEnd];
+        var nameEnd = separatorPos > 0 ? separatorPos : ^0;
+        return tag[..nameEnd];
     }
 
     public ReadOnlySpan<char> TrimData(ReadOnlySpan<char> section)

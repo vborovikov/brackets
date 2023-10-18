@@ -81,6 +81,8 @@
                     {
                         case TokenCategory.OpeningTag:
                         case TokenCategory.UnpairedTag:
+                        case TokenCategory.Instruction:
+                        case TokenCategory.Declaration:
                             ParseOpeningTag(token, parent, tree);
                             break;
 
@@ -194,9 +196,13 @@
         private Tag CreateTag(in Token token, bool toString)
         {
             var reference = CreateOrFindTagReference(token.Name);
-            var tag = token.Category != TokenCategory.UnpairedTag && reference.IsParent ?
-                new ParentTag(reference, token.Start, token.Length) :
-                new Tag(reference, token.Start, token.Length);
+            var tag = token.Category switch
+            {
+                TokenCategory.Instruction => new Instruction(reference, token.Start, token.Length),
+                TokenCategory.Declaration => new Declaration(reference, token.Start, token.Length),
+                TokenCategory.OpeningTag when reference.IsParent => new ParentTag(reference, token.Start, token.Length),
+                _ => new Tag(reference, token.Start, token.Length),
+            };
 
             ParseAttributes(tag, token, toString);
 

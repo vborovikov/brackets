@@ -43,7 +43,7 @@
         {
             var tags = Lexer.TokenizeElements("<!doctype>", Document.Html.Syntax);
             AssertTokens(tags, "<!doctype>");
-            AssertCategories(tags, TokenCategory.OpeningTag);
+            AssertCategories(tags, TokenCategory.Declaration);
         }
 
         [TestMethod]
@@ -140,7 +140,7 @@
                 """, Document.Xml.Syntax);
 
             AssertCategories(tags,
-                TokenCategory.UnpairedTag,  // <?xml version="1.0" encoding="utf-8"?>
+                TokenCategory.Instruction,  // <?xml version="1.0" encoding="utf-8"?>
                 TokenCategory.OpeningTag,   // <rss>
                 TokenCategory.OpeningTag,   // <channel>
                 TokenCategory.OpeningTag,   // <title>

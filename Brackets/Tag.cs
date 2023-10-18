@@ -30,8 +30,6 @@
 
         public override ElementLevel Level => this.reference.Level;
 
-        public bool IsProcessingInstruction => this.reference.IsProcessingInstruction;
-
         public bool HasAttributes => this.attribute is not null;
 
         public ITagAttributes Attributes => this;
@@ -55,15 +53,30 @@
             }
         }
 
-        internal override string ToDebugString()
-        {
-            return $"<{this.Name}/>";
-        }
+        internal override string ToDebugString() => $"<{this.Name}/>";
 
         internal void CloseAt(int end)
         {
             this.end = end;
         }
+    }
+
+    public sealed class Instruction : Tag
+    {
+        public Instruction(TagReference reference, int start, int length) : base(reference, start, length)
+        {
+        }
+
+        internal override string ToDebugString() => $"<?{this.Name}?>";
+    }
+
+    public sealed class Declaration : Tag
+    {
+        public Declaration(TagReference reference, int start, int length) : base(reference, start, length)
+        {
+        }
+
+        internal override string ToDebugString() => $"<!{this.Name}>";
     }
 
     public class ParentTag : Tag, IEnumerable<Element>
@@ -216,9 +229,6 @@
             return null;
         }
 
-        internal override string ToDebugString()
-        {
-            return $"<{this.Name}>\u2026</{this.Name}>";
-        }
+        internal override string ToDebugString() => $"<{this.Name}>\u2026</{this.Name}>";
     }
 }
