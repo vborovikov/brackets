@@ -101,6 +101,7 @@
                             break;
 
                         case TokenCategory.Comment:
+                        case TokenCategory.Comment | TokenCategory.Discarded:
                             ParseComment(token, parent);
                             break;
 
