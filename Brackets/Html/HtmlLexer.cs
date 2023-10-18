@@ -121,8 +121,8 @@ public readonly struct HtmlLexer : IMarkupLexer
                 }
                 else
                 {
-                    //todo: Discarded?
                     end = text.Length;
+                    category |= TokenCategory.Discarded;
                 }
 
                 span = text[start..end];
@@ -397,7 +397,8 @@ public readonly struct HtmlLexer : IMarkupLexer
                 ((uint)((c | 0x20) - 'a') <= 'z' - 'a') ||
                 ((uint)(c - '0') <= 9u) ||
                 (c == '-') ||
-                (c == '_')
+                (c == '_') ||
+                (c == ':')
                ))
             {
                 // c is not an ASCII letter or digit or dash or underscrore

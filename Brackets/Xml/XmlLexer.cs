@@ -121,8 +121,8 @@ public readonly struct XmlLexer : IMarkupLexer
                 }
                 else
                 {
-                    //todo: Discarded?
                     end = text.Length;
+                    category |= TokenCategory.Discarded;
                 }
 
                 span = text[start..end];
