@@ -87,7 +87,7 @@ static class RecordScanner
                 if (readResult.IsCanceled)
                     break;
 
-                recordDecoder.Decode(readResult.Buffer, builder.Encoding);
+                recordDecoder.Decode(readResult.Buffer);
                 var recordRead = RecordReadResult.Empty;
                 do
                 {
@@ -96,6 +96,7 @@ static class RecordScanner
                     {
                         var charsConsumed = await builder.BuildAsync(recordBuffer.PreviewRecord(recordLength), cancellationToken);
                         recordBuffer.Offset(recordLength, charsConsumed);
+                        recordDecoder.TryChangeEncoding(builder.Encoding, forceDecode: true);
                     }
                     else
                     {

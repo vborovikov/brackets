@@ -59,20 +59,22 @@ sealed class RecordDecoder : IDisposable
     /// </summary>
     private SequencePosition sequencePosition;
 
+    private SequencePosition redoPosition;
+
     /// <summary>
     /// The encoding to use while decoding bytes into characters.
     /// </summary>
-    private Encoding? encoding;
+    private Encoding encoding;
 
     /// <summary>
     /// The decoder.
     /// </summary>
-    private Decoder? decoder;
+    private Decoder decoder;
 
     /// <summary>
     /// The preamble for the <see cref="encoding"/> in use.
     /// </summary>
-    private byte[]? encodingPreamble;
+    private byte[] encodingPreamble;
 
     private bool isDisposed;
 
@@ -90,7 +92,9 @@ sealed class RecordDecoder : IDisposable
     {
         ArgumentNullException.ThrowIfNull(encoding);
         this.charBuffer = ArrayPool<char>.Shared.Rent(bufferLength);
-        InitializeEncoding(encoding);
+        this.encoding = encoding;
+        this.decoder = encoding.GetDecoder();
+        this.encodingPreamble = encoding.GetPreamble();
     }
 
     public SequencePosition SequencePosition => this.sequencePosition;
@@ -117,7 +121,7 @@ sealed class RecordDecoder : IDisposable
         this.charBufferPosition = 0;
         this.charBufferLength = 0;
 
-        InitializeEncoding(encoding);
+        TryChangeEncoding(encoding);
 
         // Skip a preamble if we encounter one.
         if (this.encodingPreamble.Length > 0 && sequence.Length >= this.encodingPreamble.Length)
@@ -136,20 +140,28 @@ sealed class RecordDecoder : IDisposable
                 this.sequencePosition = this.sequence.GetPosition(this.encodingPreamble.Length, this.sequence.Start);
             }
         }
+
+        this.redoPosition = this.sequencePosition;
     }
 
-    [MemberNotNull(nameof(encoding), nameof(decoder), nameof(encodingPreamble))]
-    private void InitializeEncoding(Encoding? encoding)
+    public void TryChangeEncoding(Encoding? encoding, bool forceDecode = false)
     {
-        if (this.encoding?.Equals(encoding) ?? false)
+        if (encoding is null || this.encoding.Equals(encoding))
+            return;
+
+        this.encoding = encoding;
+        this.decoder = this.encoding.GetDecoder();
+        this.encodingPreamble = this.encoding.GetPreamble();
+
+        // force re-decoding the current buffer
+        if (forceDecode)
         {
-            this.decoder!.Reset();
-        }
-        else
-        {
-            this.encoding = encoding ?? Encoding.Default;
-            this.decoder = this.encoding.GetDecoder();
-            this.encodingPreamble = this.encoding.GetPreamble();
+            var currentCharBufferPosition = this.charBufferPosition;
+            this.charBufferPosition = 0;
+            this.charBufferLength = 0;
+            this.sequencePosition = this.redoPosition;
+            DecodeCharsIfNecessary();
+            this.charBufferPosition = currentCharBufferPosition;
         }
     }
 
@@ -160,6 +172,7 @@ sealed class RecordDecoder : IDisposable
     {
         this.sequence = default;
         this.sequencePosition = default;
+        this.redoPosition = default;
     }
 
     private int Peek()
@@ -259,6 +272,7 @@ sealed class RecordDecoder : IDisposable
             // Reset to consider our character buffer empty.
             this.charBufferPosition = 0;
             this.charBufferLength = 0;
+            this.redoPosition = this.sequencePosition;
         }
 
         // Continue to decode characters for as long as we have room for TWO chars, since Decoder.Convert throws
@@ -272,16 +286,9 @@ sealed class RecordDecoder : IDisposable
                 break;
             }
 
-            if (MemoryMarshal.TryGetArray(memory, out var segment))
-            {
-                this.decoder!.Convert(segment.Array!, segment.Offset, segment.Count, this.charBuffer, this.charBufferLength, this.charBuffer.Length - this.charBufferLength, flush: false, out var bytesUsed, out var charsUsed, out var completed);
-                this.charBufferLength += charsUsed;
-                this.sequencePosition = this.sequence.GetPosition(bytesUsed, this.sequencePosition);
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            this.decoder.Convert(memory.Span, this.charBuffer.AsSpan(this.charBufferLength), flush: false, out var bytesUsed, out var charsUsed, out _);
+            this.charBufferLength += charsUsed;
+            this.sequencePosition = this.sequence.GetPosition(bytesUsed, this.sequencePosition);
         }
     }
 }
