@@ -7,7 +7,8 @@ using System.Runtime.CompilerServices;
 
 struct RecordBuffer : IDisposable
 {
-    public const int DefaultBufferLength = 4096;
+    public const int DefaultBufferLength = 1024;
+    public const int FileBufferLength = 4096;
 
     private char[] buffer;
     private int offset;

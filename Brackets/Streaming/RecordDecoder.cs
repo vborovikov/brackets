@@ -31,13 +31,13 @@ public enum RecordReadResult
 /// <summary>
 /// A scanner that reads from a reassignable instance of <see cref="ReadOnlySequence{T}"/>.
 /// </summary>
-sealed class RecordDecoder
+sealed class RecordDecoder : IDisposable
 {
     /// <summary>
     /// A buffer of written characters that have not yet been encoded.
     /// The <see cref="charBufferPosition"/> field tracks how many characters are represented in this buffer.
     /// </summary>
-    private readonly char[] charBuffer = new char[RecordBuffer.DefaultBufferLength];
+    private readonly char[] charBuffer;
 
     /// <summary>
     /// The number of characters already read from <see cref="charBuffer"/>.
@@ -74,24 +74,35 @@ sealed class RecordDecoder
     /// </summary>
     private byte[]? encodingPreamble;
 
+    private bool isDisposed;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="RecordDecoder"/> class
     /// without associating it with an initial <see cref="ReadOnlySequence{T}"/>.
     /// </summary>
     /// <param name="encoding"></param>
+    /// <param name="bufferLength"></param>
     /// <remarks>
     /// When using this constructor, call <see cref="Decode(ReadOnlySequence{byte}, Encoding)"/>
     /// to associate the instance with the initial byte sequence to be read.
     /// </remarks>
-    public RecordDecoder(Encoding encoding)
+    public RecordDecoder(Encoding encoding, int bufferLength)
     {
-        if (encoding is null)
-            throw new ArgumentNullException(nameof(encoding));
-
+        ArgumentNullException.ThrowIfNull(encoding);
+        this.charBuffer = ArrayPool<char>.Shared.Rent(bufferLength);
         InitializeEncoding(encoding);
     }
 
     public SequencePosition SequencePosition => this.sequencePosition;
+
+    public void Dispose()
+    {
+        if (!this.isDisposed)
+        {
+            ArrayPool<char>.Shared.Return(this.charBuffer);
+            this.isDisposed = true;
+        }
+    }
 
     /// <summary>
     /// Initializes or reinitializes this instance to read from a given <see cref="ReadOnlySequence{T}"/>.
@@ -176,7 +187,6 @@ sealed class RecordDecoder
     public RecordReadResult TryReadRecord(Span<char> buffer, char opener, char closer, ref bool enclosed, out int length)
     {
         var pos = 0;
-        var fillThreshold = (buffer.Length >> 5) * 31; // 97%
         while (pos < buffer.Length)
         {
             var ch = Read();
@@ -189,12 +199,8 @@ sealed class RecordDecoder
             if (enclosed && ch == closer)
             {
                 enclosed = false;
-                if (pos > fillThreshold)
-                {
-                    // buffer is almost full
-                    length = pos;
-                    return RecordReadResult.EndOfRecord;
-                }
+                length = pos;
+                return RecordReadResult.EndOfRecord;
             }
         }
 

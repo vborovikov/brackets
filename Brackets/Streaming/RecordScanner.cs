@@ -11,7 +11,7 @@ static class RecordScanner
     public static async Task ScanAsync(string filePath, IRecordBuilder builder, CancellationToken cancellationToken)
     {
         await using var fileStream = new FileStream(filePath,
-            FileMode.Open, FileAccess.Read, FileShare.Read, RecordBuffer.DefaultBufferLength,
+            FileMode.Open, FileAccess.Read, FileShare.Read, RecordBuffer.FileBufferLength,
             FileOptions.Asynchronous | FileOptions.SequentialScan);
         await ScanAsync(fileStream, builder, cancellationToken);
     }
@@ -23,7 +23,7 @@ static class RecordScanner
             Mode = FileMode.Open,
             Access = FileAccess.Read,
             Share = FileShare.Read,
-            BufferSize = RecordBuffer.DefaultBufferLength,
+            BufferSize = RecordBuffer.FileBufferLength,
             Options = FileOptions.Asynchronous | FileOptions.SequentialScan,
         });
         await ScanAsync(fileStream, builder, cancellationToken);
@@ -77,8 +77,8 @@ static class RecordScanner
 
         try
         {
-            using var recordBuffer = new RecordBuffer();
-            var recordDecoder = new RecordDecoder(builder.Encoding);
+            using var recordBuffer = new RecordBuffer(RecordBuffer.DefaultBufferLength);
+            using var recordDecoder = new RecordDecoder(builder.Encoding, RecordBuffer.DefaultBufferLength);
             var enclosed = false;
 
             while (true)
@@ -133,8 +133,8 @@ static class RecordScanner
 
         try
         {
-            using var recordBuffer = new RecordBuffer();
-            var recordDecoder = new RecordDecoder(builder.Encoding);
+            using var recordBuffer = new RecordBuffer(RecordBuffer.FileBufferLength);
+            using var recordDecoder = new RecordDecoder(builder.Encoding, RecordBuffer.FileBufferLength);
             var ignoreLineBreak = false;
 
             while (true)
