@@ -247,7 +247,7 @@ sealed class RecordDecoder : IDisposable
             }
         }
 
-        data.TryCopyTo(buffer);
+        data.CopyTo(buffer);
         length = data.Length;
         this.charBufferPosition += length;
 
