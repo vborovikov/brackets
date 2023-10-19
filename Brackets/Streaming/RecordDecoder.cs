@@ -211,14 +211,11 @@ sealed class RecordDecoder : IDisposable
     {
         DecodeCharsIfNecessary();
 
-        var maxLength = Math.Min(buffer.Length, this.charBufferLength - this.charBufferPosition);
-        if (maxLength == 0)
-        {
-            length = 0;
+        length = Math.Min(buffer.Length, this.charBufferLength - this.charBufferPosition);
+        if (length == 0)
             return RecordReadResult.Empty;
-        }
 
-        var data = this.charBuffer.AsSpan(this.charBufferPosition, maxLength);
+        var data = this.charBuffer.AsSpan(this.charBufferPosition, length);
         if (enclosed)
         {
             length = data.IndexOf(closer);
@@ -250,17 +247,16 @@ sealed class RecordDecoder : IDisposable
             }
         }
 
-        data.CopyTo(buffer);
-        length = maxLength;
+        data.TryCopyTo(buffer);
+        length = data.Length;
         this.charBufferPosition += length;
 
         return RecordReadResult.EndOfData;
     }
 
-    public RecordReadResult TryReadLine(Span<char> buffer, char encloser, ref bool ignoreLineBreak, out int length)
+    public RecordReadResult TryReadLine(Span<char> buffer, char encloser, ref bool enclosed, out int length)
     {
         var pos = 0;
-        var enclosed = ignoreLineBreak;
         while (pos < buffer.Length)
         {
             var ch = Read();
@@ -274,14 +270,12 @@ sealed class RecordDecoder : IDisposable
                 }
 
                 length = pos;
-                ignoreLineBreak = false;
                 return RecordReadResult.EndOfRecord;
             }
             buffer[pos++] = (char)ch;
         }
 
         length = pos;
-        ignoreLineBreak = enclosed;
         if (pos > 0 && pos == buffer.Length)
         {
             return RecordReadResult.EndOfData;
