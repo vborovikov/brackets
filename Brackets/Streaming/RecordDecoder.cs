@@ -197,32 +197,64 @@ sealed class RecordDecoder : IDisposable
         return result;
     }
 
+    public int Read(Span<char> buffer)
+    {
+        DecodeCharsIfNecessary();
+
+        var copied = Math.Min(buffer.Length, this.charBufferLength - this.charBufferPosition);
+        this.charBuffer.AsSpan(this.charBufferPosition, copied).CopyTo(buffer);
+        this.charBufferPosition += copied;
+        return copied;
+    }
+
     public RecordReadResult TryReadRecord(Span<char> buffer, char opener, char closer, ref bool enclosed, out int length)
     {
-        var pos = 0;
-        while (pos < buffer.Length)
+        DecodeCharsIfNecessary();
+
+        var maxLength = Math.Min(buffer.Length, this.charBufferLength - this.charBufferPosition);
+        if (maxLength == 0)
         {
-            var ch = Read();
-            if (ch == -1) break;
-            buffer[pos++] = (char)ch;
+            length = 0;
+            return RecordReadResult.Empty;
+        }
 
-            if (ch == opener)
-                enclosed = true;
-
-            if (enclosed && ch == closer)
+        var data = this.charBuffer.AsSpan(this.charBufferPosition, maxLength);
+        if (enclosed)
+        {
+            length = data.IndexOf(closer);
+            if (length >= 0)
             {
                 enclosed = false;
-                length = pos;
+                data[..++length].CopyTo(buffer);
+                this.charBufferPosition += length;
+
                 return RecordReadResult.EndOfRecord;
             }
         }
-
-        length = pos;
-        if (pos > 0 && pos == buffer.Length)
+        else
         {
-            return RecordReadResult.EndOfData;
+            length = data.IndexOf(opener);
+            if (length >= 0)
+            {
+                enclosed = true;
+                var closerPos = data[length..].IndexOf(closer);
+                if (closerPos > 0)
+                {
+                    enclosed = false;
+                    length += closerPos;
+                    data[..++length].CopyTo(buffer);
+                    this.charBufferPosition += length;
+
+                    return RecordReadResult.EndOfRecord;
+                }
+            }
         }
-        return RecordReadResult.Empty;
+
+        data.CopyTo(buffer);
+        length = maxLength;
+        this.charBufferPosition += length;
+
+        return RecordReadResult.EndOfData;
     }
 
     public RecordReadResult TryReadLine(Span<char> buffer, char encloser, ref bool ignoreLineBreak, out int length)
