@@ -4,7 +4,7 @@ namespace Brackets
 
     abstract class DocumentRoot : ParentTag
     {
-        protected DocumentRoot(RootReference rootReference, int length)
+        protected DocumentRoot(RootRef rootReference, int length)
             : base(rootReference, 0, length) { }
 
         internal bool? IsWellFormed { get; set; }
@@ -19,7 +19,7 @@ namespace Brackets
     {
         private readonly ReadOnlyMemory<char> text;
 
-        public TextDocumentRoot(ReadOnlyMemory<char> text, RootReference rootReference)
+        public TextDocumentRoot(ReadOnlyMemory<char> text, RootRef rootReference)
             : base(rootReference, text.Length)
         {
             this.text = text;
@@ -30,7 +30,7 @@ namespace Brackets
 
     sealed class EmptyDocumentRoot : DocumentRoot
     {
-        public EmptyDocumentRoot(RootReference rootReference)
+        public EmptyDocumentRoot(RootRef rootReference)
             : base(rootReference, 0) { }
 
         protected override ReadOnlySpan<char> Source => ReadOnlySpan<char>.Empty;

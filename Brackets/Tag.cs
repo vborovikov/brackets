@@ -10,17 +10,17 @@
 
     public class Tag : Element, ITagAttributes
     {
-        protected readonly TagReference reference;
+        private readonly TagRef reference;
         private Attribute? attribute;
         private int end;
 
-        public Tag(TagReference reference, int start, int length) : base(start)
+        public Tag(TagRef reference, int start, int length) : base(start)
         {
             this.reference = reference;
             this.end = start + length;
         }
 
-        internal TagReference Reference => this.reference;
+        internal TagRef Reference => this.reference;
 
         internal Attribute? FirstAttribute => this.attribute;
 
@@ -63,7 +63,7 @@
 
     public sealed class Instruction : Tag
     {
-        public Instruction(TagReference reference, int start, int length) : base(reference, start, length)
+        public Instruction(TagRef reference, int start, int length) : base(reference, start, length)
         {
         }
 
@@ -72,7 +72,7 @@
 
     public sealed class Declaration : Tag
     {
-        public Declaration(TagReference reference, int start, int length) : base(reference, start, length)
+        public Declaration(TagRef reference, int start, int length) : base(reference, start, length)
         {
         }
 
@@ -83,7 +83,7 @@
     {
         private Element? child;
 
-        public ParentTag(TagReference reference, int start, int length) : base(reference, start, length)
+        public ParentTag(TagRef reference, int start, int length) : base(reference, start, length)
         {
         }
 

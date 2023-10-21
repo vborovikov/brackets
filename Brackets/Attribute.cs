@@ -7,10 +7,10 @@ namespace Brackets
 
     public class Attribute : Element
     {
-        private readonly AttributeReference reference;
+        private readonly AttrRef reference;
         private readonly int length;
 
-        public Attribute(AttributeReference reference, int start, int length)
+        public Attribute(AttrRef reference, int start, int length)
             : base(start)
         {
             this.reference = reference;
@@ -99,7 +99,7 @@ namespace Brackets
         private readonly int valueStart;
         private readonly int valueLength;
 
-        public ValueAttribute(AttributeReference reference, int start, int length, int valueStart, int valueLength)
+        public ValueAttribute(AttrRef reference, int start, int length, int valueStart, int valueLength)
             : base(reference, start, length)
         {
             this.valueStart = valueStart;
@@ -117,7 +117,7 @@ namespace Brackets
     {
         private readonly string value;
 
-        public StringAttribute(AttributeReference reference, ReadOnlySpan<char> value, int offset, int length)
+        public StringAttribute(AttrRef reference, ReadOnlySpan<char> value, int offset, int length)
             : base(reference, offset, length)
         {
             this.value = TrimValue(value).ToString();

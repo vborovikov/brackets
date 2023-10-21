@@ -1,8 +1,8 @@
 namespace Brackets;
 
-public class AttributeReference : SyntaxAware
+public class AttrRef : SyntaxAware
 {
-    public AttributeReference(string name, ISyntaxReference syntax)
+    public AttrRef(string name, ISyntaxReference syntax)
         : base(syntax)
     {
         this.Name = name;

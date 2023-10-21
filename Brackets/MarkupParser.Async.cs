@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Parsing;
 using Streaming;
 
-public abstract partial class MarkupReference<TMarkupLexer> where TMarkupLexer : struct, IMarkupLexer
+public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : struct, IMarkupLexer
 {
     public Task<Document> ParseAsync(Stream stream, CancellationToken cancellationToken) =>
         ParseAsync(stream, Encoding.UTF8, cancellationToken);
@@ -90,16 +90,16 @@ public abstract partial class MarkupReference<TMarkupLexer> where TMarkupLexer :
 
     private class DocumentBuilder : IRecordBuilder
     {
-        private readonly MarkupReference<TMarkupLexer> parser;
+        private readonly MarkupParser<TMarkupLexer> parser;
         private readonly Stack<ParentTag> tree;
         private int contentLength;
         private bool encodingParsed;
 
-        public DocumentBuilder(MarkupReference<TMarkupLexer> parser, Encoding encoding)
+        public DocumentBuilder(MarkupParser<TMarkupLexer> parser, Encoding encoding)
         {
             this.parser = parser;
             this.Encoding = encoding;
-            this.Document = new Document(new EmptyDocumentRoot(this.parser.rootReference));
+            this.Document = new Document(new EmptyDocumentRoot(this.parser.rootRef));
             this.tree = new Stack<ParentTag>();
         }
 

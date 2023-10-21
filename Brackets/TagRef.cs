@@ -2,9 +2,9 @@
 {
     using System;
 
-    public class TagReference : SyntaxAware
+    public class TagRef : SyntaxAware
     {
-        public TagReference(string name, ISyntaxReference syntax) : base(syntax)
+        public TagRef(string name, ISyntaxReference syntax) : base(syntax)
         {
             this.Name = name;
             this.IsParent = true;
@@ -26,9 +26,9 @@
         public virtual string ToString(Tag tag) => String.Empty;
     }
 
-    public sealed class RootReference : TagReference
+    public sealed class RootRef : TagRef
     {
-        internal RootReference(ISyntaxReference syntax)
+        internal RootRef(ISyntaxReference syntax)
             : base(String.Empty, syntax)
         {
         }

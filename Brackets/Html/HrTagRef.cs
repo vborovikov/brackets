@@ -1,10 +1,10 @@
 namespace Brackets.Html
 {
-    public class HrTagReference : TagReference
+    public class HrTagRef : TagRef
     {
         private static readonly string HorizontalLine = new('-', 80);
 
-        public HrTagReference(ISyntaxReference syntax) : base("hr", syntax)
+        public HrTagRef(ISyntaxReference syntax) : base("hr", syntax)
         {
             this.IsParent = false;
         }

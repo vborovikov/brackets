@@ -19,20 +19,20 @@
         ReadOnlySpan<char> TrimValue(ReadOnlySpan<char> span);
     }
 
-    public abstract partial class MarkupReference<TMarkupLexer> : ISyntaxReference
+    public abstract partial class MarkupParser<TMarkupLexer> : ISyntaxReference
         where TMarkupLexer : struct, IMarkupLexer
     {
         private readonly TMarkupLexer lexer;
-        private readonly IStringSet<TagReference> tagReferences;
-        private readonly IStringSet<AttributeReference> attributeReferences;
-        private readonly RootReference rootReference;
+        private readonly IStringSet<TagRef> tagRefs;
+        private readonly IStringSet<AttrRef> attrRefs;
+        private readonly RootRef rootRef;
 
-        protected MarkupReference(MarkupLanguage language, IStringSet<TagReference> tagReferences, IStringSet<AttributeReference> attributeReferences)
+        protected MarkupParser(MarkupLanguage language, IStringSet<TagRef> tagRefs, IStringSet<AttrRef> attrRefs)
         {
             this.lexer = new();
-            this.tagReferences = tagReferences;
-            this.attributeReferences = attributeReferences;
-            this.rootReference = new RootReference(this);
+            this.tagRefs = tagRefs;
+            this.attrRefs = attrRefs;
+            this.rootRef = new RootRef(this);
             this.Language = language;
         }
 
@@ -46,21 +46,21 @@
             return new Document(root);
         }
 
-        protected void AddReference(TagReference reference)
+        protected void AddReference(TagRef reference)
         {
-            this.tagReferences.Add(reference.Name, reference);
+            this.tagRefs.Add(reference.Name, reference);
         }
 
-        protected void AddReference(AttributeReference reference)
+        protected void AddReference(AttrRef reference)
         {
-            this.attributeReferences.Add(reference.Name, reference);
+            this.attrRefs.Add(reference.Name, reference);
         }
 
         private DocumentRoot Parse(ReadOnlyMemory<char> text)
         {
             var span = text.Span;
             var tree = new Stack<ParentTag>();
-            tree.Push(new TextDocumentRoot(text, this.rootReference));
+            tree.Push(new TextDocumentRoot(text, this.rootRef));
 
             foreach (var token in Lexer.TokenizeElements(span, this.lexer))
             {
@@ -202,7 +202,7 @@
 
         private Tag CreateTag(in Token token, bool toString)
         {
-            var reference = CreateOrFindTagReference(token.Name);
+            var reference = CreateOrFindTagRef(token.Name);
             var tag = token.Category switch
             {
                 TokenCategory.Instruction => new Instruction(reference, token.Start, token.Length),
@@ -230,7 +230,7 @@
 
         private Attribute CreateAttribute(in Token token, bool toString)
         {
-            var reference = CreateOrFindAttributeReference(token.Name);
+            var reference = CreateOrFindAttrRef(token.Name);
             return
                 toString ?
                     new StringAttribute(reference, token.Data.ToString(), token.Offset, token.Length) :
@@ -239,22 +239,22 @@
                         new ValueAttribute(reference, token.Offset, token.Length, token.DataOffset, token.Data.Length);
         }
 
-        private TagReference CreateOrFindTagReference(ReadOnlySpan<char> tagName)
+        private TagRef CreateOrFindTagRef(ReadOnlySpan<char> tagName)
         {
-            if (!this.tagReferences.TryGetValue(tagName, out var reference))
+            if (!this.tagRefs.TryGetValue(tagName, out var reference))
             {
-                reference = new TagReference(tagName.ToString(), this);
+                reference = new TagRef(tagName.ToString(), this);
                 AddReference(reference);
             }
 
             return reference;
         }
 
-        private AttributeReference CreateOrFindAttributeReference(ReadOnlySpan<char> attributeName)
+        private AttrRef CreateOrFindAttrRef(ReadOnlySpan<char> attributeName)
         {
-            if (!this.attributeReferences.TryGetValue(attributeName, out var reference))
+            if (!this.attrRefs.TryGetValue(attributeName, out var reference))
             {
-                reference = new AttributeReference(attributeName.ToString(), this);
+                reference = new AttrRef(attributeName.ToString(), this);
                 AddReference(reference);
             }
 

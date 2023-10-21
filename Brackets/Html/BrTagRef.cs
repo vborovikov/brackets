@@ -2,9 +2,9 @@ namespace Brackets.Html
 {
     using System;
 
-    class BrTagReference : TagReference
+    class BrTagRef : TagRef
     {
-        public BrTagReference(ISyntaxReference syntax) : base("br", syntax)
+        public BrTagRef(ISyntaxReference syntax) : base("br", syntax)
         {
             this.IsParent = false;
             this.Level = ElementLevel.Inline;
