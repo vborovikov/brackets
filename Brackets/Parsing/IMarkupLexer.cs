@@ -59,7 +59,7 @@ public interface IMarkupLexer
     /// <summary>
     /// Gets the string comparison for the syntax.
     /// </summary>
-    StringComparison Comparison { get; }
+    static StringComparison Comparison { get; }
 
     char Opener { get; }
 

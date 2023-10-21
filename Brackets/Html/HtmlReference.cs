@@ -1,8 +1,16 @@
 ﻿namespace Brackets.Html;
 
+using Collections;
+
 public class HtmlReference : MarkupReference<HtmlLexer>
 {
-    public HtmlReference() : base(MarkupLanguage.Html)
+    public HtmlReference() : this(
+        new StringSet<TagReference>(HtmlLexer.Comparison),
+        new StringSet<AttributeReference>(HtmlLexer.Comparison))
+    { }
+
+    protected HtmlReference(IStringSet<TagReference> tagReferences, IStringSet<AttributeReference> attributeReferences)
+        : base(MarkupLanguage.Html, tagReferences, attributeReferences)
     {
         // tags
         //
@@ -206,4 +214,8 @@ public class HtmlReference : MarkupReference<HtmlLexer>
         AddReference(new AttributeReference("width", this));
         AddReference(new AttributeReference("wrap", this));
     }
+
+    internal static HtmlReference CreateConcurrent() =>
+        new(new ConcurrentStringSet<TagReference>(HtmlLexer.Comparison),
+            new ConcurrentStringSet<AttributeReference>(HtmlLexer.Comparison));
 }

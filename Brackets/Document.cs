@@ -20,9 +20,9 @@
             this.root = root;
         }
 
-        public static readonly HtmlReference Html = new();
+        public static readonly HtmlReference Html = HtmlReference.CreateConcurrent();
 
-        public static readonly XmlReference Xml = new();
+        public static readonly XmlReference Xml = XmlReference.CreateConcurrent();
 
         public bool IsComplete => this.root.IsWellFormed.HasValue;
 

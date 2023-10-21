@@ -27,7 +27,7 @@ public readonly struct HtmlLexer : IMarkupLexer
     private const string InstrCloser = "?>";
     private const string DeclOpener = "<!";
 
-    public StringComparison Comparison => cmp;
+    public static StringComparison Comparison => cmp;
     char IMarkupLexer.Opener => Opener;
     char IMarkupLexer.Closer => Closer;
 

@@ -23,15 +23,15 @@
         where TMarkupLexer : struct, IMarkupLexer
     {
         private readonly TMarkupLexer lexer;
-        private readonly StringSet<TagReference> tagReferences;
-        private readonly StringSet<AttributeReference> attributeReferences;
+        private readonly IStringSet<TagReference> tagReferences;
+        private readonly IStringSet<AttributeReference> attributeReferences;
         private readonly RootReference rootReference;
 
-        protected MarkupReference(MarkupLanguage language)
+        protected MarkupReference(MarkupLanguage language, IStringSet<TagReference> tagReferences, IStringSet<AttributeReference> attributeReferences)
         {
             this.lexer = new();
-            this.tagReferences = new(this.lexer.Comparison);
-            this.attributeReferences = new(this.lexer.Comparison);
+            this.tagReferences = tagReferences;
+            this.attributeReferences = attributeReferences;
             this.rootReference = new RootReference(this);
             this.Language = language;
         }

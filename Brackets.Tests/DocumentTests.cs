@@ -93,6 +93,20 @@
         }
 
         [TestMethod]
+        public async Task ParseAsync_ParallelParsing_ThreadSafe()
+        {
+            var fileNames = new[] { "benq.html", "broken.xml", "dotnet8perf.html", "google.html", "head_script.html", "japantimes.html", "newsde.html" };
+
+            await Parallel.ForEachAsync(fileNames, async (fileName, cancellationToken) =>
+            {
+                await using var stream = GetSampleStream(fileName);
+                var document = await Document.Xml.ParseAsync(stream, cancellationToken);
+                Assert.IsNotNull(document);
+                Assert.IsNotNull(document.FirstOrDefault());
+            });
+        }
+
+        [TestMethod]
         public async Task ParseAsync_LargeFile_Parsed()
         {
             using var stream = GetSampleStream("newsde.html");
