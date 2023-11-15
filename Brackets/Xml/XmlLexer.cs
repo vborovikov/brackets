@@ -1,6 +1,7 @@
 ﻿namespace Brackets.Xml;
 
 using System;
+using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Parsing;
@@ -14,9 +15,12 @@ public readonly struct XmlLexer : IMarkupLexer
     private const char DataOpener = '[';
     private const char ValueSeparator = '=';
     private const string QuotationMarks = "'\"";
-    private const string Separators = " \r\n\t\xA0";
-    private const string NameSeparators = "/" + Separators;
-    private const string AttrSeparators = "=" + Separators;
+    private const string SeparatorsTrim = " \r\n\t\xA0";
+    private const string NameSeparatorsTrim = "/" + SeparatorsTrim;
+    private const string AttrSeparatorsTrim = "=" + SeparatorsTrim;
+    private static readonly SearchValues<char> Separators = SearchValues.Create(SeparatorsTrim);
+    private static readonly SearchValues<char> NameSeparators = SearchValues.Create(NameSeparatorsTrim);
+    private static readonly SearchValues<char> AttrSeparators = SearchValues.Create(AttrSeparatorsTrim);
     private const string TermOpener = "</";
     private const string TermCloser = "/>";
     private const string CommentOpener = "<!--";
@@ -308,7 +312,7 @@ public readonly struct XmlLexer : IMarkupLexer
         if (terminatorPos == (trimTag.Length - 1))
             return true;
 
-        return trimTag[..nameLength].Equals(trimTag[(terminatorPos + 1)..].Trim(NameSeparators), cmp);
+        return trimTag[..nameLength].Equals(trimTag[(terminatorPos + 1)..].Trim(NameSeparatorsTrim), cmp);
     }
 
     public ReadOnlySpan<char> TrimName(ReadOnlySpan<char> tag)
