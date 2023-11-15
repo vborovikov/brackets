@@ -7,6 +7,8 @@ Resilient markup parser library
 
 The library is used to parse XML and HTML files. The parser produces a tree of nodes that represent the structure of the document. The parse tree is very simple by design and doesn't try to replicate the document object model (DOM) in any way.
 
+Ill-structured documents will be parsed without errors. The parser will try to detect and correct stray tags, broken tags, etc.
+
 ## Usage
 
 Both HTML and XML parsers are derived from the `MarkupParser<TMarkupLexer>` class and are used in the same way. You can access the parsers using the `Document.Html` and the `Document.Xml` static properties or by instantiating the `HtmlParser` and the `XmlParser` classes. The parsers provided by the static properties of the `Document` class are thread-safe and can be used in multiple threads simultaneously. The parsers instantiated directly are not thread-safe but can be slightly faster.
