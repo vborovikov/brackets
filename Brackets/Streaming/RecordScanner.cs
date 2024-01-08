@@ -6,7 +6,7 @@ using System.IO.Pipelines;
 using System.Threading;
 using System.Threading.Tasks;
 
-static class RecordScanner
+public static class RecordScanner
 {
     public static async Task ScanAsync(string filePath, IRecordBuilder builder, CancellationToken cancellationToken)
     {
