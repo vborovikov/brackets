@@ -5,8 +5,6 @@ namespace Brackets.Streaming;
 
 using System;
 using System.Buffers;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
 using System.Text;
 
 /// <summary>
@@ -33,6 +31,8 @@ public enum RecordReadResult
 /// </summary>
 sealed class RecordDecoder : IDisposable
 {
+    private const string LineSeparators = "\r\n";
+
     /// <summary>
     /// A buffer of written characters that have not yet been encoded.
     /// The <see cref="charBufferPosition"/> field tracks how many characters are represented in this buffer.
@@ -207,7 +207,7 @@ sealed class RecordDecoder : IDisposable
         return copied;
     }
 
-    public RecordReadResult TryReadRecord(Span<char> buffer, char opener, char closer, ref bool enclosed, out int length)
+    public RecordReadResult TryReadElement(Span<char> buffer, char opener, char closer, ref bool enclosed, out int length)
     {
         DecodeCharsIfNecessary();
 
@@ -254,7 +254,7 @@ sealed class RecordDecoder : IDisposable
         return RecordReadResult.EndOfData;
     }
 
-    public RecordReadResult TryReadLine(Span<char> buffer, char encloser, ref bool enclosed, out int length)
+    public RecordReadResult TryReadMultiline(Span<char> buffer, char encloser, ref bool enclosed, out int length)
     {
         var pos = 0;
         while (pos < buffer.Length)
@@ -281,6 +281,37 @@ sealed class RecordDecoder : IDisposable
             return RecordReadResult.EndOfData;
         }
         return RecordReadResult.Empty;
+    }
+
+    public RecordReadResult TryReadLine(Span<char> buffer, out int length)
+    {
+        DecodeCharsIfNecessary();
+
+        length = Math.Min(buffer.Length, this.charBufferLength - this.charBufferPosition);
+        if (length == 0)
+            return RecordReadResult.Empty;
+
+        var data = this.charBuffer.AsSpan(this.charBufferPosition, length);
+        var pos = data.IndexOfAny(LineSeparators);
+        var result = RecordReadResult.EndOfRecord;
+        if (pos < 0)
+        {
+            result = RecordReadResult.EndOfData;
+            pos = length;
+            this.charBufferPosition += length;
+        }
+        else
+        {
+            length = pos;
+            this.charBufferPosition += pos + 1;
+            if (data[pos] == '\r' && data.Length - pos > 1 && data[pos + 1] == '\n')
+            {
+                ++this.charBufferPosition;
+            }
+        }
+
+        data[..pos].CopyTo(buffer);
+        return result;
     }
 
     private void DecodeCharsIfNecessary()

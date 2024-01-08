@@ -88,7 +88,7 @@ public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : st
         return span.Length;
     }
 
-    private class DocumentBuilder : IRecordBuilder
+    private sealed class DocumentBuilder : IElementBuilder
     {
         private readonly MarkupParser<TMarkupLexer> parser;
         private readonly Stack<ParentTag> tree;
@@ -106,7 +106,6 @@ public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : st
         public Encoding Encoding { get; private set; }
         public char Opener => this.parser.lexer.Opener;
         public char Closer => this.parser.lexer.Closer;
-        public char Encloser => '"';
         public Document Document { get; }
 
         public ValueTask StartAsync()
