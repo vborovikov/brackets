@@ -34,9 +34,12 @@ public static class RecordScanner
         var dataPipe = new Pipe();
 
         var loading = LoadAsync(stream, dataPipe.Writer, cancellationToken);
-        var reading = builder.Opener != builder.Closer ?
-            ReadRecordsAsync(dataPipe.Reader, builder, cancellationToken) :
-            ReadLinesAsync(dataPipe.Reader, builder, cancellationToken);
+        var reading = builder switch
+        {
+            IElementBuilder elementBuilder => ReadElementsAsync(dataPipe.Reader, elementBuilder, cancellationToken),
+            IMultilineBuilder multilineBuilder => ReadMultilinesAsync(dataPipe.Reader, multilineBuilder, cancellationToken),
+            _ => ReadLinesAsync(dataPipe.Reader, builder, cancellationToken)
+        };
 
         return Task.WhenAll(loading, reading);
     }
@@ -70,7 +73,7 @@ public static class RecordScanner
         await writer.CompleteAsync(exception);
     }
 
-    private static async Task ReadRecordsAsync(PipeReader reader, IRecordBuilder builder, CancellationToken cancellationToken)
+    private static async Task ReadElementsAsync(PipeReader reader, IElementBuilder builder, CancellationToken cancellationToken)
     {
         await builder.StartAsync();
         var exception = default(Exception);
@@ -91,12 +94,67 @@ public static class RecordScanner
                 var recordRead = RecordReadResult.Empty;
                 do
                 {
-                    recordRead = recordDecoder.TryReadRecord(recordBuffer, builder.Opener, builder.Closer, ref enclosed, out var recordLength);
+                    recordRead = recordDecoder.TryReadElement(recordBuffer, builder.Opener, builder.Closer, ref enclosed, out var recordLength);
                     if (recordRead == RecordReadResult.EndOfRecord)
                     {
                         var charsConsumed = await builder.BuildAsync(recordBuffer.PreviewRecord(recordLength), cancellationToken);
                         recordBuffer.Offset(recordLength, charsConsumed);
                         recordDecoder.TryChangeEncoding(builder.Encoding, forceDecode: true);
+                    }
+                    else
+                    {
+                        recordBuffer.Offset(recordLength);
+                    }
+                } while (recordRead != RecordReadResult.Empty);
+
+                reader.AdvanceTo(recordDecoder.SequencePosition);
+                if (readResult.IsCompleted)
+                {
+                    if (recordBuffer.CanMakeRecord)
+                    {
+                        await builder.BuildAsync(recordBuffer.MakeRecord(), cancellationToken);
+                    }
+
+                    break;
+                }
+            }
+        }
+        catch (Exception x)
+        {
+            exception = x;
+        }
+        finally
+        {
+            await reader.CompleteAsync(exception);
+            await builder.StopAsync();
+        }
+    }
+
+    private static async Task ReadMultilinesAsync(PipeReader reader, IMultilineBuilder builder, CancellationToken cancellationToken)
+    {
+        await builder.StartAsync();
+        var exception = default(Exception);
+
+        try
+        {
+            using var recordBuffer = new RecordBuffer(RecordBuffer.FileBufferLength);
+            using var recordDecoder = new RecordDecoder(builder.Encoding, RecordBuffer.FileBufferLength);
+            var ignoreLineBreak = false;
+
+            while (true)
+            {
+                var readResult = await reader.ReadAsync(cancellationToken);
+                if (readResult.IsCanceled)
+                    break;
+
+                recordDecoder.Decode(readResult.Buffer, builder.Encoding);
+                var recordRead = RecordReadResult.Empty;
+                do
+                {
+                    recordRead = recordDecoder.TryReadMultiline(recordBuffer, builder.Encloser, ref ignoreLineBreak, out var recordLength);
+                    if (recordRead == RecordReadResult.EndOfRecord)
+                    {
+                        await builder.BuildAsync(recordBuffer.MakeRecord(recordLength), cancellationToken);
                     }
                     else
                     {
@@ -136,7 +194,6 @@ public static class RecordScanner
         {
             using var recordBuffer = new RecordBuffer(RecordBuffer.FileBufferLength);
             using var recordDecoder = new RecordDecoder(builder.Encoding, RecordBuffer.FileBufferLength);
-            var ignoreLineBreak = false;
 
             while (true)
             {
@@ -148,7 +205,7 @@ public static class RecordScanner
                 var recordRead = RecordReadResult.Empty;
                 do
                 {
-                    recordRead = recordDecoder.TryReadLine(recordBuffer, builder.Encloser, ref ignoreLineBreak, out var recordLength);
+                    recordRead = recordDecoder.TryReadLine(recordBuffer, out var recordLength);
                     if (recordRead == RecordReadResult.EndOfRecord)
                     {
                         await builder.BuildAsync(recordBuffer.MakeRecord(recordLength), cancellationToken);

@@ -9,15 +9,21 @@ public interface IRecordBuilder
 {
     Encoding Encoding { get; }
 
-    char Opener { get; }
-
-    char Closer { get; }
-
-    char Encloser { get; }
-
     ValueTask StartAsync();
 
     ValueTask StopAsync();
 
     ValueTask<int> BuildAsync(ReadOnlySpan<char> recordSpan, CancellationToken cancellationToken);
+}
+
+public interface IMultilineBuilder : IRecordBuilder
+{
+    char Encloser { get; }
+}
+
+public interface IElementBuilder : IRecordBuilder
+{
+    char Opener { get; }
+
+    char Closer { get; }
 }
