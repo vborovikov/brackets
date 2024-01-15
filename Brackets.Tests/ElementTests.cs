@@ -6,6 +6,150 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 public class ElementTests
 {
     [TestMethod]
+    public void PreviousSibling_SingleElement_ThrowsInvalidOperationException()
+    {
+        var document = Document.Html.Parse("<span>Value1</span>");
+        var element = document.First();
+        Assert.ThrowsException<InvalidOperationException>(() => element.PreviousSibling());
+    }
+
+    [TestMethod]
+    public void PreviousSibling_FirstElement_ThrowsInvalidOperationException()
+    {
+        var document = Document.Html.Parse("<span>Value1</span><i>Value2</i><span>Value3</span>");
+        var element = document.First();
+        Assert.ThrowsException<InvalidOperationException>(() => element.PreviousSibling());
+    }
+
+    [TestMethod]
+    public void PreviousSibling_MiddleElement_ReturnsPreviousElement()
+    {
+        var document = Document.Html.Parse("<span>Value1</span><i>Value2</i><span>Value3</span>");
+        var element = document.First(t => t is Tag { Name: "i" });
+        var result = element.PreviousSibling() as Tag;
+        Assert.IsNotNull(result);
+        Assert.AreEqual("span", result.Name);
+    }
+
+    [TestMethod]
+    public void PreviousSibling_LastElement_ReturnsPreviousElement()
+    {
+        var document = Document.Html.Parse("<span>Value1</span><i>Value2</i><span>Value3</span>");
+        var element = document.Last();
+        var result = element.PreviousSibling() as Tag;
+        Assert.IsNotNull(result);
+        Assert.AreEqual("i", result.Name);
+    }
+
+    [TestMethod]
+    public void PreviousSiblingOrDefault_SingleElement_ReturnsNull()
+    {
+        var document = Document.Html.Parse("<span>Value1</span>");
+        var element = document.First();
+        Assert.IsNull(element.PreviousSiblingOrDefault());
+    }
+
+    [TestMethod]
+    public void PreviousSiblingOrDefault_FirstElement_ReturnsNull()
+    {
+        var document = Document.Html.Parse("<span>Value1</span><i>Value2</i><span>Value3</span>");
+        var element = document.First();
+        Assert.IsNull(element.PreviousSiblingOrDefault());
+    }
+
+    [TestMethod]
+    public void PreviousSiblingOrDefault_MiddleElement_ReturnsPreviousElement()
+    {
+        var document = Document.Html.Parse("<span>Value1</span><i>Value2</i><span>Value3</span>");
+        var element = document.First(t => t is Tag { Name: "i" });
+        var result = element.PreviousSiblingOrDefault() as Tag;
+        Assert.IsNotNull(result);
+        Assert.AreEqual("span", result.Name);
+    }
+
+    [TestMethod]
+    public void PreviousSiblingOrDefault_LastElement_ReturnsPreviousElement()
+    {
+        var document = Document.Html.Parse("<span>Value1</span><i>Value2</i><span>Value3</span>");
+        var element = document.Last();
+        var result = element.PreviousSiblingOrDefault() as Tag;
+        Assert.IsNotNull(result);
+        Assert.AreEqual("i", result.Name);
+    }
+
+    [TestMethod]
+    public void NextSibling_SingleElement_ThrowsInvalidOperationException()
+    {
+        var document = Document.Html.Parse("<span>Value1</span>");
+        var element = document.First();
+        Assert.ThrowsException<InvalidOperationException>(() => element.NextSibling());
+    }
+
+    [TestMethod]
+    public void NextSibling_FirstElement_ReturnsNextElement()
+    {
+        var document = Document.Html.Parse("<span>Value1</span><i>Value2</i><span>Value3</span>");
+        var element = document.First();
+        var result = element.NextSibling() as Tag;
+        Assert.IsNotNull(result);
+        Assert.AreEqual("i", result.Name);
+    }
+
+    [TestMethod]
+    public void NextSibling_MiddleElement_ReturnsNextElement()
+    {
+        var document = Document.Html.Parse("<span>Value1</span><i>Value2</i><span>Value3</span>");
+        var element = document.First(t => t is Tag { Name: "i" });
+        var result = element.NextSibling() as Tag;
+        Assert.IsNotNull(result);
+        Assert.AreEqual("span", result.Name);
+    }
+
+    [TestMethod]
+    public void NextSiblingOrDefault_SingleElement_ReturnsNull()
+    {
+        var document = Document.Html.Parse("<span>Value1</span>");
+        var element = document.First();
+        Assert.IsNull(element.NextSiblingOrDefault());
+    }
+
+    [TestMethod]
+    public void NextSiblingOrDefault_FirstElement_ReturnsNextElement()
+    {
+        var document = Document.Html.Parse("<span>Value1</span><i>Value2</i><span>Value3</span>");
+        var element = document.First();
+        var result = element.NextSiblingOrDefault() as Tag;
+        Assert.IsNotNull(result);
+        Assert.AreEqual("i", result.Name);
+    }
+
+    [TestMethod]
+    public void NextSiblingOrDefault_MiddleElement_ReturnsNextElement()
+    {
+        var document = Document.Html.Parse("<span>Value1</span><i>Value2</i><span>Value3</span>");
+        var element = document.First(t => t is Tag { Name: "i" });
+        var result = element.NextSiblingOrDefault() as Tag;
+        Assert.IsNotNull(result);
+        Assert.AreEqual("span", result.Name);
+    }
+
+    [TestMethod]
+    public void NextSiblingOrDefault_LastElement_ReturnsNull()
+    {
+        var document = Document.Html.Parse("<span>Value1</span><i>Value2</i><span>Value3</span>");
+        var element = document.Last();
+        Assert.IsNull(element.NextSiblingOrDefault());
+    }
+
+    [TestMethod]
+    public void NextSibling_LastElement_ThrowsInvalidOperationException()
+    {
+        var document = Document.Html.Parse("<span>Value1</span><i>Value2</i><span>Value3</span>");
+        var element = document.Last();
+        Assert.ThrowsException<InvalidOperationException>(() => element.NextSibling());
+    }
+
+    [TestMethod]
     public void First_EmptyDocument_ThrowsInvalidOperationException()
     {
         var document = Document.Html.Parse("");
