@@ -4,6 +4,42 @@ using System;
 
 public static class ElementExtensions
 {
+    public static Element PreviousSibling(this Element element)
+    {
+        if (IsFirstOrSingleSibling(element))
+            throw new InvalidOperationException("Element has no previous sibling.");
+
+        return element.Prev;
+    }
+
+    public static Element? PreviousSiblingOrDefault(this Element element) => IsFirstOrSingleSibling(element) ? default : element.Prev;
+
+    public static Element NextSibling(this Element element)
+    {
+        if (IsLastOrSingleSibling(element))
+            throw new InvalidOperationException("Element has no next sibling.");
+
+        return element.Next;
+    }
+
+    public static Element? NextSiblingOrDefault(this Element element) => IsLastOrSingleSibling(element) ? default : element.Next;
+
+    private static bool IsFirstOrSingleSibling(Element element)
+    {
+        return
+            element.Prev == element ||
+            element.Parent?.FirstAttribute == element ||
+            (element.Parent as ParentTag)?.Child == element;
+    }
+
+    private static bool IsLastOrSingleSibling(Element element)
+    {
+        return
+            element.Next == element ||
+            element.Parent?.FirstAttribute?.Prev == element ||
+            (element.Parent as ParentTag)?.Child?.Prev == element;
+    }
+
     public static bool Contains(this Element element, ReadOnlySpan<char> text)
     {
         if (element is Attribute attribute)
@@ -80,7 +116,7 @@ public static class ElementExtensions
     {
         if (attributes is not Tag tag || tag.FirstAttribute is null)
             throw new InvalidOperationException("Sequence contains no elements.");
-        
+
         return (Attribute)tag.FirstAttribute.Prev;
     }
 
@@ -278,7 +314,7 @@ public static class ElementExtensions
 
     public static bool All(this ParentTag root, Func<Element, bool> predicate) => All(root.Child, predicate);
 
-    public static bool All(this ITagAttributes attributes, Func<Attribute, bool> predicate) => 
+    public static bool All(this ITagAttributes attributes, Func<Attribute, bool> predicate) =>
         All((attributes as Tag)?.FirstAttribute, el => predicate((Attribute)el));
 
     private static bool All(Element? first, Func<Element, bool> predicate)
