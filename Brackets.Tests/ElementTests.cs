@@ -180,7 +180,7 @@ public class ElementTests
         var document = Document.Html.Parse("");
         Assert.ThrowsException<InvalidOperationException>(() => document.First(element => true));
     }
-    
+
     [TestMethod]
     public void FirstWithPredicate_SingleTag_ReturnsFirstElementWhenPredicateSatisfied()
     {
@@ -189,14 +189,14 @@ public class ElementTests
         Assert.IsNotNull(result);
         Assert.AreEqual("span", result.Name);
     }
-    
+
     [TestMethod]
     public void FirstWithPredicate_SingleTag_ThrowsInvalidOperationExceptionWhenPredicateNotSatisfied()
     {
         var document = Document.Html.Parse("<span>Value1</span>");
         Assert.ThrowsException<InvalidOperationException>(() => document.First(element => element is Tag { Name: "div" }));
     }
-    
+
     [TestMethod]
     public void FirstWithPredicate_MultipleTags_ReturnsFirstElementWhenPredicateSatisfied()
     {
@@ -205,7 +205,7 @@ public class ElementTests
         Assert.IsNotNull(result);
         Assert.AreEqual("div", result.Name);
     }
-    
+
     [TestMethod]
     public void FirstWithPredicate_MultipleTags_ThrowsInvalidOperationExceptionWhenNoElementSatisfiesPredicate()
     {
@@ -229,7 +229,7 @@ public class ElementTests
         Assert.IsNotNull(result);
         Assert.AreEqual("span", result.Name);
     }
-    
+
     [TestMethod]
     public void FirstOrDefault_MultipleTags_ReturnsFirstElement()
     {
@@ -246,7 +246,7 @@ public class ElementTests
         var result = document.FirstOrDefault(element => element is Tag { Name: "span" });
         Assert.IsNull(result);
     }
-    
+
     [TestMethod]
     public void FirstOrDefaultWithPredicate_SingleTag_ReturnsFirstMatchingElement()
     {
@@ -255,7 +255,7 @@ public class ElementTests
         Assert.IsNotNull(result);
         Assert.AreEqual("span", result.Name);
     }
-    
+
     [TestMethod]
     public void FirstOrDefaultWithPredicate_SingleTag_ReturnsNullWhenNoMatchingElement()
     {
@@ -312,7 +312,7 @@ public class ElementTests
         var document = Document.Html.Parse("");
         Assert.ThrowsException<InvalidOperationException>(() => document.Last(element => true));
     }
-    
+
     [TestMethod]
     public void LastWithPredicate_SingleTag_ReturnsLastElementWhenPredicateSatisfied()
     {
@@ -321,14 +321,14 @@ public class ElementTests
         Assert.IsNotNull(result);
         Assert.AreEqual("span", result.Name);
     }
-    
+
     [TestMethod]
     public void LastWithPredicate_SingleTag_ThrowsInvalidOperationExceptionWhenPredicateNotSatisfied()
     {
         var document = Document.Html.Parse("<span>Value1</span>");
         Assert.ThrowsException<InvalidOperationException>(() => document.Last(element => element is Tag { Name: "div" }));
     }
-    
+
     [TestMethod]
     public void LastWithPredicate_MultipleTags_ReturnsLastElementWhenPredicateSatisfied()
     {
@@ -337,7 +337,7 @@ public class ElementTests
         Assert.IsNotNull(result);
         Assert.AreEqual("span", result.Name);
     }
-    
+
     [TestMethod]
     public void LastWithPredicate_MultipleTags_ThrowsWhenNoElementSatisfiesCondition()
     {
@@ -361,7 +361,7 @@ public class ElementTests
         Assert.IsNotNull(result);
         Assert.AreEqual("span", result.Name);
     }
-    
+
     [TestMethod]
     public void LastOrDefault_MultipleTags_ReturnsLastElement()
     {
@@ -378,7 +378,7 @@ public class ElementTests
         var result = document.LastOrDefault(element => element is Tag { Name: "span" });
         Assert.IsNull(result);
     }
-    
+
     [TestMethod]
     public void LastOrDefaultWithPredicate_SingleTag_ReturnsLastMatchingElement()
     {
@@ -387,7 +387,7 @@ public class ElementTests
         Assert.IsNotNull(result);
         Assert.AreEqual("span", result.Name);
     }
-    
+
     [TestMethod]
     public void LastOrDefaultWithPredicate_SingleTag_ReturnsNullWhenNoMatchingElement()
     {
@@ -655,7 +655,7 @@ public class ElementTests
         var count = document.Count();
         Assert.AreEqual(0, count);
     }
-    
+
     [TestMethod]
     public void Count_SingleTag_ReturnsOne()
     {
@@ -663,7 +663,7 @@ public class ElementTests
         var count = document.Count();
         Assert.AreEqual(1, count);
     }
-    
+
     [TestMethod]
     public void Count_MultipleTags_ReturnsNumberOfTags()
     {
@@ -679,7 +679,7 @@ public class ElementTests
         var count = document.Count(element => element is Tag { Name: "span" });
         Assert.AreEqual(0, count);
     }
-    
+
     [TestMethod]
     public void CountWithPredicate_SingleTag_ReturnsOneWhenPredicateSatisfied()
     {
@@ -687,7 +687,7 @@ public class ElementTests
         var count = document.Count(element => element is Tag { Name: "span" });
         Assert.AreEqual(1, count);
     }
-    
+
     [TestMethod]
     public void CountWithPredicate_SingleTag_ReturnsZeroWhenPredicateNotSatisfied()
     {
@@ -695,7 +695,7 @@ public class ElementTests
         var count = document.Count(element => element is Tag { Name: "div" });
         Assert.AreEqual(0, count);
     }
-    
+
     [TestMethod]
     public void CountWithPredicate_MultipleTags_ReturnsNumberOfMatchingTags()
     {

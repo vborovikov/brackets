@@ -45,6 +45,8 @@ public partial class Document
             return this.Value.ToString()!;
         }
 
+        public override Element Clone() => (Element)MemberwiseClone();
+
         internal override string ToDebugString() => this.Value.ToString() ?? string.Empty;
 
         public static DataElement From(int number) => new(DataType.Number, number);

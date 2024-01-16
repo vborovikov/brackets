@@ -10,7 +10,7 @@
     using Xml;
     using XPath;
 
-    public partial class Document : IEnumerable<Element>
+    public partial class Document : IEnumerable<Element>, ICloneable
     {
         private static readonly LRUCache<string, PathQuery> pathQueryCache = new(16);
         private readonly DocumentRoot root;
@@ -36,6 +36,13 @@
         {
             return this.root.ToString();
         }
+
+        public Document Clone()
+        {
+            return new Document((DocumentRoot)this.root.Clone());
+        }
+
+        object ICloneable.Clone() => Clone();
 
         public Element? Find(Predicate<Element> match)
         {

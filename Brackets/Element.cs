@@ -15,7 +15,7 @@
     }
 
     [DebuggerDisplay("{" + nameof(ToDebugString) + "(),nq}")]
-    public abstract class Element
+    public abstract class Element : ICloneable
     {
         private Tag? parent;
         private Element prev;
@@ -53,6 +53,10 @@
         }
 
         protected virtual ReadOnlySpan<char> Source => this.parent is null ? ReadOnlySpan<char>.Empty : this.parent.Source;
+
+        public abstract Element Clone();
+
+        object ICloneable.Clone() => Clone();
 
         public static string ToString(IEnumerable<Element> elements)
         {

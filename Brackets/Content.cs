@@ -40,6 +40,8 @@
 
         public sealed override int End => this.end;
 
+        public override Element Clone() => new StringContent(this.Data.ToString(), this.Offset);
+
         internal virtual bool TryConcat(Content content)
         {
             if (content.Start == this.End)
@@ -64,6 +66,10 @@
 
         protected override ReadOnlySpan<char> Source => this.value;
         public override ReadOnlySpan<char> Data => this.value;
+
+        public override string ToString() => this.value;
+
+        public override Element Clone() => new StringContent(this.value, this.Offset);
 
         internal override bool TryConcat(Content content)
         {
@@ -92,28 +98,39 @@
 
         public override int End { get; }
 
+        public virtual ReadOnlySpan<char> Name => this.Parent is ParentTag parent ? parent.Reference.Syntax.TrimName(base.Data) : ReadOnlySpan<char>.Empty;
         public override ReadOnlySpan<char> Data => this.Source.Slice(this.dataStart, this.dataLength);
+
+        protected int DataStart => this.dataStart;
+
+        public override Element Clone() => new StringSection(this.Name.ToString(), 
+            this.Offset, this.Length, this.Data.ToString(), this.dataStart);
 
         internal override string ToDebugString()
         {
-            var name = this.Parent is ParentTag parent ? parent.Reference.Syntax.TrimName(base.Data) : ReadOnlySpan<char>.Empty;
-            return $"<[{name}[{base.ToDebugString()}]]>";
+            return $"<[{this.Name}[{base.ToDebugString()}]]>";
         }
     }
 
-    sealed class StreamSection : Section
+    sealed class StringSection : Section
     {
         private readonly string name;
         private readonly string data;
 
-        public StreamSection(string name, int start, int length, string data, int dataStart)
+        public StringSection(string name, int start, int length, string data, int dataStart)
             : base(start, length, dataStart, data.Length)
         {
             this.name = name;
             this.data = data;
         }
 
+        public override ReadOnlySpan<char> Name => this.name;
         public override ReadOnlySpan<char> Data => this.data;
+
+        public override string ToString() => this.data;
+
+        public override Element Clone() => new StringSection(this.name,
+            this.Offset, this.Length, this.data, this.DataStart);
 
         internal override string ToDebugString()
         {
@@ -122,7 +139,7 @@
         }
     }
 
-    public sealed class Comment : CharacterData
+    public class Comment : CharacterData
     {
         public Comment(int start, int length) : base(start)
         {
@@ -136,9 +153,27 @@
             this.Parent is ParentTag parent ? parent.Reference.Syntax.TrimData(base.Data) :
             base.Data;
 
+        public override Element Clone() => new StringComment(this.Data.ToString(), this.Offset, this.Length);
+
         internal override string ToDebugString()
         {
             return $"<!--{base.ToDebugString()}-->";
         }
+    }
+
+    sealed class StringComment : Comment
+    {
+        private readonly string data;
+
+        public StringComment(string data, int start, int length) : base(start, length)
+        {
+            this.data = data;
+        }
+
+        public override ReadOnlySpan<char> Data => this.data;
+
+        public override string ToString() => this.data;
+
+        public override Element Clone() => new StringComment(this.data, this.Offset, this.Length);
     }
 }

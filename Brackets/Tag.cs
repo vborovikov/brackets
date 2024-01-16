@@ -40,6 +40,28 @@
 
         public override string ToString() => this.reference.ToString(this);
 
+        public override Element Clone()
+        {
+            var tag = new Tag(this.reference, this.Offset, this.Length);
+
+            CloneAttributes(tag);
+
+            return tag;
+        }
+
+        protected void CloneAttributes(Tag tag)
+        {
+            if (this.attribute is null)
+                return;
+
+            var attr = this.attribute;
+            do
+            {
+                tag.Add((Attribute)attr.Clone());
+                attr = (Attribute)attr.Next;
+            } while (attr != this.attribute);
+        }
+
         public void Add(Attribute attribute)
         {
             this.attribute = (Attribute?)Link(attribute, this, this.attribute);
@@ -67,6 +89,15 @@
         {
         }
 
+        public override Element Clone()
+        {
+            var tag = new Instruction(this.Reference, this.Offset, this.Length);
+
+            CloneAttributes(tag);
+
+            return tag;
+        }
+
         internal override string ToDebugString() => $"<?{this.Name}?>";
     }
 
@@ -74,6 +105,15 @@
     {
         public Declaration(TagRef reference, int start, int length) : base(reference, start, length)
         {
+        }
+
+        public override Element Clone()
+        {
+            var tag = new Declaration(this.Reference, this.Offset, this.Length);
+
+            CloneAttributes(tag);
+
+            return tag;
         }
 
         internal override string ToDebugString() => $"<!{this.Name}>";
@@ -92,6 +132,29 @@
         public int ContentEnd => this.child?.Prev?.End ?? -1;
 
         protected internal Element? Child => this.child;
+
+        public override Element Clone()
+        {
+            var parentTag = new ParentTag(this.Reference, this.Offset, this.Length);
+
+            CloneAttributes(parentTag);
+            CloneElements(parentTag);
+
+            return parentTag;
+        }
+
+        protected void CloneElements(ParentTag parentTag)
+        {
+            if (this.child is null)
+                return;
+
+            var element = this.child;
+            do
+            {
+                parentTag.Add(element.Clone());
+                element = element.Next;
+            } while (element != this.child);
+        }
 
         public void Add(Element element)
         {
