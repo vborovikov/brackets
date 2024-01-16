@@ -13,6 +13,15 @@ namespace Brackets
         {
             return string.Concat(this);
         }
+
+        public override Element Clone()
+        {
+            var root = new EmptyDocumentRoot((RootRef)this.Reference);
+
+            CloneElements(root);
+
+            return root;
+        }
     }
 
     sealed class TextDocumentRoot : DocumentRoot

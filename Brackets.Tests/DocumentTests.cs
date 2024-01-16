@@ -1,33 +1,11 @@
 ﻿namespace Brackets.Tests.Markup
 {
-    using System.IO;
-    using System.Reflection;
-    using System.Text;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Tools;
 
     [TestClass]
     public class DocumentTests
     {
-        private static Assembly assembly;
-
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            assembly = Assembly.GetExecutingAssembly();
-        }
-
-        private static string GetSample(string fileName)
-        {
-            using var fileStream = GetSampleStream(fileName);
-            using var fileReader = new StreamReader(fileStream, Encoding.UTF8);
-            return fileReader.ReadToEnd();
-        }
-
-        private static Stream GetSampleStream(string fileName)
-        {
-            return assembly.GetManifestResourceStream($"Brackets.Tests.Samples.{fileName}");
-        }
-
         [DataTestMethod]
         [DataRow("benq.html")]
         [DataRow("broken.xml")]
@@ -38,11 +16,11 @@
         [DataRow("newsde.html")]
         public async Task ParseAsync_AsyncSyncHtmlParsing_Equal(string fileName)
         {
-            using var stream = GetSampleStream(fileName);
+            using var stream = Samples.GetStream(fileName);
             var asyncDoc = await Document.Html.ParseAsync(stream, default);
             var asyncElements = asyncDoc.FindAll(_ => true).GetEnumerator();
 
-            var sample = GetSample(fileName);
+            var sample = Samples.GetString(fileName);
             var syncDoc = Document.Html.Parse(sample);
             var syncElements = syncDoc.FindAll(_ => true).GetEnumerator();
 
@@ -67,11 +45,11 @@
         [DataRow("broken.xml")]
         public async Task ParseAsync_AsyncSyncXmlParsing_Equal(string fileName)
         {
-            using var stream = GetSampleStream(fileName);
+            using var stream = Samples.GetStream(fileName);
             var asyncDoc = await Document.Xml.ParseAsync(stream, default);
             var asyncElements = asyncDoc.FindAll(_ => true).GetEnumerator();
 
-            var sample = GetSample(fileName);
+            var sample = Samples.GetString(fileName);
             var syncDoc = Document.Xml.Parse(sample);
             var syncElements = syncDoc.FindAll(_ => true).GetEnumerator();
 
@@ -99,7 +77,7 @@
 
             await Parallel.ForEachAsync(fileNames, async (fileName, cancellationToken) =>
             {
-                await using var stream = GetSampleStream(fileName);
+                await using var stream = Samples.GetStream(fileName);
                 var document = await Document.Xml.ParseAsync(stream, cancellationToken);
                 Assert.IsNotNull(document);
                 Assert.IsNotNull(document.FirstOrDefault());
@@ -109,7 +87,7 @@
         [TestMethod]
         public async Task ParseAsync_LargeFile_Parsed()
         {
-            using var stream = GetSampleStream("newsde.html");
+            using var stream = Samples.GetStream("newsde.html");
             var document = await Document.Html.ParseAsync(stream, default);
             Assert.IsNotNull(document);
             Assert.AreEqual(6, document.Count());
@@ -128,7 +106,7 @@
         [TestMethod]
         public void ComplexScript_Build_ClosedProperly()
         {
-            var sample = GetSample("head_script.html");
+            var sample = Samples.GetString("head_script.html");
             var document = Document.Html.Parse(sample);
 
             var headBlock = document.First() as ParentTag;
@@ -149,7 +127,7 @@
         [TestMethod]
         public void XmlParse_BrokenTag_ClosedBeforeNextTag()
         {
-            var sample = GetSample("broken.xml");
+            var sample = Samples.GetString("broken.xml");
             var document = Document.Xml.Parse(sample);
 
             var docsTag = document.Find<ParentTag>(t => t.Name == "docs");

@@ -19,6 +19,8 @@ namespace Brackets
 
         public sealed override int End => this.Start + this.length;
 
+        internal AttrRef Reference => this.reference;
+
         public string Name => this.reference.Name;
 
         public bool IsFlag => this.reference.IsFlag || !this.HasValue;
@@ -29,6 +31,8 @@ namespace Brackets
         public virtual ReadOnlySpan<char> Value => this.Name;
 
         public override string ToString() => this.Name;
+
+        public override Element Clone() => new StringAttribute(this.reference, string.Empty, this.Offset, this.length);
 
         public override bool TryGetValue<T>([MaybeNullWhen(false)] out T value)
         {
@@ -111,6 +115,9 @@ namespace Brackets
         public override ReadOnlySpan<char> Value => TrimValue(this.Source.Slice(this.valueStart, this.valueLength));
 
         public override string ToString() => this.Value.ToString();
+
+        public override Element Clone() =>
+            new StringAttribute(this.Reference, this.Source.Slice(this.valueStart, this.valueLength), this.Offset, this.Length);
     }
 
     sealed class StringAttribute : Attribute
@@ -123,6 +130,12 @@ namespace Brackets
             this.value = TrimValue(value).ToString();
         }
 
+        public StringAttribute(AttrRef reference, string value, int offset, int length)
+            : base(reference, offset, length)
+        {
+            this.value = value;
+        }
+
         public override bool HasValue => !string.IsNullOrEmpty(this.value);
 
         public override ReadOnlySpan<char> Value => this.value;
@@ -130,5 +143,8 @@ namespace Brackets
         protected override ReadOnlySpan<char> Source => this.value;
 
         public override string ToString() => this.value;
+
+        public override Element Clone() =>
+            new StringAttribute(this.Reference, this.value, this.Offset, this.Length);
     }
 }

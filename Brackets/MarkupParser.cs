@@ -140,7 +140,7 @@
         private static void ParseSection(in Token token, ParentTag parent, bool toString = false)
         {
             parent.Add(toString ?
-                new StreamSection(token.Name.ToString(), token.Offset, token.Length, token.Data.ToString(), token.DataOffset) :
+                new StringSection(token.Name.ToString(), token.Offset, token.Length, token.Data.ToString(), token.DataOffset) :
                 new Section(token.Offset, token.Length, token.DataOffset, token.Data.Length));
         }
 
@@ -233,7 +233,7 @@
             var reference = CreateOrFindAttrRef(token.Name);
             return
                 toString ?
-                    new StringAttribute(reference, token.Data.ToString(), token.Offset, token.Length) :
+                    new StringAttribute(reference, token.Data, token.Offset, token.Length) :
                     token.Data.IsEmpty ?
                         new Attribute(reference, token.Offset, token.Length) :
                         new ValueAttribute(reference, token.Offset, token.Length, token.DataOffset, token.Data.Length);
