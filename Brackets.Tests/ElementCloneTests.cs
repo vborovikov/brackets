@@ -36,16 +36,27 @@ public class ElementCloneTests
 
             var elemStr = $"{expected.GetType().Name}: {expected.ToDebugString()}";
 
-            Assert.IsInstanceOfType(actual, expected.GetType(), elemStr);
+            Assert.AreNotSame(expected, actual, elemStr);
             Assert.AreEqual(expected.Offset, actual.Offset, elemStr);
             Assert.AreEqual(expected.Length, actual.Length, elemStr);
             if (expected is CharacterData && actual is CharacterData)
             {
                 Assert.AreEqual(expected.ToString(), actual.ToString(), elemStr);
             }
-            else if (expected is ParentTag expectedParent && actual is ParentTag actualParent)
+            else if (expected is Tag expectedTag && actual is Tag actualTag)
             {
-                AssertAreEqual(expectedParent, actualParent);
+                AssertAreEqual(expectedTag.EnumerateAttributes(), actualTag.EnumerateAttributes());
+
+                if (expectedTag is ParentTag expectedParent && actualTag is ParentTag actualParent)
+                {
+                    AssertAreEqual(expectedParent, actualParent);
+                }
+            }
+            else if (expected is Attribute expectedAttr && actual is Attribute actualAttr)
+            {
+                Assert.AreEqual(expectedAttr.HasValue, actualAttr.HasValue, elemStr);
+                Assert.AreEqual(expectedAttr.Name, actualAttr.Name, elemStr);
+                Assert.AreEqual(expectedAttr.ToString(), actualAttr.ToString(), elemStr);
             }
         }
 
