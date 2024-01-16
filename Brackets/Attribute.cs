@@ -28,11 +28,11 @@ namespace Brackets
         [MemberNotNullWhen(true, nameof(Value))]
         public virtual bool HasValue => false;
 
-        public virtual ReadOnlySpan<char> Value => this.Name;
+        public virtual ReadOnlySpan<char> Value => ReadOnlySpan<char>.Empty;
 
-        public override string ToString() => this.Name;
+        public override string ToString() => string.Empty;
 
-        public override Element Clone() => new StringAttribute(this.reference, string.Empty, this.Offset, this.length);
+        public override Element Clone() => new StringAttribute(this.reference, null, this.Offset, this.length);
 
         public override bool TryGetValue<T>([MaybeNullWhen(false)] out T value)
         {
@@ -122,7 +122,7 @@ namespace Brackets
 
     sealed class StringAttribute : Attribute
     {
-        private readonly string value;
+        private readonly string? value;
 
         public StringAttribute(AttrRef reference, ReadOnlySpan<char> value, int offset, int length)
             : base(reference, offset, length)
@@ -130,19 +130,19 @@ namespace Brackets
             this.value = TrimValue(value).ToString();
         }
 
-        public StringAttribute(AttrRef reference, string value, int offset, int length)
+        public StringAttribute(AttrRef reference, string? value, int offset, int length)
             : base(reference, offset, length)
         {
             this.value = value;
         }
 
-        public override bool HasValue => !string.IsNullOrEmpty(this.value);
+        public override bool HasValue => this.value is not null;
 
         public override ReadOnlySpan<char> Value => this.value;
 
         protected override ReadOnlySpan<char> Source => this.value;
 
-        public override string ToString() => this.value;
+        public override string ToString() => this.value ?? string.Empty;
 
         public override Element Clone() =>
             new StringAttribute(this.Reference, this.value, this.Offset, this.Length);
