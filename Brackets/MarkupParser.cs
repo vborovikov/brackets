@@ -46,6 +46,13 @@
             return new Document(root);
         }
 
+        public Tag CreateTag(ReadOnlySpan<char> name)
+        {
+            return CreateTag(
+                new Token(TokenCategory.OpeningTag, ReadOnlySpan<char>.Empty, 0, name, 0, ReadOnlySpan<char>.Empty, 0),
+                toString: true);
+        }
+
         protected void AddReference(TagRef reference)
         {
             this.tagRefs.Add(reference.Name, reference);

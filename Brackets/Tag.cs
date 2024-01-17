@@ -158,6 +158,10 @@
 
         public void Add(Element element)
         {
+            ArgumentNullException.ThrowIfNull(element);
+            if (element == this)
+                throw new ArgumentException("Cannot add an element to itself.");
+
             if (this.HasRawContent && element is Content content && this.child is not null)
             {
                 var childElement = this.child;
@@ -174,6 +178,43 @@
             this.child = Link(element, this, this.child);
         }
 
+        public void Remove(Element element)
+        {
+            ArgumentNullException.ThrowIfNull(element);
+            if (element == this)
+                throw new ArgumentException("Cannot remove an element from itself.");
+            if (this.child is null)
+                throw new InvalidOperationException("Cannot remove an element when the parent has no children.");
+
+            this.child = Unlink(element, this, this.child);
+        }
+
+        public void Replace(Element oldElement, Element newElement)
+        {
+            ArgumentNullException.ThrowIfNull(oldElement);
+            ArgumentNullException.ThrowIfNull(newElement);
+            if (oldElement == newElement)
+                throw new ArgumentException("Cannot replace an element with itself.");
+            if (oldElement == this)
+                throw new ArgumentException("Cannot replace the parent element.");
+            if (newElement == this)
+                throw new ArgumentException("Cannot replace an element with the parent element.");
+            if (this.child is null)
+                throw new InvalidOperationException("Cannot replace an element when the parent has no children.");
+
+            var next = oldElement.Next;
+            Remove(oldElement);
+
+            if (this.child is null)
+            {
+                Add(newElement);
+            }
+            else
+            {
+                Link(newElement, this, next);
+            }
+        }
+
         public Enumerator GetEnumerator() => new(this.child);
 
         IEnumerator<Element> IEnumerable<Element>.GetEnumerator() =>
@@ -181,14 +222,6 @@
 
         IEnumerator IEnumerable.GetEnumerator() =>
             ((IEnumerable<Element>)this).GetEnumerator();
-
-        public void Remove(Element element)
-        {
-            if (this.child is not null)
-            {
-                this.child = Unlink(element, this, this.child);
-            }
-        }
 
         public TElement? Find<TElement>(Func<TElement, bool> match)
             where TElement : Element
