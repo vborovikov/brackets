@@ -96,6 +96,18 @@ namespace Brackets
             readonly IEnumerator<Attribute> IEnumerable<Attribute>.GetEnumerator() => GetEnumerator();
             readonly IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
+
+        public readonly struct List
+        {
+            private readonly Tag tag;
+
+            internal List(Tag tag)
+            {
+                this.tag = tag;
+            }
+
+            internal Attribute? First => this.tag.FirstAttribute;
+        }
     }
 
     public class ValueAttribute : Attribute

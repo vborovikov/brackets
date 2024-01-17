@@ -4,11 +4,7 @@
     using System.Collections;
     using System.Collections.Generic;
 
-    public interface ITagAttributes
-    {
-    }
-
-    public class Tag : Element, ITagAttributes
+    public class Tag : Element
     {
         private readonly TagRef reference;
         private Attribute? attribute;
@@ -32,7 +28,7 @@
 
         public bool HasAttributes => this.attribute is not null;
 
-        public ITagAttributes Attributes => this;
+        public Attribute.List Attributes => new(this);
 
         public Attribute.Enumerator EnumerateAttributes() => new(this.attribute);
 
