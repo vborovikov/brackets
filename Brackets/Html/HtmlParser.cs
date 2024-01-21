@@ -1,5 +1,6 @@
 ﻿namespace Brackets.Html;
 
+using System;
 using Collections;
 
 public class HtmlParser : MarkupParser<HtmlLexer>
@@ -218,4 +219,6 @@ public class HtmlParser : MarkupParser<HtmlLexer>
     internal static HtmlParser CreateConcurrent() =>
         new(new ConcurrentStringSet<TagRef>(HtmlLexer.Comparison),
             new ConcurrentStringSet<AttrRef>(HtmlLexer.Comparison));
+
+    public override StringComparison Comparison => HtmlLexer.Comparison;
 }

@@ -71,6 +71,48 @@
             }
         }
 
+        public void Replace(Attribute? oldAttribute, Attribute newAttribute)
+        {
+            ArgumentNullException.ThrowIfNull(newAttribute);
+            if (oldAttribute == newAttribute)
+                throw new ArgumentException("Cannot replace an attribute with itself.");
+
+            var next = this.attribute;
+            if (oldAttribute is not null)
+            {
+                if (this.attribute is null)
+                    throw new InvalidOperationException("Cannot replace an attribute when the tag has no attributes.");
+
+                next = (Attribute)oldAttribute.Next;
+                Remove(oldAttribute);
+            }
+
+            if (this.attribute is null)
+            {
+                Add(newAttribute);
+            }
+            else
+            {
+                Link(newAttribute, this, next);
+            }
+        }
+
+        public Attribute? FindAttribute(Predicate<Attribute> predicate)
+        {
+            if (this.attribute is Attribute first)
+            {
+                var current = first;
+                do
+                {
+                    if (predicate(current))
+                        return current;
+                    current = (Attribute)current.Next;
+                } while (current != first);
+            }
+
+            return null;
+        }
+
         internal override string ToDebugString() => $"<{this.Name}/>";
 
         internal void CloseAt(int end)
@@ -185,9 +227,8 @@
             this.child = Unlink(element, this, this.child);
         }
 
-        public void Replace(Element oldElement, Element newElement)
+        public void Replace(Element? oldElement, Element newElement)
         {
-            ArgumentNullException.ThrowIfNull(oldElement);
             ArgumentNullException.ThrowIfNull(newElement);
             if (oldElement == newElement)
                 throw new ArgumentException("Cannot replace an element with itself.");
@@ -195,11 +236,16 @@
                 throw new ArgumentException("Cannot replace the parent element.");
             if (newElement == this)
                 throw new ArgumentException("Cannot replace an element with the parent element.");
-            if (this.child is null)
-                throw new InvalidOperationException("Cannot replace an element when the parent has no children.");
 
-            var next = oldElement.Next;
-            Remove(oldElement);
+            var next = this.child;
+            if (oldElement is not null)
+            {
+                if (this.child is null)
+                    throw new InvalidOperationException("Cannot replace an element when the parent has no children.");
+
+                next = oldElement.Next;
+                Remove(oldElement);
+            }
 
             if (this.child is null)
             {
@@ -306,7 +352,7 @@
                 {
                     if (!hasContentBeforeTags)
                     {
-                        // a first non-comment element element is a tag, we don't prune it
+                        // the first non-comment element element is a tag, we don't prune it
                         //todo: or maybe we want to find the first content element amoung children and prune the element from there
                         break;
                     }

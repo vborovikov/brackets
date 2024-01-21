@@ -14,9 +14,14 @@
 
     public interface ISyntaxReference
     {
+        StringComparison Comparison { get; }
+
         ReadOnlySpan<char> TrimName(ReadOnlySpan<char> span);
         ReadOnlySpan<char> TrimData(ReadOnlySpan<char> span);
         ReadOnlySpan<char> TrimValue(ReadOnlySpan<char> span);
+
+        Tag CreateTag(ReadOnlySpan<char> name);
+        Attribute CreateAttribute(ReadOnlySpan<char> name, ReadOnlySpan<char> value);
     }
 
     public abstract partial class MarkupParser<TMarkupLexer> : ISyntaxReference
@@ -50,6 +55,13 @@
         {
             return CreateTag(
                 new Token(TokenCategory.OpeningTag, ReadOnlySpan<char>.Empty, 0, name, 0, ReadOnlySpan<char>.Empty, 0),
+                toString: true);
+        }
+
+        public Attribute CreateAttribute(ReadOnlySpan<char> name, ReadOnlySpan<char> value)
+        {
+            return CreateAttribute(
+                new Token(TokenCategory.Attribute, ReadOnlySpan<char>.Empty, 0, name, 0, value, 0),
                 toString: true);
         }
 
@@ -268,6 +280,8 @@
             return reference;
         }
 
+        public abstract StringComparison Comparison { get; }
+        StringComparison ISyntaxReference.Comparison => this.Comparison;
         ReadOnlySpan<char> ISyntaxReference.TrimName(ReadOnlySpan<char> span) => this.lexer.TrimName(span);
         ReadOnlySpan<char> ISyntaxReference.TrimData(ReadOnlySpan<char> span) => this.lexer.TrimData(span);
         ReadOnlySpan<char> ISyntaxReference.TrimValue(ReadOnlySpan<char> span) => this.lexer.TrimValue(span);

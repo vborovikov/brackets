@@ -107,6 +107,34 @@ namespace Brackets
             }
 
             internal Attribute? First => this.tag.FirstAttribute;
+
+            public ReadOnlySpan<char> Get(ReadOnlySpan<char> name)
+            {
+                return Find(name) is Attribute attr ? attr.Value : ReadOnlySpan<char>.Empty;
+            }
+
+            public void Set(ReadOnlySpan<char> name, ReadOnlySpan<char> value)
+            {
+                var newAttr = this.tag.Reference.Syntax.CreateAttribute(name, value);
+                this.tag.Replace(Find(name), newAttr);
+            }
+
+            private Attribute? Find(ReadOnlySpan<char> name)
+            {
+                if (this.tag.FirstAttribute is Attribute first)
+                {
+                    var compareMethod = this.tag.Reference.Syntax.Comparison;
+                    var current = first;
+                    do
+                    {
+                        if (name.Equals(current.Name, compareMethod))
+                            return current;
+                        current = (Attribute)current.Next;
+                    } while (current != first);
+                }
+
+                return null;
+            }
         }
     }
 
