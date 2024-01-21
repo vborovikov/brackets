@@ -21,4 +21,6 @@ public class XmlParser : MarkupParser<XmlLexer>
     internal static XmlParser CreateConcurrent() =>
         new(new ConcurrentStringSet<TagRef>(XmlLexer.Comparison), 
             new ConcurrentStringSet<AttrRef>(XmlLexer.Comparison));
+
+    public override StringComparison Comparison => XmlLexer.Comparison;
 }

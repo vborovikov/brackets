@@ -5,12 +5,12 @@ namespace Brackets
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
 
-    public class Attribute : Element
+    public class Attr : Element
     {
         private readonly AttrRef reference;
         private readonly int length;
 
-        public Attribute(AttrRef reference, int start, int length)
+        public Attr(AttrRef reference, int start, int length)
             : base(start)
         {
             this.reference = reference;
@@ -32,7 +32,7 @@ namespace Brackets
 
         public override string ToString() => string.Empty;
 
-        public override Element Clone() => new StringAttribute(this.reference, null, this.Offset, this.length);
+        public override Element Clone() => new StringAttr(this.reference, null, this.Offset, this.length);
 
         public override bool TryGetValue<T>([MaybeNullWhen(false)] out T value)
         {
@@ -52,19 +52,19 @@ namespace Brackets
 
         protected ReadOnlySpan<char> TrimValue(ReadOnlySpan<char> value) => this.reference.Syntax.TrimValue(value);
 
-        public new struct Enumerator : IEnumerable<Attribute>, IEnumerator<Attribute>
+        public new struct Enumerator : IEnumerable<Attr>, IEnumerator<Attr>
         {
-            private readonly Attribute? first;
-            private Attribute? sibling;
-            private Attribute? current;
+            private readonly Attr? first;
+            private Attr? sibling;
+            private Attr? current;
 
-            internal Enumerator(Attribute? node)
+            internal Enumerator(Attr? node)
             {
                 this.first = node;
                 this.sibling = node;
             }
 
-            public readonly Attribute Current => this.current!;
+            public readonly Attr Current => this.current!;
             public readonly Enumerator GetEnumerator() => this;
             readonly object IEnumerator.Current => this.current!;
 
@@ -78,7 +78,7 @@ namespace Brackets
                     return false;
 
                 this.current = this.sibling;
-                this.sibling = (Attribute)this.sibling.Next;
+                this.sibling = (Attr)this.sibling.Next;
                 if (this.sibling == this.first)
                 {
                     this.sibling = null;
@@ -93,17 +93,57 @@ namespace Brackets
                 this.current = null;
             }
 
-            readonly IEnumerator<Attribute> IEnumerable<Attribute>.GetEnumerator() => GetEnumerator();
+            readonly IEnumerator<Attr> IEnumerable<Attr>.GetEnumerator() => GetEnumerator();
             readonly IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        }
+
+        public readonly struct List
+        {
+            private readonly Tag tag;
+
+            internal List(Tag tag)
+            {
+                this.tag = tag;
+            }
+
+            internal Attr? First => this.tag.FirstAttribute;
+
+            public ReadOnlySpan<char> Get(ReadOnlySpan<char> name)
+            {
+                return Find(name) is Attr attr ? attr.Value : ReadOnlySpan<char>.Empty;
+            }
+
+            public void Set(ReadOnlySpan<char> name, ReadOnlySpan<char> value)
+            {
+                var newAttr = this.tag.Reference.Syntax.CreateAttribute(name, value);
+                this.tag.ReplaceAttribute(Find(name), newAttr);
+            }
+
+            private Attr? Find(ReadOnlySpan<char> name)
+            {
+                if (this.tag.FirstAttribute is Attr first)
+                {
+                    var compareMethod = this.tag.Reference.Syntax.Comparison;
+                    var current = first;
+                    do
+                    {
+                        if (name.Equals(current.Name, compareMethod))
+                            return current;
+                        current = (Attr)current.Next;
+                    } while (current != first);
+                }
+
+                return null;
+            }
         }
     }
 
-    public class ValueAttribute : Attribute
+    sealed class ValueAttr : Attr
     {
         private readonly int valueStart;
         private readonly int valueLength;
 
-        public ValueAttribute(AttrRef reference, int start, int length, int valueStart, int valueLength)
+        public ValueAttr(AttrRef reference, int start, int length, int valueStart, int valueLength)
             : base(reference, start, length)
         {
             this.valueStart = valueStart;
@@ -117,20 +157,20 @@ namespace Brackets
         public override string ToString() => this.Value.ToString();
 
         public override Element Clone() =>
-            new StringAttribute(this.Reference, this.Source.Slice(this.valueStart, this.valueLength), this.Offset, this.Length);
+            new StringAttr(this.Reference, this.Source.Slice(this.valueStart, this.valueLength), this.Offset, this.Length);
     }
 
-    sealed class StringAttribute : Attribute
+    sealed class StringAttr : Attr
     {
         private readonly string? value;
 
-        public StringAttribute(AttrRef reference, ReadOnlySpan<char> value, int offset, int length)
+        public StringAttr(AttrRef reference, ReadOnlySpan<char> value, int offset, int length)
             : base(reference, offset, length)
         {
             this.value = TrimValue(value).ToString();
         }
 
-        public StringAttribute(AttrRef reference, string? value, int offset, int length)
+        public StringAttr(AttrRef reference, string? value, int offset, int length)
             : base(reference, offset, length)
         {
             this.value = value;
@@ -145,6 +185,6 @@ namespace Brackets
         public override string ToString() => this.value ?? string.Empty;
 
         public override Element Clone() =>
-            new StringAttribute(this.Reference, this.value, this.Offset, this.Length);
+            new StringAttr(this.Reference, this.value, this.Offset, this.Length);
     }
 }

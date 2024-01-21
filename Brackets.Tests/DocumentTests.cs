@@ -6,6 +6,25 @@
     [TestClass]
     public class DocumentTests
     {
+        [TestMethod]
+        public void CreateAttribute_SimpleAttribute_Created()
+        {
+            var attr = Document.Html.CreateAttribute("name", "value");
+            Assert.IsNotNull(attr);
+            Assert.AreEqual("name", attr.Name);
+            Assert.IsTrue(attr.HasValue);
+            Assert.AreEqual("value", attr.Value.ToString());
+        }
+
+        [TestMethod]
+        public void CreateTag_DivTag_CreatedParentTag()
+        {
+            var tag = Document.Html.CreateTag("div");
+            Assert.IsNotNull(tag);
+            Assert.IsInstanceOfType(tag, typeof(ParentTag));
+            Assert.AreEqual("div", tag.Name);
+        }
+
         [DataTestMethod]
         [DataRow("benq.html")]
         [DataRow("broken.xml")]

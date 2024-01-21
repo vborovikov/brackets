@@ -4,14 +4,10 @@
     using System.Collections;
     using System.Collections.Generic;
 
-    public interface ITagAttributes
-    {
-    }
-
-    public class Tag : Element, ITagAttributes
+    public class Tag : Element
     {
         private readonly TagRef reference;
-        private Attribute? attribute;
+        private Attr? attribute;
         private int end;
 
         public Tag(TagRef reference, int start, int length) : base(start)
@@ -22,7 +18,7 @@
 
         internal TagRef Reference => this.reference;
 
-        internal Attribute? FirstAttribute => this.attribute;
+        internal Attr? FirstAttribute => this.attribute;
 
         public string Name => this.reference.Name;
 
@@ -32,9 +28,9 @@
 
         public bool HasAttributes => this.attribute is not null;
 
-        public ITagAttributes Attributes => this;
+        public Attr.List Attributes => new(this);
 
-        public Attribute.Enumerator EnumerateAttributes() => new(this.attribute);
+        public Attr.Enumerator EnumerateAttributes() => new(this.attribute);
 
         public sealed override int End => this.end;
 
@@ -57,22 +53,64 @@
             var attr = this.attribute;
             do
             {
-                tag.Add((Attribute)attr.Clone());
-                attr = (Attribute)attr.Next;
+                tag.AddAttribute((Attr)attr.Clone());
+                attr = (Attr)attr.Next;
             } while (attr != this.attribute);
         }
 
-        public void Add(Attribute attribute)
+        public void AddAttribute(Attr attribute)
         {
-            this.attribute = (Attribute?)Link(attribute, this, this.attribute);
+            this.attribute = (Attr?)Link(attribute, this, this.attribute);
         }
 
-        public void Remove(Attribute attribute)
+        public void RemoveAttribute(Attr attribute)
         {
             if (this.attribute is not null)
             {
-                this.attribute = (Attribute?)Unlink(attribute, this, this.attribute);
+                this.attribute = (Attr?)Unlink(attribute, this, this.attribute);
             }
+        }
+
+        public void ReplaceAttribute(Attr? oldAttribute, Attr newAttribute)
+        {
+            ArgumentNullException.ThrowIfNull(newAttribute);
+            if (oldAttribute == newAttribute)
+                throw new ArgumentException("Cannot replace an attribute with itself.");
+
+            var next = this.attribute;
+            if (oldAttribute is not null)
+            {
+                if (this.attribute is null)
+                    throw new InvalidOperationException("Cannot replace an attribute when the tag has no attributes.");
+
+                next = (Attr)oldAttribute.Next;
+                RemoveAttribute(oldAttribute);
+            }
+
+            if (this.attribute is null)
+            {
+                AddAttribute(newAttribute);
+            }
+            else
+            {
+                Link(newAttribute, this, next);
+            }
+        }
+
+        public Attr? FindAttribute(Predicate<Attr> predicate)
+        {
+            if (this.attribute is Attr first)
+            {
+                var current = first;
+                do
+                {
+                    if (predicate(current))
+                        return current;
+                    current = (Attr)current.Next;
+                } while (current != first);
+            }
+
+            return null;
         }
 
         internal override string ToDebugString() => $"<{this.Name}/>";
@@ -158,6 +196,12 @@
 
         public void Add(Element element)
         {
+            ArgumentNullException.ThrowIfNull(element);
+            if (element is Attr)
+                throw new InvalidOperationException("Cannot add an attribute to a parent tag.");
+            if (element == this)
+                throw new ArgumentException("Cannot add an element to itself.");
+
             if (this.HasRawContent && element is Content content && this.child is not null)
             {
                 var childElement = this.child;
@@ -174,6 +218,51 @@
             this.child = Link(element, this, this.child);
         }
 
+        public void Remove(Element element)
+        {
+            ArgumentNullException.ThrowIfNull(element);
+            if (element is Attr)
+                throw new InvalidOperationException("Cannot remove an attribute from a parent tag.");
+            if (element == this)
+                throw new ArgumentException("Cannot remove an element from itself.");
+            if (this.child is null)
+                throw new InvalidOperationException("Cannot remove an element when the parent has no children.");
+
+            this.child = Unlink(element, this, this.child);
+        }
+
+        public void Replace(Element? oldElement, Element newElement)
+        {
+            ArgumentNullException.ThrowIfNull(newElement);
+            if (newElement is Attr || oldElement is Attr)
+                throw new InvalidOperationException("Cannot replace an attribute.");
+            if (oldElement == newElement)
+                throw new ArgumentException("Cannot replace an element with itself.");
+            if (oldElement == this)
+                throw new ArgumentException("Cannot replace the parent element.");
+            if (newElement == this)
+                throw new ArgumentException("Cannot replace an element with the parent element.");
+
+            var next = this.child;
+            if (oldElement is not null)
+            {
+                if (this.child is null)
+                    throw new InvalidOperationException("Cannot replace an element when the parent has no children.");
+
+                next = oldElement.Next;
+                Remove(oldElement);
+            }
+
+            if (this.child is null)
+            {
+                Add(newElement);
+            }
+            else
+            {
+                Link(newElement, this, next);
+            }
+        }
+
         public Enumerator GetEnumerator() => new(this.child);
 
         IEnumerator<Element> IEnumerable<Element>.GetEnumerator() =>
@@ -181,14 +270,6 @@
 
         IEnumerator IEnumerable.GetEnumerator() =>
             ((IEnumerable<Element>)this).GetEnumerator();
-
-        public void Remove(Element element)
-        {
-            if (this.child is not null)
-            {
-                this.child = Unlink(element, this, this.child);
-            }
-        }
 
         public TElement? Find<TElement>(Func<TElement, bool> match)
             where TElement : Element
@@ -277,7 +358,7 @@
                 {
                     if (!hasContentBeforeTags)
                     {
-                        // a first non-comment element element is a tag, we don't prune it
+                        // the first non-comment element element is a tag, we don't prune it
                         //todo: or maybe we want to find the first content element amoung children and prune the element from there
                         break;
                     }

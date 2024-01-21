@@ -14,9 +14,14 @@
 
     public interface ISyntaxReference
     {
+        StringComparison Comparison { get; }
+
         ReadOnlySpan<char> TrimName(ReadOnlySpan<char> span);
         ReadOnlySpan<char> TrimData(ReadOnlySpan<char> span);
         ReadOnlySpan<char> TrimValue(ReadOnlySpan<char> span);
+
+        Tag CreateTag(ReadOnlySpan<char> name);
+        Attr CreateAttribute(ReadOnlySpan<char> name, ReadOnlySpan<char> value);
     }
 
     public abstract partial class MarkupParser<TMarkupLexer> : ISyntaxReference
@@ -44,6 +49,20 @@
         {
             var root = Parse(text.AsMemory());
             return new Document(root);
+        }
+
+        public Tag CreateTag(ReadOnlySpan<char> name)
+        {
+            return CreateTag(
+                new Token(TokenCategory.OpeningTag, ReadOnlySpan<char>.Empty, 0, name, 0, ReadOnlySpan<char>.Empty, 0),
+                toString: true);
+        }
+
+        public Attr CreateAttribute(ReadOnlySpan<char> name, ReadOnlySpan<char> value)
+        {
+            return CreateAttribute(
+                new Token(TokenCategory.Attribute, ReadOnlySpan<char>.Empty, 0, name, 0, value, 0),
+                toString: true);
         }
 
         protected void AddReference(TagRef reference)
@@ -224,19 +243,19 @@
             foreach (var attr in Lexer.TokenizeAttributes(token, this.lexer))
             {
                 var attribute = CreateAttribute(attr, toString);
-                tag.Add(attribute);
+                tag.AddAttribute(attribute);
             }
         }
 
-        private Attribute CreateAttribute(in Token token, bool toString)
+        private Attr CreateAttribute(in Token token, bool toString)
         {
             var reference = CreateOrFindAttrRef(token.Name);
             return
                 toString ?
-                    new StringAttribute(reference, token.Data, token.Offset, token.Length) :
+                    new StringAttr(reference, token.Data, token.Offset, token.Length) :
                     token.Data.IsEmpty ?
-                        new Attribute(reference, token.Offset, token.Length) :
-                        new ValueAttribute(reference, token.Offset, token.Length, token.DataOffset, token.Data.Length);
+                        new Attr(reference, token.Offset, token.Length) :
+                        new ValueAttr(reference, token.Offset, token.Length, token.DataOffset, token.Data.Length);
         }
 
         private TagRef CreateOrFindTagRef(ReadOnlySpan<char> tagName)
@@ -261,6 +280,8 @@
             return reference;
         }
 
+        public abstract StringComparison Comparison { get; }
+        StringComparison ISyntaxReference.Comparison => this.Comparison;
         ReadOnlySpan<char> ISyntaxReference.TrimName(ReadOnlySpan<char> span) => this.lexer.TrimName(span);
         ReadOnlySpan<char> ISyntaxReference.TrimData(ReadOnlySpan<char> span) => this.lexer.TrimData(span);
         ReadOnlySpan<char> ISyntaxReference.TrimValue(ReadOnlySpan<char> span) => this.lexer.TrimValue(span);

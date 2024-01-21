@@ -313,7 +313,7 @@ public partial class Document
 
                 case XPathNodeType.Attribute:
                     {
-                        if (element is not Attribute attr)
+                        if (element is not Attr attr)
                             return false;
                         if (this.skipNameTest)
                             return true;
@@ -325,7 +325,7 @@ public partial class Document
                     return false;
 
                 case XPathNodeType.Text:
-                    return element is Content || element is Attribute || element is DataElement;
+                    return element is Content || element is Attr || element is DataElement;
 
                 case XPathNodeType.All:
                     return true;
@@ -359,7 +359,7 @@ public partial class Document
         private IEnumerable<Element> EnumerateChildren(Element element)
         {
             // to evaluate '@attr/text()' as the attribute value
-            if (element is Attribute attr &&
+            if (element is Attr attr &&
                 this.nodeType == XPathNodeType.Text &&
                 attr.TryGetValue<string>(out var text))
             {
@@ -872,7 +872,7 @@ public partial class Document
             return element switch
             {
                 Tag tag => tag.Name,
-                Attribute attr => attr.Name,
+                Attr attr => attr.Name,
                 _ => string.Empty,
             };
         }
