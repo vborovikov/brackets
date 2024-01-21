@@ -116,7 +116,7 @@ namespace Brackets
             public void Set(ReadOnlySpan<char> name, ReadOnlySpan<char> value)
             {
                 var newAttr = this.tag.Reference.Syntax.CreateAttribute(name, value);
-                this.tag.Replace(Find(name), newAttr);
+                this.tag.ReplaceAttribute(Find(name), newAttr);
             }
 
             private Attribute? Find(ReadOnlySpan<char> name)

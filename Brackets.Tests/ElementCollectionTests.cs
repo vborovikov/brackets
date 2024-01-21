@@ -10,7 +10,7 @@ public class ElementCollectionTests
         var element = document.First() as ParentTag;
 
         Assert.IsFalse(element.HasAttributes);
-        element.Add(Document.Html.CreateAttribute("name", "value"));
+        element.AddAttribute(Document.Html.CreateAttribute("name", "value"));
         Assert.IsTrue(element.HasAttributes);
 
         Assert.AreEqual("value", element.Attributes.Get("name").ToString());
@@ -24,7 +24,7 @@ public class ElementCollectionTests
 
         Assert.AreEqual(1, element.Attributes.Count());
         Assert.AreEqual("value1", element.Attributes.Get("name1").ToString());
-        element.Add(Document.Html.CreateAttribute("name2", "value2"));
+        element.AddAttribute(Document.Html.CreateAttribute("name2", "value2"));
 
         Assert.AreEqual(2, element.Attributes.Count());
         Assert.AreEqual("value2", element.Attributes.Get("name2").ToString());

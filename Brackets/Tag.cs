@@ -53,17 +53,17 @@
             var attr = this.attribute;
             do
             {
-                tag.Add((Attribute)attr.Clone());
+                tag.AddAttribute((Attribute)attr.Clone());
                 attr = (Attribute)attr.Next;
             } while (attr != this.attribute);
         }
 
-        public void Add(Attribute attribute)
+        public void AddAttribute(Attribute attribute)
         {
             this.attribute = (Attribute?)Link(attribute, this, this.attribute);
         }
 
-        public void Remove(Attribute attribute)
+        public void RemoveAttribute(Attribute attribute)
         {
             if (this.attribute is not null)
             {
@@ -71,7 +71,7 @@
             }
         }
 
-        public void Replace(Attribute? oldAttribute, Attribute newAttribute)
+        public void ReplaceAttribute(Attribute? oldAttribute, Attribute newAttribute)
         {
             ArgumentNullException.ThrowIfNull(newAttribute);
             if (oldAttribute == newAttribute)
@@ -84,12 +84,12 @@
                     throw new InvalidOperationException("Cannot replace an attribute when the tag has no attributes.");
 
                 next = (Attribute)oldAttribute.Next;
-                Remove(oldAttribute);
+                RemoveAttribute(oldAttribute);
             }
 
             if (this.attribute is null)
             {
-                Add(newAttribute);
+                AddAttribute(newAttribute);
             }
             else
             {
@@ -197,6 +197,8 @@
         public void Add(Element element)
         {
             ArgumentNullException.ThrowIfNull(element);
+            if (element is Attribute)
+                throw new InvalidOperationException("Cannot add an attribute to a parent tag.");
             if (element == this)
                 throw new ArgumentException("Cannot add an element to itself.");
 
@@ -219,6 +221,8 @@
         public void Remove(Element element)
         {
             ArgumentNullException.ThrowIfNull(element);
+            if (element is Attribute)
+                throw new InvalidOperationException("Cannot remove an attribute from a parent tag.");
             if (element == this)
                 throw new ArgumentException("Cannot remove an element from itself.");
             if (this.child is null)
@@ -230,6 +234,8 @@
         public void Replace(Element? oldElement, Element newElement)
         {
             ArgumentNullException.ThrowIfNull(newElement);
+            if (newElement is Attribute || oldElement is Attribute)
+                throw new InvalidOperationException("Cannot replace an attribute.");
             if (oldElement == newElement)
                 throw new ArgumentException("Cannot replace an element with itself.");
             if (oldElement == this)

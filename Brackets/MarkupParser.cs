@@ -243,7 +243,7 @@
             foreach (var attr in Lexer.TokenizeAttributes(token, this.lexer))
             {
                 var attribute = CreateAttribute(attr, toString);
-                tag.Add(attribute);
+                tag.AddAttribute(attribute);
             }
         }
 
