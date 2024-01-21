@@ -52,7 +52,7 @@ public class ElementCloneTests
                     AssertAreEqual(expectedParent, actualParent);
                 }
             }
-            else if (expected is Attribute expectedAttr && actual is Attribute actualAttr)
+            else if (expected is Attr expectedAttr && actual is Attr actualAttr)
             {
                 Assert.AreEqual(expectedAttr.HasValue, actualAttr.HasValue, elemStr);
                 Assert.AreEqual(expectedAttr.Name, actualAttr.Name, elemStr);

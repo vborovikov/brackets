@@ -143,7 +143,7 @@ public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : st
             if (this.contentLength == 0 && this.parser.Language == MarkupLanguage.Xml)
             {
                 if (this.Document.FirstOrDefault() is Instruction { Name: "xml", HasAttributes: true } xmlInstruction &&
-                    xmlInstruction.Attributes.FirstOrDefault(a => a is { Name: "encoding", HasValue: true }) is Attribute encodingAttr)
+                    xmlInstruction.Attributes.FirstOrDefault(a => a is { Name: "encoding", HasValue: true }) is Attr encodingAttr)
                 {
                     SetEncoding(encodingAttr.ToString());
                 }

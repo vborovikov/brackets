@@ -7,7 +7,7 @@
     public class Tag : Element
     {
         private readonly TagRef reference;
-        private Attribute? attribute;
+        private Attr? attribute;
         private int end;
 
         public Tag(TagRef reference, int start, int length) : base(start)
@@ -18,7 +18,7 @@
 
         internal TagRef Reference => this.reference;
 
-        internal Attribute? FirstAttribute => this.attribute;
+        internal Attr? FirstAttribute => this.attribute;
 
         public string Name => this.reference.Name;
 
@@ -28,9 +28,9 @@
 
         public bool HasAttributes => this.attribute is not null;
 
-        public Attribute.List Attributes => new(this);
+        public Attr.List Attributes => new(this);
 
-        public Attribute.Enumerator EnumerateAttributes() => new(this.attribute);
+        public Attr.Enumerator EnumerateAttributes() => new(this.attribute);
 
         public sealed override int End => this.end;
 
@@ -53,25 +53,25 @@
             var attr = this.attribute;
             do
             {
-                tag.AddAttribute((Attribute)attr.Clone());
-                attr = (Attribute)attr.Next;
+                tag.AddAttribute((Attr)attr.Clone());
+                attr = (Attr)attr.Next;
             } while (attr != this.attribute);
         }
 
-        public void AddAttribute(Attribute attribute)
+        public void AddAttribute(Attr attribute)
         {
-            this.attribute = (Attribute?)Link(attribute, this, this.attribute);
+            this.attribute = (Attr?)Link(attribute, this, this.attribute);
         }
 
-        public void RemoveAttribute(Attribute attribute)
+        public void RemoveAttribute(Attr attribute)
         {
             if (this.attribute is not null)
             {
-                this.attribute = (Attribute?)Unlink(attribute, this, this.attribute);
+                this.attribute = (Attr?)Unlink(attribute, this, this.attribute);
             }
         }
 
-        public void ReplaceAttribute(Attribute? oldAttribute, Attribute newAttribute)
+        public void ReplaceAttribute(Attr? oldAttribute, Attr newAttribute)
         {
             ArgumentNullException.ThrowIfNull(newAttribute);
             if (oldAttribute == newAttribute)
@@ -83,7 +83,7 @@
                 if (this.attribute is null)
                     throw new InvalidOperationException("Cannot replace an attribute when the tag has no attributes.");
 
-                next = (Attribute)oldAttribute.Next;
+                next = (Attr)oldAttribute.Next;
                 RemoveAttribute(oldAttribute);
             }
 
@@ -97,16 +97,16 @@
             }
         }
 
-        public Attribute? FindAttribute(Predicate<Attribute> predicate)
+        public Attr? FindAttribute(Predicate<Attr> predicate)
         {
-            if (this.attribute is Attribute first)
+            if (this.attribute is Attr first)
             {
                 var current = first;
                 do
                 {
                     if (predicate(current))
                         return current;
-                    current = (Attribute)current.Next;
+                    current = (Attr)current.Next;
                 } while (current != first);
             }
 
@@ -197,7 +197,7 @@
         public void Add(Element element)
         {
             ArgumentNullException.ThrowIfNull(element);
-            if (element is Attribute)
+            if (element is Attr)
                 throw new InvalidOperationException("Cannot add an attribute to a parent tag.");
             if (element == this)
                 throw new ArgumentException("Cannot add an element to itself.");
@@ -221,7 +221,7 @@
         public void Remove(Element element)
         {
             ArgumentNullException.ThrowIfNull(element);
-            if (element is Attribute)
+            if (element is Attr)
                 throw new InvalidOperationException("Cannot remove an attribute from a parent tag.");
             if (element == this)
                 throw new ArgumentException("Cannot remove an element from itself.");
@@ -234,7 +234,7 @@
         public void Replace(Element? oldElement, Element newElement)
         {
             ArgumentNullException.ThrowIfNull(newElement);
-            if (newElement is Attribute || oldElement is Attribute)
+            if (newElement is Attr || oldElement is Attr)
                 throw new InvalidOperationException("Cannot replace an attribute.");
             if (oldElement == newElement)
                 throw new ArgumentException("Cannot replace an element with itself.");

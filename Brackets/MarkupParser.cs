@@ -21,7 +21,7 @@
         ReadOnlySpan<char> TrimValue(ReadOnlySpan<char> span);
 
         Tag CreateTag(ReadOnlySpan<char> name);
-        Attribute CreateAttribute(ReadOnlySpan<char> name, ReadOnlySpan<char> value);
+        Attr CreateAttribute(ReadOnlySpan<char> name, ReadOnlySpan<char> value);
     }
 
     public abstract partial class MarkupParser<TMarkupLexer> : ISyntaxReference
@@ -58,7 +58,7 @@
                 toString: true);
         }
 
-        public Attribute CreateAttribute(ReadOnlySpan<char> name, ReadOnlySpan<char> value)
+        public Attr CreateAttribute(ReadOnlySpan<char> name, ReadOnlySpan<char> value)
         {
             return CreateAttribute(
                 new Token(TokenCategory.Attribute, ReadOnlySpan<char>.Empty, 0, name, 0, value, 0),
@@ -247,15 +247,15 @@
             }
         }
 
-        private Attribute CreateAttribute(in Token token, bool toString)
+        private Attr CreateAttribute(in Token token, bool toString)
         {
             var reference = CreateOrFindAttrRef(token.Name);
             return
                 toString ?
-                    new StringAttribute(reference, token.Data, token.Offset, token.Length) :
+                    new StringAttr(reference, token.Data, token.Offset, token.Length) :
                     token.Data.IsEmpty ?
-                        new Attribute(reference, token.Offset, token.Length) :
-                        new ValueAttribute(reference, token.Offset, token.Length, token.DataOffset, token.Data.Length);
+                        new Attr(reference, token.Offset, token.Length) :
+                        new ValueAttr(reference, token.Offset, token.Length, token.DataOffset, token.Data.Length);
         }
 
         private TagRef CreateOrFindTagRef(ReadOnlySpan<char> tagName)

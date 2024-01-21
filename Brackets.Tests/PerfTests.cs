@@ -17,6 +17,6 @@ public class PerfTests
         Assert.AreEqual(1, Marshal.SizeOf(typeof(HtmlLexer)));
 
         Assert.AreEqual(24, Marshal.SizeOf(typeof(Element.Enumerator)));
-        Assert.AreEqual(24, Marshal.SizeOf(typeof(Attribute.Enumerator)));
+        Assert.AreEqual(24, Marshal.SizeOf(typeof(Attr.Enumerator)));
     }
 }
