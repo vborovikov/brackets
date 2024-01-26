@@ -97,7 +97,7 @@ namespace Brackets
             readonly IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
 
-        public readonly struct List
+        public readonly struct List : IEnumerable<Attr>
         {
             private readonly Tag tag;
 
@@ -107,6 +107,16 @@ namespace Brackets
             }
 
             internal Attr? First => this.tag.FirstAttribute;
+
+            public ReadOnlySpan<char> this[ReadOnlySpan<char> name]
+            {
+                get => Get(name);
+                set => Set(name, value);
+            }
+
+            public Enumerator GetEnumerator() => new(this.tag.FirstAttribute);
+            IEnumerator<Attr> IEnumerable<Attr>.GetEnumerator() => GetEnumerator();
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
             public ReadOnlySpan<char> Get(ReadOnlySpan<char> name)
             {
@@ -118,6 +128,8 @@ namespace Brackets
                 var newAttr = this.tag.Reference.Syntax.CreateAttribute(name, value);
                 this.tag.ReplaceAttribute(Find(name), newAttr);
             }
+
+            public bool Has(ReadOnlySpan<char> name) => Find(name) is not null;
 
             private Attr? Find(ReadOnlySpan<char> name)
             {
