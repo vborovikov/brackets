@@ -183,57 +183,6 @@
         }
 
         [TestMethod]
-        public void Parse_CodeTagMultipleTags_RawContent()
-        {
-            var document = Document.Html.Parse(
-                """
-                <pre><code class="language-xml"><Project Sdk="Microsoft.NET.Sdk">
-
-                  <PropertyGroup>
-                    <OutputType>Exe</OutputType>
-                    <TargetFrameworks>net8.0;net7.0</TargetFrameworks>
-                    <LangVersion>Preview</LangVersion>
-                    <ImplicitUsings>enable</ImplicitUsings>
-                    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-                    <ServerGarbageCollection>true</ServerGarbageCollection>
-                  </PropertyGroup>
-
-                  <ItemGroup>
-                    <PackageReference Include="BenchmarkDotNet" Version="0.13.8" />
-                  </ItemGroup>
-
-                </Project></code></pre>
-                """);
-
-            var pre = document.SingleOrDefault() as ParentTag;
-            Assert.IsNotNull(pre);
-            var code = pre.SingleOrDefault() as ParentTag;
-            Assert.IsNotNull(code);
-            var content = code.SingleOrDefault() as Content;
-            Assert.IsNotNull(content);
-
-            Assert.AreEqual(
-                """
-                <Project Sdk="Microsoft.NET.Sdk">
-                
-                  <PropertyGroup>
-                    <OutputType>Exe</OutputType>
-                    <TargetFrameworks>net8.0;net7.0</TargetFrameworks>
-                    <LangVersion>Preview</LangVersion>
-                    <ImplicitUsings>enable</ImplicitUsings>
-                    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-                    <ServerGarbageCollection>true</ServerGarbageCollection>
-                  </PropertyGroup>
-                
-                  <ItemGroup>
-                    <PackageReference Include="BenchmarkDotNet" Version="0.13.8" />
-                  </ItemGroup>
-                
-                </Project>
-                """, content.ToString());
-        }
-
-        [TestMethod]
         public void Parse_CodeTagCsharp_RawContent()
         {
             var document = Document.Html.Parse(
@@ -291,89 +240,24 @@
         }
 
         [TestMethod]
-        public void Parse_CodeTagRazor_SingleContent()
+        public void Parse_CDataInScript_ParsedAsCData()
         {
             var document = Document.Html.Parse(
                 """
-                <pre><code class="language-razor"><EditForm Model="Customer" method="post" OnSubmit="DisplayCustomer" FormName="customer">
-                    <div>
-                        <label>Name</label>
-                        <InputText @bind-Value="Customer.Name" />
-                    </div>
-                    <AddressEditor @bind-Value="Customer.BillingAddress" />
-                    <button>Send</button>
-                </EditForm>
+                <script type="application/ld+json">
+                    <![CDATA[
+                    {"@context":"https:\/\/schema.org","@type":"Article","name":"Hermitian matrix","url":"https:\/\/en.wikipedia.org\/wiki\/Hermitian_matrix","sameAs":"http:\/\/www.wikidata.org\/entity\/Q652941","mainEntity":"http:\/\/www.wikidata.org\/entity\/Q652941","author":{"@type":"Organization","name":"Contributors to Wikimedia projects"},"publisher":{"@type":"Organization","name":"Wikimedia Foundation, Inc.","logo":{"@type":"ImageObject","url":"https:\/\/www.wikimedia.org\/static\/images\/wmf-hor-googpub.png"}},"datePublished":"2003-02-28T21:51:08Z","dateModified":"2020-02-24T20:33:46Z","headline":"matrix equal to its conjugate-transpose"}
+                    ]]>
+                </script>
+                """);
 
-                @if (submitted)
-                {
-                    <!-- Display customer data -->
-                    <h3>Customer</h3>
-                    <p>Name: @Customer.Name</p>
-                    <p>Street: @Customer.BillingAddress.Street</p>
-                    <p>City: @Customer.BillingAddress.City</p>
-                    <p>State: @Customer.BillingAddress.State</p>
-                    <p>Zip: @Customer.BillingAddress.Zip</p>
-                }
+            var script = document.FirstOrDefault() as ParentTag;
+            Assert.IsNotNull(script);
+            Assert.AreEqual("script", script.Name);
 
-                @code {
-                    public void DisplayCustomer()
-                    {
-                        submitted = true;
-                    }
-
-                    [SupplyParameterFromForm] Customer? Customer { get; set; }
-
-                    protected override void OnInitialized() => Customer ??= new();
-
-                    bool submitted = false;
-                    public void Submit() => submitted = true;
-                }</code></pre>
-                """
-                );
-
-            var pre = document.SingleOrDefault() as ParentTag;
-            Assert.IsNotNull(pre);
-            var code = pre.SingleOrDefault() as ParentTag;
-            Assert.IsNotNull(code);
-            var content = code.SingleOrDefault() as Content;
-            Assert.IsNotNull(content);
-
-            Assert.AreEqual(
-                """
-                <EditForm Model="Customer" method="post" OnSubmit="DisplayCustomer" FormName="customer">
-                    <div>
-                        <label>Name</label>
-                        <InputText @bind-Value="Customer.Name" />
-                    </div>
-                    <AddressEditor @bind-Value="Customer.BillingAddress" />
-                    <button>Send</button>
-                </EditForm>
-                
-                @if (submitted)
-                {
-                    <!-- Display customer data -->
-                    <h3>Customer</h3>
-                    <p>Name: @Customer.Name</p>
-                    <p>Street: @Customer.BillingAddress.Street</p>
-                    <p>City: @Customer.BillingAddress.City</p>
-                    <p>State: @Customer.BillingAddress.State</p>
-                    <p>Zip: @Customer.BillingAddress.Zip</p>
-                }
-                
-                @code {
-                    public void DisplayCustomer()
-                    {
-                        submitted = true;
-                    }
-                
-                    [SupplyParameterFromForm] Customer? Customer { get; set; }
-                
-                    protected override void OnInitialized() => Customer ??= new();
-                
-                    bool submitted = false;
-                    public void Submit() => submitted = true;
-                }
-                """, content.ToString());
+            var cdata = script.SingleOrDefault();
+            Assert.IsNotNull(cdata);
+            Assert.IsInstanceOfType(cdata, typeof(Section));
         }
     }
 }

@@ -36,7 +36,18 @@ public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : st
                 }
                 else
                 {
-                    ParseContent(token, parent, toString: true);
+                    // skip empty content before and immediately after a single child
+                    if (token.IsEmpty && (parent.Child is null || parent.Child.Next == parent.Child))
+                        continue;
+
+                    if (token.Category == TokenCategory.Section)
+                    {
+                        ParseSection(token, parent, toString: true);
+                    }
+                    else
+                    {
+                        ParseContent(token, parent, toString: true);
+                    }
                 }
             }
             else
