@@ -7,6 +7,8 @@
         protected CharacterData(int start)
             : base(start) { }
 
+        public new ParentTag? Parent => base.Parent as ParentTag;
+
         public virtual ReadOnlySpan<char> Data => this.Source[this.Start..this.End];
 
         public override string ToString()

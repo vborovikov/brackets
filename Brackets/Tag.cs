@@ -20,6 +20,8 @@
 
         internal Attr? FirstAttribute => this.attribute;
 
+        public new ParentTag? Parent => base.Parent as ParentTag;
+
         public string Name => this.reference.Name;
 
         public bool HasRawContent => this.reference.HasRawContent;
