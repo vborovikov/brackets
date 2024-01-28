@@ -2,7 +2,7 @@ namespace Brackets.Html
 {
     using System;
 
-    class BrTagRef : TagRef
+    sealed class BrTagRef : TagRef
     {
         public BrTagRef(ISyntaxReference syntax) : base("br", syntax)
         {
