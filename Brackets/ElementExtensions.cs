@@ -40,6 +40,54 @@ public static class ElementExtensions
             (element.Parent as ParentTag)?.Child?.Prev == element;
     }
 
+    public static Element PreviousSibling(this Element element, Func<Element, bool> predicate)
+    {
+        if (PreviousSiblingOrDefault(element, predicate) is not Element prev)
+            throw new InvalidOperationException("Element has no previous sibling.");
+
+        return prev;
+    }
+
+    public static Element? PreviousSiblingOrDefault(this Element element, Func<Element, bool> predicate)
+    {
+        var first = element is Attr ? element.Parent?.FirstAttribute : (element.Parent as ParentTag)?.Child;
+        if (element.Parent is null || first is null)
+            return default;
+
+        while (element != first)
+        {
+            element = element.Prev;
+            if (predicate(element))
+                return element;
+        }
+
+        return default;
+    }
+
+    public static Element NextSibling(this Element element, Func<Element, bool> predicate)
+    {
+        if (NextSiblingOrDefault(element, predicate) is not Element next)
+            throw new InvalidOperationException("Element has no next sibling.");
+
+        return next;
+    }
+
+    public static Element? NextSiblingOrDefault(this Element element, Func<Element, bool> predicate)
+    {
+        var last = element is Attr ? element.Parent?.FirstAttribute?.Prev : (element.Parent as ParentTag)?.Child?.Prev;
+        if (element.Parent is null || last is null)
+            return default;
+
+        while (element != last)
+        {
+            element = element.Next;
+            if (predicate(element))
+                return element;
+        }
+
+        return default;
+    }
+
     public static bool Contains(this Element element, ReadOnlySpan<char> text)
     {
         if (element is Attr attribute)
