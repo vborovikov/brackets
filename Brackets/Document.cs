@@ -63,7 +63,7 @@
         public IEnumerable<TElement> FindAll<TElement>(Func<TElement, bool> match)
             where TElement : Element
         {
-            return this.root.FindAll(el => el is TElement element && match(element)).Cast<TElement>();
+            return this.root.FindAll(match);
         }
 
         public IEnumerable<Element> Find(string path)

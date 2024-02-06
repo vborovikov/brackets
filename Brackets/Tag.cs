@@ -62,15 +62,18 @@
 
         public void AddAttribute(Attr attribute)
         {
+            ArgumentNullException.ThrowIfNull(attribute);
+
             this.attribute = (Attr?)Link(attribute, this, this.attribute);
         }
 
         public void RemoveAttribute(Attr attribute)
         {
-            if (this.attribute is not null)
-            {
-                this.attribute = (Attr?)Unlink(attribute, this, this.attribute);
-            }
+            ArgumentNullException.ThrowIfNull(attribute);
+            if (this.attribute is null)
+                throw new InvalidOperationException("Cannot remove an attribute when the tag has no attributes.");
+
+            this.attribute = (Attr?)Unlink(attribute, this, this.attribute);
         }
 
         public void ReplaceAttribute(Attr? oldAttribute, Attr newAttribute)
@@ -322,6 +325,9 @@
                 }
             } while (elementParent != this || element != this.child);
         }
+
+        public IEnumerable<TElement> FindAll<TElement>(Func<TElement, bool> match) where TElement : Element =>
+            FindAll(el => el is TElement element && match(element)).Cast<TElement>();
 
         public override string ToString()
         {

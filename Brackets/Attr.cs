@@ -54,14 +54,15 @@ namespace Brackets
 
         public new struct Enumerator : IEnumerable<Attr>, IEnumerator<Attr>
         {
-            private readonly Attr? first;
+            private readonly Attr? last;
             private Attr? sibling;
             private Attr? current;
 
-            internal Enumerator(Attr? node)
+            internal Enumerator(Attr? first)
             {
-                this.first = node;
-                this.sibling = node;
+                //todo: use last here?
+                this.last = (Attr?)first?.Prev;
+                this.sibling = first;
             }
 
             public readonly Attr Current => this.current!;
@@ -78,18 +79,14 @@ namespace Brackets
                     return false;
 
                 this.current = this.sibling;
-                this.sibling = (Attr)this.sibling.Next;
-                if (this.sibling == this.first)
-                {
-                    this.sibling = null;
-                }
+                this.sibling = this.sibling == this.last ? null : (Attr)this.sibling.Next;
 
                 return true;
             }
 
             public void Reset()
             {
-                this.sibling = this.first;
+                this.sibling = (Attr?)this.last?.Next;
                 this.current = null;
             }
 

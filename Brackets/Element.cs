@@ -141,7 +141,7 @@
         protected static Element Link(Element element, Tag parent, Element? sibling)
         {
             if (element.parent is not null)
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("Element already has a parent.");
             element.parent = parent;
 
             if (sibling is null)
@@ -164,10 +164,10 @@
         protected static Element? Unlink(Element element, Tag parent, Element sibling)
         {
             if (element.parent is null || element.parent != parent)
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("Element does not have the expected parent.");
 
             if (sibling is null)
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("Element does not have a sibling.");
 
             var child = sibling;
             if (element.next == element)
@@ -249,14 +249,15 @@
 
         public struct Enumerator : IEnumerable<Element>, IEnumerator<Element>
         {
-            private readonly Element? first;
-            private Element? node;
+            private readonly Element? last;
+            private Element? sibling;
             private Element? current;
 
-            internal Enumerator(Element? node)
+            internal Enumerator(Element? first)
             {
-                this.first = node;
-                this.node = node;
+                //todo: use last here? so enumerating elements while removing them will work
+                this.last = first?.prev;
+                this.sibling = first;
             }
 
             public readonly Element Current => this.current!;
@@ -269,22 +270,18 @@
 
             public bool MoveNext()
             {
-                if (this.node is null)
+                if (this.sibling is null)
                     return false;
 
-                this.current = this.node;
-                this.node = this.node.next;
-                if (this.node == this.first)
-                {
-                    this.node = null;
-                }
+                this.current = this.sibling;
+                this.sibling = this.sibling == this.last ? null : this.sibling.next;
 
                 return true;
             }
 
             public void Reset()
             {
-                this.node = this.first;
+                this.sibling = this.last?.next;
                 this.current = null;
             }
 
