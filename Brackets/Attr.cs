@@ -128,6 +128,12 @@ namespace Brackets
 
             public bool Has(ReadOnlySpan<char> name) => Find(name) is not null;
 
+            public bool Has(ReadOnlySpan<char> name, ReadOnlySpan<char> value, StringComparison valueComparison = StringComparison.OrdinalIgnoreCase)
+            {
+                var attr = Find(name);
+                return attr is not null && attr.Value.Contains(value, valueComparison);
+            }
+
             private Attr? Find(ReadOnlySpan<char> name)
             {
                 if (this.tag.FirstAttribute is Attr first)
