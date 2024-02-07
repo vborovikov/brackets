@@ -22,6 +22,7 @@
 
         Tag CreateTag(ReadOnlySpan<char> name);
         Attr CreateAttribute(ReadOnlySpan<char> name, ReadOnlySpan<char> value);
+        Content CreateContent(ReadOnlySpan<char> value);
     }
 
     public abstract partial class MarkupParser<TMarkupLexer> : ISyntaxReference
@@ -62,6 +63,13 @@
         {
             return CreateAttribute(
                 new Token(TokenCategory.Attribute, ReadOnlySpan<char>.Empty, 0, name, 0, value, 0),
+                toString: true);
+        }
+
+        public Content CreateContent(ReadOnlySpan<char> value)
+        {
+            return CreateContent(
+                new Token(TokenCategory.Content, value, 0),
                 toString: true);
         }
 
