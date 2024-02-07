@@ -18,5 +18,15 @@ public class PerfTests
 
         Assert.AreEqual(24, Marshal.SizeOf(typeof(Element.Enumerator)));
         Assert.AreEqual(24, Marshal.SizeOf(typeof(Attr.Enumerator)));
+        Assert.AreEqual(8, Marshal.SizeOf(typeof(Attr.List)));
+    }
+
+    [TestMethod]
+    public void AttrListIndexedProperty_Setter_CS1612NotRaised()
+    {
+        var tag = Document.Html.CreateTag("div");
+        tag.Attributes["id"] = "can-set-id";
+        var value = tag.Attributes["id"];
+        Assert.AreEqual("can-set-id", value.ToString());
     }
 }

@@ -7,12 +7,14 @@
     public class Tag : Element
     {
         private readonly TagRef reference;
+        private readonly Attr.List attrList;
         private Attr? attribute;
         private int end;
 
         public Tag(TagRef reference, int start, int length) : base(start)
         {
             this.reference = reference;
+            this.attrList = new Attr.List(this);
             this.end = start + length;
         }
 
@@ -30,7 +32,7 @@
 
         public bool HasAttributes => this.attribute is not null;
 
-        public Attr.List Attributes => new(this);
+        public ref readonly Attr.List Attributes => ref this.attrList;
 
         public Attr.Enumerator EnumerateAttributes() => new(this.attribute);
 
