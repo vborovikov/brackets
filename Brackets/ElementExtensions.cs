@@ -88,6 +88,24 @@ public static class ElementExtensions
         return default;
     }
 
+    public static TElement PreviousSibling<TElement>(this Element element) where TElement : Element =>
+        (TElement)element.PreviousSibling(e => e is TElement);
+    public static TElement? PreviousSiblingOrDefault<TElement>(this Element element) where TElement : Element =>
+        (TElement?)element.PreviousSiblingOrDefault(e => e is TElement);
+    public static TElement NextSibling<TElement>(this Element element) where TElement : Element =>
+        (TElement)element.NextSibling(e => e is TElement);
+    public static TElement? NextSiblingOrDefault<TElement>(this Element element) where TElement : Element =>
+        (TElement?)element.NextSiblingOrDefault(e => e is TElement);
+
+    public static TElement PreviousSibling<TElement>(this Element element, Func<TElement, bool> predicate) where TElement : Element =>
+        (TElement)element.PreviousSibling(e => e is TElement sibling && predicate(sibling));
+    public static TElement? PreviousSiblingOrDefault<TElement>(this Element element, Func<TElement, bool> predicate) where TElement : Element =>
+        (TElement?)element.PreviousSiblingOrDefault(e => e is TElement sibling && predicate(sibling));
+    public static TElement NextSibling<TElement>(this Element element, Func<TElement, bool> predicate) where TElement : Element =>
+        (TElement)element.NextSibling(e => e is TElement sibling && predicate(sibling));
+    public static TElement? NextSiblingOrDefault<TElement>(this Element element, Func<TElement, bool> predicate) where TElement : Element =>
+        (TElement?)element.NextSiblingOrDefault(e => e is TElement sibling && predicate(sibling));
+
     public static bool Contains(this Element element, ReadOnlySpan<char> text)
     {
         if (element is Attr attribute)
@@ -357,6 +375,58 @@ public static class ElementExtensions
 
         return single;
     }
+
+    public static TElement First<TElement>(this Document document) where TElement : Element =>
+        (TElement)document.First(e => e is TElement);
+    public static TElement First<TElement>(this ParentTag parent) where TElement : Element =>
+        (TElement)parent.First(e => e is TElement);
+    public static TElement Last<TElement>(this Document document) where TElement : Element =>
+        (TElement)document.Last(e => e is TElement);
+    public static TElement Last<TElement>(this ParentTag parent) where TElement : Element =>
+        (TElement)parent.Last(e => e is TElement);
+    public static TElement Single<TElement>(this Document document) where TElement : Element =>
+        (TElement)document.Single(e => e is TElement);
+    public static TElement Single<TElement>(this ParentTag parent) where TElement : Element =>
+        (TElement)parent.Single(e => e is TElement);
+
+    public static TElement? FirstOrDefault<TElement>(this Document document) where TElement : Element =>
+        (TElement?)document.FirstOrDefault(e => e is TElement);
+    public static TElement? FirstOrDefault<TElement>(this ParentTag parent) where TElement : Element =>
+        (TElement?)parent.FirstOrDefault(e => e is TElement);
+    public static TElement? LastOrDefault<TElement>(this Document document) where TElement : Element =>
+        (TElement?)document.LastOrDefault(e => e is TElement);
+    public static TElement? LastOrDefault<TElement>(this ParentTag parent) where TElement : Element =>
+        (TElement?)parent.LastOrDefault(e => e is TElement);
+    public static TElement? SingleOrDefault<TElement>(this Document document) where TElement : Element =>
+        (TElement?)document.SingleOrDefault(e => e is TElement);
+    public static TElement? SingleOrDefault<TElement>(this ParentTag parent) where TElement : Element =>
+        (TElement?)parent.SingleOrDefault(e => e is TElement);
+
+    public static TElement First<TElement>(this Document document, Func<TElement, bool> predicate) where TElement : Element =>
+        (TElement)document.First(e => e is TElement element && predicate(element));
+    public static TElement First<TElement>(this ParentTag parent, Func<TElement, bool> predicate) where TElement : Element =>
+        (TElement)parent.First(e => e is TElement element && predicate(element));
+    public static TElement Last<TElement>(this Document document, Func<TElement, bool> predicate) where TElement : Element =>
+        (TElement)document.Last(e => e is TElement element && predicate(element));
+    public static TElement Last<TElement>(this ParentTag parent, Func<TElement, bool> predicate) where TElement : Element =>
+        (TElement)parent.Last(e => e is TElement element && predicate(element));
+    public static TElement Single<TElement>(this Document document, Func<TElement, bool> predicate) where TElement : Element =>
+        (TElement)document.Single(e => e is TElement element && predicate(element));
+    public static TElement Single<TElement>(this ParentTag parent, Func<TElement, bool> predicate) where TElement : Element =>
+        (TElement)parent.Single(e => e is TElement element && predicate(element));
+
+    public static TElement? FirstOrDefault<TElement>(this Document document, Func<TElement, bool> predicate) where TElement : Element =>
+        (TElement?)document.FirstOrDefault(e => e is TElement element && predicate(element));
+    public static TElement? FirstOrDefault<TElement>(this ParentTag parent, Func<TElement, bool> predicate) where TElement : Element =>
+        (TElement?)parent.FirstOrDefault(e => e is TElement element && predicate(element));
+    public static TElement? LastOrDefault<TElement>(this Document document, Func<TElement, bool> predicate) where TElement : Element =>
+        (TElement?)document.LastOrDefault(e => e is TElement element && predicate(element));
+    public static TElement? LastOrDefault<TElement>(this ParentTag parent, Func<TElement, bool> predicate) where TElement : Element =>
+        (TElement?)parent.LastOrDefault(e => e is TElement element && predicate(element));
+    public static TElement? SingleOrDefault<TElement>(this Document document, Func<TElement, bool> predicate) where TElement : Element =>
+        (TElement?)document.SingleOrDefault(e => e is TElement element && predicate(element));
+    public static TElement? SingleOrDefault<TElement>(this ParentTag parent, Func<TElement, bool> predicate) where TElement : Element =>
+        (TElement?)parent.SingleOrDefault(e => e is TElement element && predicate(element));
 
     public static bool All(this Document document, Func<Element, bool> predicate) => document.Root.All(predicate);
 
