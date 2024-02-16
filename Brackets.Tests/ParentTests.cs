@@ -39,4 +39,17 @@ public class ParentTests
 
         Assert.AreEqual(newElement, parent.Find<ParentTag>(t => !t.Any()));
     }
+
+    [TestMethod]
+    public void Replace_FirstElement_NewElementBecomesFirst()
+    {
+        var document = Document.Html.Parse("<span><i>Value1</i><i>Value2</i><i>Value3</i></span>");
+        var parent = document.First<ParentTag>();
+        var oldElement = parent.First<Tag>();
+        var newElement = Document.Html.CreateTag("i");
+
+        parent.Replace(oldElement, newElement);
+
+        Assert.AreEqual(newElement, parent.First<Tag>());
+    }
 }

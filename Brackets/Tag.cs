@@ -251,12 +251,14 @@
                 throw new ArgumentException("Cannot replace an element with the parent element.");
 
             var next = this.child;
+            var isFirst = false;
             if (oldElement is not null)
             {
                 if (this.child is null)
                     throw new InvalidOperationException("Cannot replace an element when the parent has no children.");
 
                 next = oldElement.Next;
+                isFirst = oldElement == this.child;
                 Remove(oldElement);
             }
 
@@ -267,6 +269,10 @@
             else
             {
                 Link(newElement, this, next);
+                if (isFirst)
+                {
+                    this.child = newElement;
+                }
             }
         }
 
