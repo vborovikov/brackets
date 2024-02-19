@@ -529,4 +529,29 @@ public static class ElementExtensions
 
         return count;
     }
+
+    public static bool All<TElement>(this Document document) where TElement : Element =>
+        document.All(e => e is TElement);
+    public static bool All<TElement>(this Document document, Func<Element, bool> predicate) where TElement : Element =>
+        document.All(e => e is TElement element && predicate(element));
+    public static bool All<TElement>(this ParentTag root) where TElement : Element =>
+        root.All(e => e is TElement);
+    public static bool All<TElement>(this ParentTag root, Func<Element, bool> predicate) where TElement : Element =>
+        root.All(e => e is TElement element && predicate(element));
+    public static bool Any<TElement>(this Document document) where TElement : Element =>
+        document.Any(e => e is TElement);
+    public static bool Any<TElement>(this Document document, Func<Element, bool> predicate) where TElement : Element =>
+        document.Any(e => e is TElement element && predicate(element));
+    public static bool Any<TElement>(this ParentTag root) where TElement : Element =>
+        root.Any(e => e is TElement);
+    public static bool Any<TElement>(this ParentTag root, Func<Element, bool> predicate) where TElement : Element =>
+        root.Any(e => e is TElement element && predicate(element));
+    public static int Count<TElement>(this Document document) where TElement : Element =>
+        document.Count(e => e is TElement);
+    public static int Count<TElement>(this Document document, Func<Element, bool> predicate) where TElement : Element =>
+        document.Count(e => e is TElement element && predicate(element));
+    public static int Count<TElement>(this ParentTag root) where TElement : Element =>
+        root.Count(e => e is TElement);
+    public static int Count<TElement>(this ParentTag root, Func<Element, bool> predicate) where TElement : Element =>
+        root.Count(e => e is TElement element && predicate(element));
 }
