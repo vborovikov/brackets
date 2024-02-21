@@ -47,7 +47,7 @@ namespace Brackets
 
         internal override string ToDebugString()
         {
-            return this.HasValue ? $"{this.Name}={this.Value}" : this.Name;
+            return this.HasValue ? $"{this.Name}=\"{this.Value}\"" : this.Name;
         }
 
         protected ReadOnlySpan<char> TrimValue(ReadOnlySpan<char> value) => this.reference.Syntax.TrimValue(value);
@@ -182,7 +182,7 @@ namespace Brackets
         public StringAttr(AttrRef reference, ReadOnlySpan<char> value, int offset, int length)
             : base(reference, offset, length)
         {
-            this.value = TrimValue(value).ToString();
+            this.value = value.IsEmpty ? null : TrimValue(value).ToString();
         }
 
         public StringAttr(AttrRef reference, string? value, int offset, int length)

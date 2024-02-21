@@ -3,6 +3,7 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Text;
 
     public class Tag : Element
     {
@@ -120,7 +121,23 @@
             return null;
         }
 
-        internal override string ToDebugString() => $"<{this.Name}/>";
+        internal override string ToDebugString()
+        {
+            var debug = new StringBuilder();
+
+            debug.Append('<').Append(this.Name).Append(' ');
+            if (this.HasAttributes)
+            {
+                foreach (var attr in EnumerateAttributes())
+                {
+                    debug.Append(attr.ToDebugString()).Append(' ');
+                }
+                debug.Length -= 1;
+            }
+            debug.Append("/>");
+
+            return debug.ToString();
+        }
 
         internal void CloseAt(int end)
         {
@@ -171,6 +188,8 @@
         public ParentTag(TagRef reference, int start, int length) : base(reference, start, length)
         {
         }
+
+        public bool HasChildren => this.child is not null;
 
         public int ContentStart => this.child?.Start ?? -1;
 
@@ -395,6 +414,26 @@
             return null;
         }
 
-        internal override string ToDebugString() => $"<{this.Name}>\u2026</{this.Name}>";
+        internal override string ToDebugString()
+        {
+            var debug = new StringBuilder();
+
+            debug.Append('<').Append(this.Name).Append(' ');
+            if (this.HasAttributes)
+            {
+                foreach (var attr in EnumerateAttributes())
+                {
+                    debug.Append(attr.ToDebugString()).Append(' ');
+                }
+                debug.Length -= 1;
+            }
+            debug.Append('>');
+            if (this.HasChildren)
+            {
+                debug.Append('\u2026');
+            }
+
+            return debug.ToString();
+        }
     }
 }
