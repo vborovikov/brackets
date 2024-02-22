@@ -50,7 +50,12 @@ namespace Brackets
             return this.HasValue ? $"{this.Name}=\"{this.Value}\"" : this.Name;
         }
 
-        protected ReadOnlySpan<char> TrimValue(ReadOnlySpan<char> value) => this.reference.Syntax.TrimValue(value);
+        /// <summary>
+        /// Strips the attribute value from the quotation marks and then removes any leading or trailing whitespace.
+        /// </summary>
+        /// <param name="value">The raw attribute value provided by the parser.</param>
+        /// <returns>The trimmed attribute value.</returns>
+        protected ReadOnlySpan<char> TrimValue(ReadOnlySpan<char> value) => this.reference.Syntax.TrimValue(value).Trim();
 
         public new struct Enumerator : IEnumerable<Attr>, IEnumerator<Attr>
         {
