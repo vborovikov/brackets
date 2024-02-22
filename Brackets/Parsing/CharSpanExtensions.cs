@@ -15,7 +15,7 @@ static class CharSpanExtensions
     /// <param name="stopChars">The stop characters to search for.</param>
     /// <param name="quoteChars">The quotation mark characters to consider.</param>
     /// <returns>The index of the first occurrence of any of the stop characters after a quote, or -1 if not found.</returns>
-    public static int IndexOfAnyAfterQuotes(this ReadOnlySpan<char> span, SearchValues<char> stopChars, ReadOnlySpan<char> quoteChars)
+    public static int IndexOfAnyAfterQuotes(this ReadOnlySpan<char> span, ReadOnlySpan<char> stopChars, ReadOnlySpan<char> quoteChars)
     {
         if (span.Length == 0)
             return -1;
@@ -31,7 +31,7 @@ static class CharSpanExtensions
     /// <param name="stopChars">The stop characters to search for.</param>
     /// <param name="quoteChar">The quotation mark character.</param>
     /// <returns>The index of the first occurrence of any of the stop characters after a quote, or -1 if not found.</returns>
-    public static int IndexOfAnyAfterQuotes(this ReadOnlySpan<char> span, SearchValues<char> stopChars, char quoteChar)
+    public static int IndexOfAnyAfterQuotes(this ReadOnlySpan<char> span, ReadOnlySpan<char> stopChars, char quoteChar)
     {
         var insideQuotes = false;
         for (var start = 0; start < span.Length; ++start)

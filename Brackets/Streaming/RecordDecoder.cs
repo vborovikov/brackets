@@ -31,7 +31,7 @@ public enum RecordReadResult
 /// </summary>
 sealed class RecordDecoder : IDisposable
 {
-    private static readonly SearchValues<char> LineSeparators = SearchValues.Create("\r\n");
+    private static readonly string LineSeparators = "\r\n";
 
     /// <summary>
     /// A buffer of written characters that have not yet been encoded.

@@ -18,9 +18,9 @@ public readonly struct XmlLexer : IMarkupLexer
     private const string SeparatorsTrim = " \r\n\t\xA0";
     private const string NameSeparatorsTrim = "/" + SeparatorsTrim;
     private const string AttrSeparatorsTrim = "=" + SeparatorsTrim;
-    private static readonly SearchValues<char> Separators = SearchValues.Create(SeparatorsTrim);
-    private static readonly SearchValues<char> NameSeparators = SearchValues.Create(NameSeparatorsTrim);
-    private static readonly SearchValues<char> AttrSeparators = SearchValues.Create(AttrSeparatorsTrim);
+    private static readonly string Separators = SeparatorsTrim;
+    private static readonly string NameSeparators = NameSeparatorsTrim;
+    private static readonly string AttrSeparators = AttrSeparatorsTrim;
     private const string TermOpener = "</";
     private const string TermCloser = "/>";
     private const string CommentOpener = "<!--";
