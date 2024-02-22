@@ -104,7 +104,7 @@
             Assert.AreEqual(1, tag.EnumerateAttributes().Count());
 
             var attr = tag.EnumerateAttributes().First();
-            Assert.AreEqual(" \"\"v1\"\" ", attr.Value.ToString());
+            Assert.AreEqual("\"\"v1\"\"", attr.Value.ToString());
         }
 
         [TestMethod]
