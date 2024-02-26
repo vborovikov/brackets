@@ -172,71 +172,25 @@
         }
 
         [TestMethod]
-        public void Parse_CodeTag_RawContent()
+        public void Parse_CodeTagEscapedTag_RawContent()
         {
-            var document = Document.Html.Parse("<code><PackageReference/></code>");
+            var document = Document.Html.Parse("<code>&lt;PackageReference/&gt;</code>");
             var code = document.First() as ParentTag;
             Assert.IsNotNull(code);
             var content = code.SingleOrDefault() as Content;
             Assert.IsNotNull(content);
-            Assert.AreEqual("<PackageReference/>", content.ToString());
+            Assert.AreEqual("&lt;PackageReference/&gt;", content.ToString());
         }
 
         [TestMethod]
-        public void Parse_CodeTagCsharp_RawContent()
+        public void Parse_CodeTagUnescapedTag_UknownTag()
         {
-            var document = Document.Html.Parse(
-                """
-                <pre><code class="language-C#">static void Count(ref uint sharedCounter)
-                {
-                    uint currentCount = sharedCounter, delta = 1;
-                    if (currentCount > 0)
-                    {
-                        int logCount = 31 - (int)uint.LeadingZeroCount(currentCount);
-                        if (logCount >= 13)
-                        {
-                            delta = 1u << (logCount - 12);
-                            uint random = (uint)Random.Shared.NextInt64(0, uint.MaxValue + 1L);
-                            if ((random & (delta - 1)) != 0)
-                            {
-                                return;
-                            }
-                        }
-                    }
-
-                    Interlocked.Add(ref sharedCounter, delta);
-                }</code></pre>
-                """);
-
-            var pre = document.SingleOrDefault() as ParentTag;
-            Assert.IsNotNull(pre);
-            var code = pre.SingleOrDefault() as ParentTag;
+            var document = Document.Html.Parse("<code><PackageReference/></code>");
+            var code = document.First() as ParentTag;
             Assert.IsNotNull(code);
-            var content = code.SingleOrDefault() as Content;
+            var content = code.SingleOrDefault();
             Assert.IsNotNull(content);
-
-            Assert.AreEqual(
-                """
-                static void Count(ref uint sharedCounter)
-                {
-                    uint currentCount = sharedCounter, delta = 1;
-                    if (currentCount > 0)
-                    {
-                        int logCount = 31 - (int)uint.LeadingZeroCount(currentCount);
-                        if (logCount >= 13)
-                        {
-                            delta = 1u << (logCount - 12);
-                            uint random = (uint)Random.Shared.NextInt64(0, uint.MaxValue + 1L);
-                            if ((random & (delta - 1)) != 0)
-                            {
-                                return;
-                            }
-                        }
-                    }
-
-                    Interlocked.Add(ref sharedCounter, delta);
-                }
-                """, content.ToString());
+            Assert.IsInstanceOfType<Tag>(content);
         }
 
         [TestMethod]

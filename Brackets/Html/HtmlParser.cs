@@ -36,7 +36,7 @@ public class HtmlParser : MarkupParser<HtmlLexer>
         // raw text elements
         AddReference(new TagRef("style", this) { HasRawContent = true });
         AddReference(new TagRef("script", this) { HasRawContent = true, Level = ElementLevel.Inline });
-        AddReference(new TagRef("code", this) { HasRawContent = true, Level = ElementLevel.Inline });
+        AddReference(new TagRef("code", this) { HasRawContent = false, Level = ElementLevel.Inline });
         // other inline elements
         AddReference(new TagRef("a", this) { Level = ElementLevel.Inline });
         AddReference(new TagRef("abbr", this) { Level = ElementLevel.Inline });
