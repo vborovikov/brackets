@@ -176,7 +176,7 @@
             }
 
             // skip empty content if the parent doesn't allow phrasing content
-            return parent.Level != ElementLevel.Inline && !parent.PermittedContent.HasFlag(ContentCategory.Phrasing);
+            return parent.Layout != FlowLayout.Inline && !parent.PermittedContent.HasFlag(ContentCategory.Phrasing);
         }
 
         private static void ParseComment(in Token token, ParentTag parent)

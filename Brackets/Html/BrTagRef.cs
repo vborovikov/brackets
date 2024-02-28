@@ -7,7 +7,7 @@ namespace Brackets.Html
         public BrTagRef(ISyntaxReference syntax) : base("br", syntax)
         {
             this.IsParent = false;
-            this.Level = ElementLevel.Inline;
+            this.Layout = FlowLayout.Inline;
             this.Category = ContentCategory.Flow | ContentCategory.Phrasing;
         }
 

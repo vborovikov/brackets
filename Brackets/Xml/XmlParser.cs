@@ -13,9 +13,9 @@ public class XmlParser : MarkupParser<XmlLexer>
         : base(MarkupLanguage.Xml, tagReferences, attributeReferences)
     {
         // void elements
-        AddReference(new TagRef("xml", this) { IsParent = false, Level = ElementLevel.Inline, IsProcessingInstruction = true });
-        AddReference(new TagRef("doctype", this) { IsParent = false, Level = ElementLevel.Inline, IsProcessingInstruction = true });
-        AddReference(new TagRef("xml-stylesheet", this) { IsParent = false, Level = ElementLevel.Inline, IsProcessingInstruction = true });
+        AddReference(new TagRef("xml", this) { IsParent = false, Layout = FlowLayout.Inline, IsProcessingInstruction = true });
+        AddReference(new TagRef("doctype", this) { IsParent = false, Layout = FlowLayout.Inline, IsProcessingInstruction = true });
+        AddReference(new TagRef("xml-stylesheet", this) { IsParent = false, Layout = FlowLayout.Inline, IsProcessingInstruction = true });
     }
 
     internal static XmlParser CreateConcurrent() =>

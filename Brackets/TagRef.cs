@@ -8,7 +8,7 @@
         {
             this.Name = name;
             this.IsParent = true;
-            this.Level = ElementLevel.Block;
+            this.Layout = FlowLayout.Block;
             this.Category = ContentCategory.Flow;
         }
 
@@ -18,7 +18,7 @@
 
         public bool HasRawContent { get; init; }
 
-        public ElementLevel Level { get; init; }
+        public FlowLayout Layout { get; init; }
 
         public ContentCategory Category { get; init; }
 

@@ -29,7 +29,7 @@
 
         public bool HasRawContent => this.reference.HasRawContent;
 
-        public override ElementLevel Level => this.reference.Level;
+        public override FlowLayout Layout => this.reference.Layout;
 
         public override ContentCategory Category => this.reference.Category;
 

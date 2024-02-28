@@ -9,7 +9,7 @@
     using System.Text;
 
     //todo: rename to FlowLayout
-    public enum ElementLevel
+    public enum FlowLayout
     {
         Inline,
         Block,
@@ -28,7 +28,7 @@
             this.Start = start;
         }
 
-        public virtual ElementLevel Level => ElementLevel.Inline;
+        public virtual FlowLayout Layout => FlowLayout.Inline;
 
         public virtual ContentCategory Category => ContentCategory.Flow;
 
@@ -75,12 +75,12 @@
                     BreakLine();
                 }
 
-                if (element.Level == ElementLevel.Block)
+                if (element.Layout == FlowLayout.Block)
                 {
                     BreakLine();
                 }
                 text.Append(element.ToString());
-                if (element.Level == ElementLevel.Block)
+                if (element.Layout == FlowLayout.Block)
                 {
                     BreakLine();
                 }
