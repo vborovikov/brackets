@@ -8,6 +8,7 @@ namespace Brackets.Html
         {
             this.IsParent = false;
             this.Level = ElementLevel.Inline;
+            this.Category = ContentCategory.Flow | ContentCategory.Phrasing;
         }
 
         public override string ToString(Tag tag) => Environment.NewLine;

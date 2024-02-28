@@ -8,6 +8,7 @@
     using System.Diagnostics.CodeAnalysis;
     using System.Text;
 
+    //todo: rename to FlowLayout
     public enum ElementLevel
     {
         Inline,
@@ -28,6 +29,8 @@
         }
 
         public virtual ElementLevel Level => ElementLevel.Inline;
+
+        public virtual ContentCategory Category => ContentCategory.Flow;
 
         public int Start { get; }
 

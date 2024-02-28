@@ -31,6 +31,10 @@
 
         public override ElementLevel Level => this.reference.Level;
 
+        public override ContentCategory Category => this.reference.Category;
+
+        public ContentCategory PermittedContent => this.reference.PermittedContent;
+
         public bool HasAttributes => this.attribute is not null;
 
         public ref readonly Attr.List Attributes => ref this.attrList;

@@ -64,8 +64,8 @@ public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : st
                     return token.Offset - globalOffset;
                 }
 
-                // skip empty content
-                if (token.IsEmpty)
+                // skip empty content if the parent doesn't allow phrasing content
+                if (token.IsEmpty && parent.Level != ElementLevel.Inline && !parent.PermittedContent.HasFlag(ContentCategory.Phrasing))
                     continue;
 
                 switch (token.Category)

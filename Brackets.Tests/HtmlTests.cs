@@ -213,5 +213,22 @@
             Assert.IsNotNull(cdata);
             Assert.IsInstanceOfType(cdata, typeof(Section));
         }
+
+        [TestMethod]
+        public void ToString_NoWhiteSpace_WhiteSpaceIntroduced()
+        {
+            var document = Document.Html.Parse(
+                """
+                <p>
+                    <span>by</span> <a>the author</a>
+                </p>
+                """);
+
+            var para = document.First<ParentTag>();
+            Assert.AreEqual("p", para.Name);
+
+            var text = para.ToString().Trim();
+            Assert.AreEqual("by the author", text);
+        }
     }
 }

@@ -9,6 +9,7 @@
             this.Name = name;
             this.IsParent = true;
             this.Level = ElementLevel.Block;
+            this.Category = ContentCategory.Flow;
         }
 
         public string Name { get; }
@@ -19,11 +20,15 @@
 
         public ElementLevel Level { get; init; }
 
+        public ContentCategory Category { get; init; }
+
+        public ContentCategory PermittedContent { get; init; }
+
         public bool IsProcessingInstruction { get; init; }
 
         public virtual bool IsRoot => false;
 
-        public virtual string ToString(Tag tag) => String.Empty;
+        public virtual string ToString(Tag tag) => string.Empty;
     }
 
     public sealed class RootRef : TagRef
