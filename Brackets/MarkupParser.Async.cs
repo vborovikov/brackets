@@ -27,6 +27,8 @@ public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : st
         foreach (var token in Lexer.TokenizeElements(span, this.lexer, globalOffset))
         {
             var parent = tree.Peek();
+            if (CanSkip(token, parent))
+                continue;
 
             if (parent.HasRawContent)
             {
@@ -36,10 +38,6 @@ public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : st
                 }
                 else
                 {
-                    // skip empty content before and immediately after a single child
-                    if (token.IsEmpty && (parent.Child is null || parent.Child.Next == parent.Child))
-                        continue;
-
                     if (token.Category == TokenCategory.Section)
                     {
                         ParseSection(token, parent, toString: true);
@@ -63,10 +61,6 @@ public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : st
                     Debug.WriteLine("More data required");
                     return token.Offset - globalOffset;
                 }
-
-                // skip empty content if the parent doesn't allow phrasing content
-                if (token.IsEmpty && parent.Level != ElementLevel.Inline && !parent.PermittedContent.HasFlag(ContentCategory.Phrasing))
-                    continue;
 
                 switch (token.Category)
                 {

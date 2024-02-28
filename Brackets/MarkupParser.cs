@@ -92,6 +92,8 @@
             foreach (var token in Lexer.TokenizeElements(span, this.lexer))
             {
                 var parent = tree.Peek();
+                if (CanSkip(token, parent))
+                    continue;
 
                 if (parent.HasRawContent)
                 {
@@ -101,10 +103,6 @@
                     }
                     else
                     {
-                        // skip empty content before and immediately after a single child
-                        if (token.IsEmpty && (parent.Child is null || parent.Child.Next == parent.Child))
-                            continue;
-
                         if (token.Category == TokenCategory.Section)
                         {
                             ParseSection(token, parent);
@@ -117,10 +115,6 @@
                 }
                 else
                 {
-                    // skip empty content if the parent doesn't allow phrasing content
-                    if (token.IsEmpty && parent.Level != ElementLevel.Inline && !parent.PermittedContent.HasFlag(ContentCategory.Phrasing))
-                        continue;
-
                     switch (token.Category)
                     {
                         case TokenCategory.OpeningTag:
@@ -168,6 +162,21 @@
             var root = (DocumentRoot)tree.Pop();
             root.IsWellFormed = wellFormed;
             return root;
+        }
+
+        private static bool CanSkip(in Token token, ParentTag parent)
+        {
+            if (!token.IsEmpty)
+                return false;
+
+            if (parent.HasRawContent)
+            {
+                // skip empty content before and immediately after a single child
+                return parent.Child is null || parent.Child.Next == parent.Child;
+            }
+
+            // skip empty content if the parent doesn't allow phrasing content
+            return parent.Level != ElementLevel.Inline && !parent.PermittedContent.HasFlag(ContentCategory.Phrasing);
         }
 
         private static void ParseComment(in Token token, ParentTag parent)
