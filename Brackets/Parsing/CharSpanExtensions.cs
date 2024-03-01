@@ -2,6 +2,8 @@
 
 using System;
 using System.Buffers;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 static class CharSpanExtensions
@@ -33,14 +35,19 @@ static class CharSpanExtensions
     /// <returns>The index of the first occurrence of any of the stop characters after a quote, or -1 if not found.</returns>
     public static int IndexOfAnyAfterQuotes(this ReadOnlySpan<char> span, SearchValues<char> stopChars, char quoteChar)
     {
+        var len = span.Length;
         var insideQuotes = false;
-        for (var start = 0; start < span.Length; ++start)
+        ref char src = ref MemoryMarshal.GetReference(span);
+        while (len > 0)
         {
-            insideQuotes ^= span[start] == quoteChar;
-            if (!insideQuotes && stopChars.Contains(span[start]))
+            insideQuotes ^= src == quoteChar;
+            if (!insideQuotes && stopChars.Contains(src))
             {
-                return start;
+                return span.Length - len;
             }
+
+            src = ref Unsafe.Add(ref src, 1);
+            --len;
         }
 
         return -1;
