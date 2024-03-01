@@ -225,7 +225,7 @@ public readonly struct HtmlLexer : IMarkupLexer
         if (openerPos > 0)
         {
             // check if we have an attribute value with tags
-            var attrValuePos = span.LastIndexOfAny(QuotationMarks);
+            var attrValuePos = FindLastAttrValueIndex(span);
             if (attrValuePos > 0 && attrValuePos < openerPos)
             {
                 // try to find the end of the attribute value
@@ -246,12 +246,26 @@ public readonly struct HtmlLexer : IMarkupLexer
                 else
                 {
                     // more data needed in a streaming scenario
-                    //return -1;
+                    return -1;
                 }
             }
         }
 
         return closerPos;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int FindLastAttrValueIndex(ReadOnlySpan<char> span)
+    {
+        var valuePos = span.LastIndexOfAny(QuotationMarks);
+        if (valuePos > 0)
+        {
+            span = span[..valuePos].TrimEnd();
+            if (span[^1] == ValueSeparator)
+                return valuePos;
+        }
+
+        return -1;
     }
 
     public Token GetAttributeToken(ReadOnlySpan<char> text, int globalOffset)
