@@ -1,6 +1,7 @@
 ﻿namespace Brackets.Tests.Markup
 {
     using System;
+    using Brackets.Tests.Tools;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
@@ -236,9 +237,23 @@
         {
             var document = Document.Html.Parse(
                 """
-                <iframe src="javascript:&quot;<html><body style='background:transparent'></body></html>&quot;"></iframe>
+                <iframe width="0" height="0" frameborder="0" id="google_ads_iframe_/4049405/728x90_1_home_hrreview_0__hidden__" name="google_ads_iframe_/4049405/728x90_1_home_hrreview_0__hidden__" scrolling="no" marginwidth="0" marginheight="0" style="border: 0px none; vertical-align: bottom; visibility: hidden; display: none;" src="javascript:&quot;<html><body style='background:transparent'></body></html>&quot;"></iframe>
                 """);
             var iframe = document.First<ParentTag>();
+            Assert.IsFalse(iframe.Any());
+        }
+
+        [TestMethod]
+        public async Task HtmlAsyncParse_IFrameWithSrcMarkup_ParsedAsAttrValue()
+        {
+            using var stream = Samples.GetStream("iab.html");
+            var document = await Document.Html.ParseAsync(stream, default);
+
+            var iframe = document.Find<ParentTag>(t =>
+                t.Name == "iframe" &&
+                t.Attributes["id"] is "google_ads_iframe_/4049405/728x90_1_home_hrreview_0__hidden__");
+            Assert.IsNotNull(iframe);
+
             Assert.IsFalse(iframe.Any());
         }
     }

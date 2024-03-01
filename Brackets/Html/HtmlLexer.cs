@@ -218,7 +218,7 @@ public readonly struct HtmlLexer : IMarkupLexer
         var closerPos = text.IndexOf(Closer);
         if (closerPos < 0)
             return -1;
-        
+
         // check if there are no unexpected openers
         var span = text[1..closerPos];
         var openerPos = span.IndexOf(Opener);
@@ -242,6 +242,11 @@ public readonly struct HtmlLexer : IMarkupLexer
                     {
                         return offset + closerPos;
                     }
+                }
+                else
+                {
+                    // more data needed in a streaming scenario
+                    //return -1;
                 }
             }
         }
