@@ -18,7 +18,9 @@ public readonly struct HtmlLexer : IMarkupLexer
     private const string SeparatorsTrim = " \r\n\t\xA0";
     private const string NameSeparatorsTrim = "/" + SeparatorsTrim;
     private const string AttrSeparatorsTrim = "=" + SeparatorsTrim;
+    private const string TagSeparatorsTrim = ">" + NameSeparatorsTrim;
     private static readonly SearchValues<char> Separators = SearchValues.Create(SeparatorsTrim);
+    private static readonly SearchValues<char> TagSeparators = SearchValues.Create(TagSeparatorsTrim);
     private static readonly SearchValues<char> NameSeparators = SearchValues.Create(NameSeparatorsTrim);
     private static readonly SearchValues<char> AttrSeparators = SearchValues.Create(AttrSeparatorsTrim);
     private const string TermOpener = "</";
@@ -222,20 +224,21 @@ public readonly struct HtmlLexer : IMarkupLexer
         var openerPos = span.IndexOf(Opener);
         if (openerPos > 0)
         {
-            //check if we have an attribute value with tags
+            // check if we have an attribute value with tags
             var attrValuePos = span.LastIndexOfAny(QuotationMarks);
-            if (attrValuePos >= 0 && attrValuePos < openerPos)
+            if (attrValuePos > 0 && attrValuePos < openerPos)
             {
                 // try to find the end of the attribute value
                 var quotationMark = span[attrValuePos];
-                span = text[closerPos..];
-                attrValuePos = span.IndexOf(quotationMark);
+                var offset = attrValuePos + 1;
+                span = text[offset..];
+                attrValuePos = span.IndexOfAnyAfterQuotes(TagSeparators, quotationMark);
                 if (attrValuePos > 0)
                 {
-                    var offset = closerPos + attrValuePos;
+                    offset += attrValuePos;
                     span = span[attrValuePos..];
                     closerPos = span.IndexOf(Closer);
-                    if (closerPos > 0)
+                    if (closerPos >= 0)
                     {
                         return offset + closerPos;
                     }
