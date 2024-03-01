@@ -49,7 +49,7 @@ public readonly struct HtmlLexer : IMarkupLexer
         {
             return new(TokenCategory.Content, text[..start], globalOffset);
         }
-        var end = text.IndexOf(Closer) + 1;
+        var end = FindCloserIndex(text) + 1;
         if (end <= 0)
         {
             return new(TokenCategory.Discarded | TokenCategory.Content, text, globalOffset);
@@ -208,6 +208,42 @@ public readonly struct HtmlLexer : IMarkupLexer
                 return new(TokenCategory.Discarded | category, span, globalOffset + start);
             }
         }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int FindCloserIndex(ReadOnlySpan<char> text)
+    {
+        var closerPos = text.IndexOf(Closer);
+        if (closerPos < 0)
+            return -1;
+        
+        // check if there are no unexpected openers
+        var span = text[1..closerPos];
+        var openerPos = span.IndexOf(Opener);
+        if (openerPos > 0)
+        {
+            //check if we have an attribute value with tags
+            var attrValuePos = span.LastIndexOfAny(QuotationMarks);
+            if (attrValuePos >= 0 && attrValuePos < openerPos)
+            {
+                // try to find the end of the attribute value
+                var quotationMark = span[attrValuePos];
+                span = text[closerPos..];
+                attrValuePos = span.IndexOf(quotationMark);
+                if (attrValuePos > 0)
+                {
+                    var offset = closerPos + attrValuePos;
+                    span = span[attrValuePos..];
+                    closerPos = span.IndexOf(Closer);
+                    if (closerPos > 0)
+                    {
+                        return offset + closerPos;
+                    }
+                }
+            }
+        }
+
+        return closerPos;
     }
 
     public Token GetAttributeToken(ReadOnlySpan<char> text, int globalOffset)

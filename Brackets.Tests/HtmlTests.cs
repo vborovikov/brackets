@@ -230,5 +230,16 @@
             var text = para.ToString().Trim();
             Assert.AreEqual("by the author", text);
         }
+
+        [TestMethod]
+        public void HtmlParse_IFrameWithSrcMarkup_ParsedAsAttrValue()
+        {
+            var document = Document.Html.Parse(
+                """
+                <iframe src="javascript:&quot;<html><body style='background:transparent'></body></html>&quot;"></iframe>
+                """);
+            var iframe = document.First<ParentTag>();
+            Assert.IsFalse(iframe.Any());
+        }
     }
 }
