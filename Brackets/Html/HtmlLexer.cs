@@ -14,7 +14,7 @@ public readonly struct HtmlLexer : IMarkupLexer
     private const char Terminator = '/';
     private const char DataOpener = '[';
     private const char ValueSeparator = '=';
-    private const string QuotationMarks = "'\"";
+    private const string QuotationMarks = "\"'";
     private const string SeparatorsTrim = " \r\n\t\xA0";
     private const string NameSeparatorsTrim = "/" + SeparatorsTrim;
     private const string AttrSeparatorsTrim = "=" + SeparatorsTrim;
@@ -226,7 +226,7 @@ public readonly struct HtmlLexer : IMarkupLexer
         // check last attribute only
         if (!QuotationMarks.Contains(data[^1]) || HasQuoteInsideValue(data))
         {
-            var pos = data.LastIndexOfAny(Separators);
+            var pos = data.LastIndexOfAnyOutsideQuotes(Separators, QuotationMarks, insideQuotes: true);
             if (pos < 0 || pos == (data.Length - 1))
                 return true;
 
@@ -253,10 +253,10 @@ public readonly struct HtmlLexer : IMarkupLexer
         static bool HasQuoteInsideValue(ReadOnlySpan<char> span)
         {
             var mark = span[^1] == QuotationMarks[0] ? QuotationMarks[1] : QuotationMarks[0];
-            var pos = span.LastIndexOf(mark);
+            var pos = span.LastIndexOfAnyOutsideQuotes(AttrSeparators, mark, insideQuotes: true);
             if (pos > 0)
             {
-                span = span[..pos].TrimEnd();
+                span = span[..(pos + 1)].TrimEnd();
                 return span.Length > 0 && span[^1] == ValueSeparator;
             }
 
