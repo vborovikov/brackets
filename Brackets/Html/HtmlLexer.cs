@@ -18,9 +18,7 @@ public readonly struct HtmlLexer : IMarkupLexer
     private const string SeparatorsTrim = " \r\n\t\xA0";
     private const string NameSeparatorsTrim = "/" + SeparatorsTrim;
     private const string AttrSeparatorsTrim = "=" + SeparatorsTrim;
-    private const string TagSeparatorsTrim = ">" + NameSeparatorsTrim;
     private static readonly SearchValues<char> Separators = SearchValues.Create(SeparatorsTrim);
-    private static readonly SearchValues<char> TagSeparators = SearchValues.Create(TagSeparatorsTrim);
     private static readonly SearchValues<char> NameSeparators = SearchValues.Create(NameSeparatorsTrim);
     private static readonly SearchValues<char> AttrSeparators = SearchValues.Create(AttrSeparatorsTrim);
     private const string TermOpener = "</";
@@ -262,62 +260,6 @@ public readonly struct HtmlLexer : IMarkupLexer
 
             return false;
         }
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int FindCloserIndex(ReadOnlySpan<char> text)
-    {
-        var closerPos = text.IndexOf(Closer);
-        if (closerPos < 0)
-            return -1;
-
-        // check if there are no unexpected openers
-        var span = text[1..closerPos];
-        var openerPos = span.IndexOf(Opener);
-        if (openerPos > 0)
-        {
-            // check if we have an attribute value with tags
-            var attrValuePos = FindLastAttrValueIndex(span);
-            if (attrValuePos > 0 && attrValuePos < openerPos)
-            {
-                // try to find the end of the attribute value
-                var quotationMark = span[attrValuePos];
-                var offset = attrValuePos + 1;
-                span = text[offset..];
-                attrValuePos = span.IndexOfAnyOutsideQuotes(TagSeparators, quotationMark);
-                if (attrValuePos > 0)
-                {
-                    offset += attrValuePos;
-                    span = span[attrValuePos..];
-                    closerPos = span.IndexOf(Closer);
-                    if (closerPos >= 0)
-                    {
-                        return offset + closerPos;
-                    }
-                }
-                else
-                {
-                    // more data needed in a streaming scenario
-                    return -1;
-                }
-            }
-        }
-
-        return closerPos;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int FindLastAttrValueIndex(ReadOnlySpan<char> span)
-    {
-        var valuePos = span.LastIndexOfAny(QuotationMarks);
-        if (valuePos > 0)
-        {
-            span = span[..valuePos].TrimEnd();
-            if (span[^1] == ValueSeparator)
-                return valuePos;
-        }
-
-        return -1;
     }
 
     public Token GetAttributeToken(ReadOnlySpan<char> text, int globalOffset)
