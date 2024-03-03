@@ -284,7 +284,7 @@ public readonly struct HtmlLexer : IMarkupLexer
                 var quotationMark = span[attrValuePos];
                 var offset = attrValuePos + 1;
                 span = text[offset..];
-                attrValuePos = span.IndexOfAnyAfterQuotes(TagSeparators, quotationMark);
+                attrValuePos = span.IndexOfAnyOutsideQuotes(TagSeparators, quotationMark);
                 if (attrValuePos > 0)
                 {
                     offset += attrValuePos;
@@ -365,7 +365,7 @@ public readonly struct HtmlLexer : IMarkupLexer
         if (valueStart >= 0)
         {
             span = span[valueStart..];
-            var valueEnd = span.IndexOfAnyAfterQuotes(Separators, QuotationMarks);
+            var valueEnd = span.IndexOfAnyOutsideQuotes(Separators, QuotationMarks);
             if (valueEnd < 0)
             {
                 valueEnd = span.Length;
