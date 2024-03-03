@@ -51,7 +51,7 @@ public readonly struct HtmlLexer : IMarkupLexer
         {
             return new(TokenCategory.Content, text[..start], globalOffset);
         }
-        var end = FindCloserIndex(text) + 1;
+        var end = text.IndexOf(Closer) + 1;
         if (end <= 0)
         {
             return new(TokenCategory.Discarded | TokenCategory.Content, text, globalOffset);
@@ -187,6 +187,11 @@ public readonly struct HtmlLexer : IMarkupLexer
 
                         data = span[attrStart..attrEnd];
                         dataOffset = attrStart;
+
+                        if (!VerifyAttributes(data))
+                        {
+                            //todo: adjust the end pos
+                        }
                     }
                 }
 
@@ -209,6 +214,49 @@ public readonly struct HtmlLexer : IMarkupLexer
                 // discarded tag token
                 return new(TokenCategory.Discarded | category, span, globalOffset + start);
             }
+        }
+    }
+
+    private static bool VerifyAttributes(ReadOnlySpan<char> data)
+    {
+        // check last attribute only
+        if (!QuotationMarks.Contains(data[^1]) || HasQuoteInsideValue(data))
+        {
+            var pos = data.LastIndexOfAny(Separators);
+            if (pos < 0 || pos == (data.Length - 1))
+                return false;
+
+            var attr = data[(pos + 1)..];
+            if (QuotationMarks.Contains(attr[0]))
+            {
+                // "value -> invalid attribute value
+                return false;
+            }
+            pos = attr.IndexOf(ValueSeparator);
+            if (pos >= 0)
+            {
+                attr = attr[pos..];
+                if (attr[0] == ValueSeparator && QuotationMarks.Contains(attr[1]))
+                {
+                    // ="value -> invalid attribute value
+                    return false;
+                }
+            }
+        }
+
+        return true;
+
+        static bool HasQuoteInsideValue(ReadOnlySpan<char> span)
+        {
+            var mark = span[^1] == QuotationMarks[0] ? QuotationMarks[1] : QuotationMarks[0];
+            var pos = span.LastIndexOf(mark);
+            if (pos > 0)
+            {
+                span = span[..pos].TrimEnd();
+                return span.Length > 0 && span[^1] == ValueSeparator;
+            }
+
+            return false;
         }
     }
 

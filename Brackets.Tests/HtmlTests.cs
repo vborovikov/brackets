@@ -256,5 +256,26 @@
 
             Assert.IsFalse(iframe.Any());
         }
+
+        [TestMethod]
+        public void HtmlParse_AttrValueLtSign_ParsedAsAttrValue()
+        {
+            var document = Document.Html.Parse(
+                """
+                <p>But
+                  as it was, I should have as soon thought of turning my pale <a href="javascript:void(0);"
+                  onclick="return overlib('>How is Bartleby like this wise philosopher?', STICKY)"
+                  onmouseout="nd();" class="popup">plaster-of-paris 
+                bust of Cicero</a> out of doors.</p>
+                """);
+
+            var para = document.First<ParentTag>();
+            Assert.IsNotNull(para);
+            var anchor = para.First<ParentTag>();
+            Assert.IsNotNull(anchor);
+
+            Assert.AreEqual("return overlib('>How is Bartleby like this wise philosopher?', STICKY)",
+                anchor.Attributes["onclick"].ToString());
+        }
     }
 }
