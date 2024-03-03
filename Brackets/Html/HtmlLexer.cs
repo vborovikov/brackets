@@ -52,6 +52,7 @@ public readonly struct HtmlLexer : IMarkupLexer
             return new(TokenCategory.Content, text[..start], globalOffset);
         }
         var end = text.IndexOf(Closer) + 1;
+    ScanAgain:
         if (end <= 0)
         {
             return new(TokenCategory.Discarded | TokenCategory.Content, text, globalOffset);
@@ -190,7 +191,10 @@ public readonly struct HtmlLexer : IMarkupLexer
 
                         if (!VerifyAttributes(data))
                         {
-                            //todo: adjust the end pos
+                            // adjust the end pos
+                            var newEnd = text[end..].IndexOf(Closer);
+                            end = newEnd >= 0 ? newEnd + end + 1 : 0;
+                            goto ScanAgain;
                         }
                     }
                 }
@@ -224,7 +228,7 @@ public readonly struct HtmlLexer : IMarkupLexer
         {
             var pos = data.LastIndexOfAny(Separators);
             if (pos < 0 || pos == (data.Length - 1))
-                return false;
+                return true;
 
             var attr = data[(pos + 1)..];
             if (QuotationMarks.Contains(attr[0]))

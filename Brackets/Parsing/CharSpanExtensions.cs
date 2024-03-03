@@ -54,33 +54,6 @@ static class CharSpanExtensions
     }
 
     /// <summary>
-    /// Finds the last index of the specified enclosure (opener and closer).
-    /// </summary>
-    /// <param name="span">The input character span.</param>
-    /// <param name="opener">The enclosure opener character.</param>
-    /// <param name="closer">The enclosure closer character.</param>
-    /// <returns>The index of the last occurrence of the enclosure, or -1 if not found.</returns>
-    public static int LastIndexOfEnclosure(this ReadOnlySpan<char> span, char opener, char closer)
-    {
-        var len = span.Length;
-        var equilibrium = 0;
-        ref char src = ref MemoryMarshal.GetReference(span);
-        while (len > 0)
-        {
-            equilibrium += src == opener ? +1 : src == closer ? -1 : 0;
-            if (equilibrium == 0 && src == closer)
-            {
-                return span.Length - len;
-            }
-
-            src = ref Unsafe.Add(ref src, 1);
-            --len;
-        }
-
-        return -1;
-    }
-
-    /// <summary>
     ///  Any consecutive white-space (including tabs, newlines) is replaced with whatever is in normalizeTo.
     /// </summary>
     /// <param name="input">Input string.</param>
