@@ -171,12 +171,14 @@
 
             if (parent.HasRawContent)
             {
-                // skip empty content before and immediately after a single child
+                // skip empty content before and immediately after a single child (a section)
                 return parent.Child is null || parent.Child.Next == parent.Child;
             }
 
             // skip empty content if the parent doesn't allow phrasing content
-            return parent.Layout != FlowLayout.Inline && !parent.PermittedContent.HasFlag(ContentCategory.Phrasing);
+            return 
+                parent.Layout != FlowLayout.Inline &&
+                !parent.PermittedContent.HasFlag(ContentCategory.Phrasing);
         }
 
         private static void ParseComment(in Token token, ParentTag parent)
