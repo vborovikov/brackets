@@ -33,6 +33,7 @@
         [DataRow("head_script.html")]
         [DataRow("japantimes.html")]
         [DataRow("newsde.html")]
+        [DataRow("wikipedia-2.html")]
         public async Task ParseAsync_AsyncSyncHtmlParsing_Equal(string fileName)
         {
             using var stream = Samples.GetStream(fileName);

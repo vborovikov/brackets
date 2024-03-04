@@ -17,6 +17,7 @@
     <EmbeddedResource Include="Samples\iab.html" />
     <EmbeddedResource Include="Samples\japantimes.html" />
     <EmbeddedResource Include="Samples\newsde.html" />
+    <EmbeddedResource Include="Samples\wikipedia-2.html" />
   </ItemGroup>
 
   <ItemGroup>
