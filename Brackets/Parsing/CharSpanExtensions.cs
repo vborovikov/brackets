@@ -108,6 +108,35 @@ static class CharSpanExtensions
     }
 
     /// <summary>
+    /// Finds the last index of any character outside a quote.
+    /// </summary>
+    /// <param name="span">The input character span.</param>
+    /// <param name="quoteChar">The quotation mark character.</param>
+    /// <param name="insideQuotes">true if the search starts inside the quotes; otherwise, false.</param>
+    /// <returns>The index of the last occurrence of any of the stop characters ouside a quote, or -1 if not found.</returns>
+    public static int LastIndexOutsideQuotes(this ReadOnlySpan<char> span, char quoteChar, bool insideQuotes = false)
+    {
+        var len = span.Length;
+        if (len == 0) return -1;
+
+        ref char src = ref MemoryMarshal.GetReference(span);
+        src = ref Unsafe.Add(ref src, len - 1);
+        while (len > 0)
+        {
+            if (!insideQuotes)
+            {
+                return len - 1;
+            }
+
+            insideQuotes ^= src == quoteChar;
+            src = ref Unsafe.Subtract(ref src, 1);
+            --len;
+        }
+
+        return -1;
+    }
+
+    /// <summary>
     ///  Any consecutive white-space (including tabs, newlines) is replaced with whatever is in normalizeTo.
     /// </summary>
     /// <param name="input">Input string.</param>

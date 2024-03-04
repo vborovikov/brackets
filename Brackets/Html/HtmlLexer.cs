@@ -251,7 +251,7 @@ public readonly struct HtmlLexer : IMarkupLexer
         static bool HasQuoteInsideValue(ReadOnlySpan<char> span)
         {
             var mark = span[^1] == QuotationMarks[0] ? QuotationMarks[1] : QuotationMarks[0];
-            var pos = span.LastIndexOfAnyOutsideQuotes(AttrSeparators, mark, insideQuotes: true);
+            var pos = span.LastIndexOutsideQuotes(mark, insideQuotes: true);
             if (pos > 0)
             {
                 span = span[..(pos + 1)].TrimEnd();
