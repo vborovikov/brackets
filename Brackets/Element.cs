@@ -8,7 +8,6 @@
     using System.Diagnostics.CodeAnalysis;
     using System.Text;
 
-    //todo: rename to FlowLayout
     public enum FlowLayout
     {
         Inline,
