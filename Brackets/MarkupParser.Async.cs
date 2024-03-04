@@ -42,6 +42,11 @@ public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : st
                     {
                         ParseSection(token, parent, toString: true);
                     }
+                    else if (token.Category.HasFlag(TokenCategory.Discarded | TokenCategory.Section))
+                    {
+                        // we might need more data
+                        return token.Offset - globalOffset;
+                    }
                     else
                     {
                         ParseContent(token, parent, toString: true);
@@ -50,15 +55,12 @@ public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : st
             }
             else
             {
-                Debug.WriteLine("Token: {0}", token.Category);
-
                 // we might need more data
                 if (token.Category.HasFlag(TokenCategory.Discarded) &&
                     (token.Category.HasFlag(TokenCategory.Section) ||
                      token.Category.HasFlag(TokenCategory.Comment) ||
                      token.Category.HasFlag(TokenCategory.Content)))
                 {
-                    Debug.WriteLine("More data required");
                     return token.Offset - globalOffset;
                 }
 
@@ -147,25 +149,24 @@ public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : st
 
             if (this.contentLength == 0 && this.parser.Language == MarkupLanguage.Xml)
             {
-                if (this.Document.FirstOrDefault() is Instruction { Name: "xml", HasAttributes: true } xmlInstruction &&
-                    xmlInstruction.Attributes.FirstOrDefault(a => a is { Name: "encoding", HasValue: true }) is Attr encodingAttr)
+                if (this.Document.FirstOrDefault<Instruction>() is { Name: "xml", HasAttributes: true } xmlInstruction &&
+                    xmlInstruction.Attributes["encoding"] is { Length: > 0 } encoding)
                 {
-                    SetEncoding(encodingAttr.ToString());
+                    SetEncoding(encoding.ToString());
                 }
             }
             else if (this.contentLength < RecordBuffer.DefaultBufferLength && this.parser.Language == MarkupLanguage.Html)
             {
                 if (this.Document.Find<ParentTag>(t => t.Name.Equals("head", StringComparison.OrdinalIgnoreCase)) is ParentTag head)
                 {
-                    if (head.Find<Tag>(IsMetaWithCharset) is Tag charsetMeta)
+                    if (head.FirstOrDefault<Tag>(IsMetaWithCharset) is Tag charsetMeta &&
+                        charsetMeta.Attributes["charset"] is { Length: > 0 } charset)
                     {
-                        var charsetAttr = charsetMeta.Attributes.First(a => a.Name.Equals("charset", StringComparison.OrdinalIgnoreCase));
-                        SetEncoding(charsetAttr.ToString());
+                        SetEncoding(charset.ToString());
                     }
-                    else if (head.Find<Tag>(IsMetaWithContentType) is Tag contentMeta)
+                    else if (head.FirstOrDefault<Tag>(IsMetaWithContentType) is Tag contentMeta &&
+                        contentMeta.Attributes["content"] is { Length: > 0 } mimeType)
                     {
-                        var contentAttr = contentMeta.Attributes.First(a => a.Name.Equals("content", StringComparison.OrdinalIgnoreCase));
-                        var mimeType = contentAttr.Value;
                         SetEncoding(mimeType[(mimeType.LastIndexOf('=') + 1)..].ToString());
                     }
                 }
@@ -177,16 +178,11 @@ public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : st
             }
 
             static bool IsMetaWithCharset(Tag t) =>
-                t.Name.Equals("meta", StringComparison.OrdinalIgnoreCase) && t.HasAttributes &&
-                t.Attributes.FirstOrDefault(a => a.Name.Equals("charset", StringComparison.OrdinalIgnoreCase) && a.HasValue) is not null;
+                t.Name.Equals("meta", StringComparison.OrdinalIgnoreCase) && t.Attributes.Has("charset");
 
             static bool IsMetaWithContentType(Tag t) =>
-                t.Name.Equals("meta", StringComparison.OrdinalIgnoreCase) && t.HasAttributes &&
-                t.Attributes.FirstOrDefault(a =>
-                    a.Name.Equals("http-equiv", StringComparison.OrdinalIgnoreCase) &&
-                    a.HasValue && a.Value.Equals("Content-Type", StringComparison.OrdinalIgnoreCase)) is not null &&
-                t.Attributes.LastOrDefault(a =>
-                    a.Name.Equals("content", StringComparison.OrdinalIgnoreCase) && a.HasValue) is not null;
+                t.Name.Equals("meta", StringComparison.OrdinalIgnoreCase) &&
+                t.Attributes.Has("http-equiv", "Content-Type") && t.Attributes.Has("content");
         }
 
         private void SetEncoding(string encodingName)

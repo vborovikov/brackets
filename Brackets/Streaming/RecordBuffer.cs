@@ -56,7 +56,6 @@ struct RecordBuffer : IDisposable
         {
             Offset(requestedOffset);
             this.clear = newClear;
-            Debug.WriteLine($"Record buffer start shifted to position {this.clear}");
         }
     }
 
