@@ -177,4 +177,48 @@ static class CharSpanExtensions
     public static string NormalizeWhiteSpace(this string input,
         ReadOnlySpan<char> whiteSpace, string normalizeTo = WhiteSpace) =>
         NormalizeWhiteSpace(input.AsSpan(), whiteSpace, normalizeTo);
+
+    private static ReadOnlySpan<char> Normalize(Span<char> span, ReadOnlySpan<char> trim, ReadOnlySpan<char> fill)
+    {
+        var len = span.Length;
+        if (len == 0)
+            return ReadOnlySpan<char>.Empty;
+
+        ref char src = ref MemoryMarshal.GetReference(span);
+        ref char dst = ref MemoryMarshal.GetReference(span);
+        var trimmed = false;
+        var pos = 0;
+        while (len > 0)
+        {
+            if (trim.Contains(src))
+            {
+                trimmed = true;
+            }
+            else
+            {
+                if (trimmed && pos > 0 && fill.Length > 0)
+                {
+                    ref char cur = ref MemoryMarshal.GetReference(fill);
+                    ref char end = ref Unsafe.Add(ref cur, fill.Length);
+                    while (Unsafe.IsAddressLessThan(ref cur, ref end))
+                    {
+                        dst = cur;
+                        cur = ref Unsafe.Add(ref cur, 1);
+                        dst = ref Unsafe.Add(ref dst, 1);
+                        ++pos;
+                    }
+                }
+
+                trimmed = false;
+                dst = src;
+                dst = ref Unsafe.Add(ref dst, 1);
+                ++pos;
+            }
+
+            src = ref Unsafe.Add(ref src, 1);
+            --len;
+        }
+
+        return span[..pos];
+    }
 }
