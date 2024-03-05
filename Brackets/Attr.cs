@@ -32,7 +32,9 @@ namespace Brackets
 
         public override string ToString() => string.Empty;
 
-        public override Element Clone() => new StringAttr(this.reference, null, this.Offset, this.length);
+        public new Attr Clone() => (Attr)CloneOverride();
+
+        protected override Element CloneOverride() => new StringAttr(this.reference, null, this.Offset, this.length);
 
         public override bool TryGetValue<T>([MaybeNullWhen(false)] out T value)
         {
@@ -175,7 +177,7 @@ namespace Brackets
 
         public override string ToString() => this.Value.ToString();
 
-        public override Element Clone() =>
+        protected override Element CloneOverride() =>
             new StringAttr(this.Reference, this.Source.Slice(this.valueStart, this.valueLength), this.Offset, this.Length);
     }
 
@@ -203,7 +205,7 @@ namespace Brackets
 
         public override string ToString() => this.value ?? string.Empty;
 
-        public override Element Clone() =>
+        protected override Element CloneOverride() =>
             new StringAttr(this.Reference, this.value, this.Offset, this.Length);
     }
 }

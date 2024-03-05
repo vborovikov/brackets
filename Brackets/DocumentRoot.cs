@@ -14,7 +14,9 @@ namespace Brackets
             return string.Concat(this);
         }
 
-        public override Element Clone()
+        public new DocumentRoot Clone() => (DocumentRoot)CloneOverride();
+
+        protected override Element CloneOverride()
         {
             var root = new EmptyDocumentRoot((RootRef)this.Reference);
 

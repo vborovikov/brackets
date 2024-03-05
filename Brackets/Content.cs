@@ -90,7 +90,9 @@ public class Content : CharacterData
 
     public sealed override int End => this.end;
 
-    public override Element Clone() => new StringContent(this.Data.ToString(), this.Offset);
+    public new Content Clone() => (Content)CloneOverride();
+
+    protected override Element CloneOverride() => new StringContent(this.Data.ToString(), this.Offset);
 
     internal virtual bool TryConcat(Content content)
     {
@@ -119,7 +121,7 @@ sealed class StringContent : Content
 
     public override string ToString() => this.value;
 
-    public override Element Clone() => new StringContent(this.value, this.Offset);
+    protected override Element CloneOverride() => new StringContent(this.value, this.Offset);
 
     internal override bool TryConcat(Content content)
     {
@@ -153,7 +155,9 @@ public class Section : CharacterData
 
     protected int DataStart => this.dataStart;
 
-    public override Element Clone() => new StringSection(this.Name.ToString(), 
+    public new Section Clone() => (Section)CloneOverride();
+
+    protected override Element CloneOverride() => new StringSection(this.Name.ToString(), 
         this.Offset, this.Length, this.Data.ToString(), this.dataStart);
 
     internal override string ToDebugString()
@@ -179,7 +183,7 @@ sealed class StringSection : Section
 
     public override string ToString() => this.data;
 
-    public override Element Clone() => new StringSection(this.name,
+    protected override Element CloneOverride() => new StringSection(this.name,
         this.Offset, this.Length, this.data, this.DataStart);
 
     internal override string ToDebugString()
@@ -203,7 +207,9 @@ public class Comment : CharacterData
         this.Parent is ParentTag parent ? parent.Reference.Syntax.TrimData(base.Data) :
         base.Data;
 
-    public override Element Clone() => new StringComment(this.Data.ToString(), this.Offset, this.Length);
+    public new Comment Clone() => (Comment)CloneOverride();
+
+    protected override Element CloneOverride() => new StringComment(this.Data.ToString(), this.Offset, this.Length);
 
     internal override string ToDebugString()
     {
@@ -224,5 +230,5 @@ sealed class StringComment : Comment
 
     public override string ToString() => this.data;
 
-    public override Element Clone() => new StringComment(this.data, this.Offset, this.Length);
+    protected override Element CloneOverride() => new StringComment(this.data, this.Offset, this.Length);
 }

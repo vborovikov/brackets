@@ -56,7 +56,11 @@
 
         protected virtual ReadOnlySpan<char> Source => this.parent is null ? ReadOnlySpan<char>.Empty : this.parent.Source;
 
-        public abstract Element Clone();
+        public override string ToString() => string.Empty;
+
+        public Element Clone() => CloneOverride();
+
+        protected abstract Element CloneOverride();
 
         object ICloneable.Clone() => Clone();
 

@@ -45,7 +45,9 @@
 
         public override string ToString() => this.reference.ToString(this);
 
-        public override Element Clone()
+        public new Tag Clone() => (Tag)CloneOverride();
+
+        protected override Element CloneOverride()
         {
             var tag = new Tag(this.reference, this.Offset, this.Length);
 
@@ -62,7 +64,7 @@
             var attr = this.attribute;
             do
             {
-                tag.AddAttribute((Attr)attr.Clone());
+                tag.AddAttribute(attr.Clone());
                 attr = (Attr)attr.Next;
             } while (attr != this.attribute);
         }
@@ -155,7 +157,9 @@
         {
         }
 
-        public override Element Clone()
+        public new Instruction Clone() => (Instruction)CloneOverride();
+
+        protected override Element CloneOverride()
         {
             var tag = new Instruction(this.Reference, this.Offset, this.Length);
 
@@ -173,7 +177,9 @@
         {
         }
 
-        public override Element Clone()
+        public new Declaration Clone() => (Declaration)CloneOverride();
+
+        protected override Element CloneOverride()
         {
             var tag = new Declaration(this.Reference, this.Offset, this.Length);
 
@@ -201,7 +207,9 @@
 
         protected internal Element? Child => this.child;
 
-        public override Element Clone()
+        public new ParentTag Clone() => (ParentTag)CloneOverride();
+
+        protected override Element CloneOverride()
         {
             var parentTag = new ParentTag(this.Reference, this.Offset, this.Length);
 

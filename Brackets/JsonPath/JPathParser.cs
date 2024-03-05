@@ -847,8 +847,8 @@ internal class JPathParser
                 {
                     fields.Add(field);
                     return (scan)
-                        ? (PathFilter)new ScanMultipleFilter(fields)
-                        : (PathFilter)new FieldMultipleFilter(fields);
+                        ? new ScanMultipleFilter(fields)
+                        : new FieldMultipleFilter(fields);
                 }
                 else
                 {

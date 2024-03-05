@@ -39,7 +39,7 @@
 
         public Document Clone()
         {
-            return new Document((DocumentRoot)this.root.Clone());
+            return new Document(this.root.Clone());
         }
 
         object ICloneable.Clone() => Clone();
