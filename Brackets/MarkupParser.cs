@@ -175,11 +175,10 @@
                 return parent.Child is null || parent.Child.Next == parent.Child;
             }
 
-            // skip empty content if the parent doesn't allow phrasing content and it has new line characters
+            // skip empty content if the parent doesn't allow phrasing content
             return 
                 parent.Layout != FlowLayout.Inline &&
-                !parent.PermittedContent.HasFlag(ContentCategory.Phrasing) &&
-                token.Span.ContainsAny('\r', '\n');
+                !parent.PermittedContent.HasFlag(ContentCategory.Phrasing);
         }
 
         private static void ParseComment(in Token token, ParentTag parent)
