@@ -186,30 +186,30 @@ static class CharSpanExtensions
 
         ref char src = ref MemoryMarshal.GetReference(span);
         ref char dst = ref MemoryMarshal.GetReference(span);
-        var trimmed = false;
+        var trimmed = 0;
         var pos = 0;
         while (len > 0)
         {
             if (trim.Contains(src))
             {
-                trimmed = true;
+                ++trimmed;
             }
             else
             {
-                if (trimmed && pos > 0 && fill.Length > 0)
+                if (trimmed > 0 && pos > 0 && fill.Length > 0)
                 {
                     ref char cur = ref MemoryMarshal.GetReference(fill);
                     ref char end = ref Unsafe.Add(ref cur, fill.Length);
-                    while (Unsafe.IsAddressLessThan(ref cur, ref end))
+                    while (Unsafe.IsAddressLessThan(ref cur, ref end) && trimmed > 0)
                     {
                         dst = cur;
                         cur = ref Unsafe.Add(ref cur, 1);
                         dst = ref Unsafe.Add(ref dst, 1);
-                        ++pos;
+                        ++pos; --trimmed;
                     }
                 }
 
-                trimmed = false;
+                trimmed = 0;
                 dst = src;
                 dst = ref Unsafe.Add(ref dst, 1);
                 ++pos;
