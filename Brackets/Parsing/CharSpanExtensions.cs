@@ -4,12 +4,9 @@ using System;
 using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
 
 static class CharSpanExtensions
 {
-    private const string WhiteSpace = " ";
-
     /// <summary>
     /// Finds the index of any of the specified stop characters outside a quote.
     /// </summary>
@@ -136,53 +133,27 @@ static class CharSpanExtensions
         return -1;
     }
 
-    /// <summary>
-    ///  Any consecutive white-space (including tabs, newlines) is replaced with whatever is in normalizeTo.
-    /// </summary>
-    /// <param name="input">Input string.</param>
-    /// <param name="whiteSpace">White-space characters.</param>
-    /// <param name="normalizeTo">Character which is replacing whitespace.</param>
-    /// <remarks>Based on http://stackoverflow.com/a/25023688/897326 </remarks>
-    public static string NormalizeWhiteSpace(this ReadOnlySpan<char> input,
-        ReadOnlySpan<char> whiteSpace, ReadOnlySpan<char> normalizeTo)
+
+    public static string Normalize(this string input, ReadOnlySpan<char> trimChars)
     {
-        if (input.IsEmpty)
-        {
+        if (string.IsNullOrEmpty(input))
             return string.Empty;
-        }
 
-        var output = new StringBuilder();
-        var skipped = false;
-
-        for (var i = 0; i != input.Length; ++i)
-        {
-            if (whiteSpace.Contains(input[i]))
-            {
-                if (!skipped)
-                {
-                    output.Append(normalizeTo);
-                    skipped = true;
-                }
-            }
-            else
-            {
-                skipped = false;
-                output.Append(input[i]);
-            }
-        }
-
-        return output.ToString();
+        return new string(Normalize(input.ToCharArray(), trimChars, []));
     }
 
-    public static string NormalizeWhiteSpace(this string input,
-        ReadOnlySpan<char> whiteSpace, string normalizeTo = WhiteSpace) =>
-        NormalizeWhiteSpace(input.AsSpan(), whiteSpace, normalizeTo);
+    public static string Normalize(this string input, ReadOnlySpan<char> trimChars, ReadOnlySpan<char> fillChars)
+    {
+        if (string.IsNullOrEmpty(input))
+            return string.Empty;
 
-    private static ReadOnlySpan<char> Normalize(Span<char> span, ReadOnlySpan<char> trim, ReadOnlySpan<char> fill)
+        return new string(Normalize(input.ToCharArray(), trimChars, fillChars));
+    }
+
+    private static ReadOnlySpan<char> Normalize(Span<char> span, ReadOnlySpan<char> trimChars, ReadOnlySpan<char> fillChars)
     {
         var len = span.Length;
-        if (len == 0)
-            return ReadOnlySpan<char>.Empty;
+        if (len == 0) return [];
 
         ref char src = ref MemoryMarshal.GetReference(span);
         ref char dst = ref MemoryMarshal.GetReference(span);
@@ -190,26 +161,71 @@ static class CharSpanExtensions
         var pos = 0;
         while (len > 0)
         {
-            if (trim.Contains(src))
+            if (trimChars.Contains(src))
             {
                 ++trimmed;
             }
             else
             {
-                if (trimmed > 0 && pos > 0 && fill.Length > 0)
+                if (trimmed > 0 && pos > 0)
                 {
-                    ref char cur = ref MemoryMarshal.GetReference(fill);
-                    ref char end = ref Unsafe.Add(ref cur, fill.Length);
-                    while (Unsafe.IsAddressLessThan(ref cur, ref end) && trimmed > 0)
+                    if (fillChars.Length > 0)
                     {
-                        dst = cur;
-                        cur = ref Unsafe.Add(ref cur, 1);
+                        ref char cur = ref MemoryMarshal.GetReference(fillChars);
+                        ref char end = ref Unsafe.Add(ref cur, fillChars.Length);
+                        while (Unsafe.IsAddressLessThan(ref cur, ref end) && trimmed > 0)
+                        {
+                            dst = cur;
+                            cur = ref Unsafe.Add(ref cur, 1);
+                            dst = ref Unsafe.Add(ref dst, 1);
+                            ++pos; --trimmed;
+                        }
+                    }
+                    else
+                    {
+                        dst = ' ';
                         dst = ref Unsafe.Add(ref dst, 1);
-                        ++pos; --trimmed;
+                        ++pos;
                     }
                 }
 
                 trimmed = 0;
+                dst = src;
+                dst = ref Unsafe.Add(ref dst, 1);
+                ++pos;
+            }
+
+            src = ref Unsafe.Add(ref src, 1);
+            --len;
+        }
+
+        return span[..pos];
+    }
+
+    private static ReadOnlySpan<char> Normalize(Span<char> span)
+    {
+        var len = span.Length;
+        if (len == 0) return [];
+
+        ref char src = ref MemoryMarshal.GetReference(span);
+        ref char dst = ref MemoryMarshal.GetReference(span);
+        var space = false;
+        var pos = 0;
+        while (len > 0)
+        {
+            if (char.IsWhiteSpace(src))
+            {
+                space = true;
+            }
+            else
+            {
+                if (space && pos > 0)
+                {
+                    dst = ' ';
+                    dst = ref Unsafe.Add(ref dst, 1);
+                    ++pos;
+                }
+                space = false;
                 dst = src;
                 dst = ref Unsafe.Add(ref dst, 1);
                 ++pos;

@@ -972,12 +972,12 @@ public partial class Document
                 // replace html entities
                 WebUtility.HtmlDecode(text)
                 // normalize multiple whitespaces
-                .NormalizeWhiteSpace(" \t\xA0")
+                .Normalize(" \t\xA0")
                 // remove single whitespace lines
                 .Replace(" \r\n", string.Empty, StringComparison.Ordinal)
                 .Replace(" \n", string.Empty, StringComparison.Ordinal)
                 // normalize multiple empty lines
-                .NormalizeWhiteSpace("\r\n", Environment.NewLine)
+                .Normalize("\r\n", Environment.NewLine)
                 // remove all leading and trailing whitespace
                 .Trim();
         }
