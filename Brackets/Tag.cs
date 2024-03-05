@@ -145,7 +145,6 @@
 
         internal void CloseAt(int end)
         {
-            //todo: for block elements remove empty content if it's the first and/or last children
             this.end = end;
         }
     }

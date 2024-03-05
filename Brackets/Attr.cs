@@ -65,7 +65,6 @@ namespace Brackets
 
             internal Enumerator(Attr? first)
             {
-                //todo: use last here?
                 this.last = (Attr?)first?.Prev;
                 this.sibling = first;
             }

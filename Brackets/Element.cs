@@ -257,7 +257,6 @@
 
             internal Enumerator(Element? first)
             {
-                //todo: use last here? so enumerating elements while removing them will work
                 this.last = first?.prev;
                 this.sibling = first;
             }
