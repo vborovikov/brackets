@@ -22,11 +22,10 @@ public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : st
         return builder.Document;
     }
 
-    private int TryParseFragment(ReadOnlySpan<char> span, Stack<ParentTag> tree, int globalOffset)
+    private int TryParseFragment(ReadOnlySpan<char> span, ref ParentTag parent, int globalOffset)
     {
         foreach (var token in Lexer.TokenizeElements(span, this.lexer, globalOffset))
         {
-            var parent = tree.Peek();
             if (CanSkip(token, parent))
                 continue;
 
@@ -34,7 +33,7 @@ public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : st
             {
                 if (token.Category == TokenCategory.ClosingTag && this.lexer.ClosesTag(token, parent.Name))
                 {
-                    ParseClosingTag(token, parent, tree, toString: true);
+                    ParseClosingTag(token, ref parent, toString: true);
                 }
                 else
                 {
@@ -70,11 +69,11 @@ public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : st
                     case TokenCategory.UnpairedTag:
                     case TokenCategory.Instruction:
                     case TokenCategory.Declaration:
-                        ParseOpeningTag(token, parent, tree, toString: true);
+                        ParseOpeningTag(token, ref parent, toString: true);
                         break;
 
                     case TokenCategory.ClosingTag:
-                        ParseClosingTag(token, parent, tree, toString: true);
+                        ParseClosingTag(token, ref parent, toString: true);
                         break;
 
                     case TokenCategory.Section:
@@ -98,7 +97,7 @@ public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : st
     private sealed class DocumentBuilder : IElementBuilder
     {
         private readonly MarkupParser<TMarkupLexer> parser;
-        private readonly Stack<ParentTag> tree;
+        private ParentTag root;
         private int contentLength;
         private bool encodingParsed;
 
@@ -107,7 +106,7 @@ public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : st
             this.parser = parser;
             this.Encoding = encoding;
             this.Document = new Document(new EmptyDocumentRoot(this.parser.rootRef));
-            this.tree = new Stack<ParentTag>();
+            this.root = this.Document.Root;
         }
 
         public Encoding Encoding { get; private set; }
@@ -117,13 +116,12 @@ public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : st
 
         public ValueTask StartAsync()
         {
-            this.tree.Push(this.Document.Root);
             return ValueTask.CompletedTask;
         }
 
         public ValueTask<int> BuildAsync(ReadOnlySpan<char> recordSpan, CancellationToken cancellationToken)
         {
-            var charsParsed = this.parser.TryParseFragment(recordSpan, this.tree, this.contentLength);
+            var charsParsed = this.parser.TryParseFragment(recordSpan, ref this.root, this.contentLength);
             if (charsParsed <= 0)
                 return ValueTask.FromResult(0);
 
@@ -135,9 +133,8 @@ public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : st
 
         public ValueTask StopAsync()
         {
-            this.Document.Root.IsWellFormed = this.tree.Count == 1;
+            this.Document.Root.IsWellFormed = this.root.Parent is null;
             this.Document.Root.CloseAt(this.contentLength);
-            this.tree.Clear();
             return ValueTask.CompletedTask;
         }
 

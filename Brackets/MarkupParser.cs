@@ -86,12 +86,10 @@
         private DocumentRoot Parse(ReadOnlyMemory<char> text)
         {
             var span = text.Span;
-            var tree = new Stack<ParentTag>();
-            tree.Push(new TextDocumentRoot(text, this.rootRef));
+            ParentTag parent = new TextDocumentRoot(text, this.rootRef);
 
             foreach (var token in Lexer.TokenizeElements(span, this.lexer))
             {
-                var parent = tree.Peek();
                 if (CanSkip(token, parent))
                     continue;
 
@@ -99,7 +97,7 @@
                 {
                     if (token.Category == TokenCategory.ClosingTag && this.lexer.ClosesTag(token, parent.Name))
                     {
-                        ParseClosingTag(token, parent, tree);
+                        ParseClosingTag(token, ref parent);
                     }
                     else
                     {
@@ -121,11 +119,11 @@
                         case TokenCategory.UnpairedTag:
                         case TokenCategory.Instruction:
                         case TokenCategory.Declaration:
-                            ParseOpeningTag(token, parent, tree);
+                            ParseOpeningTag(token, ref parent);
                             break;
 
                         case TokenCategory.ClosingTag:
-                            ParseClosingTag(token, parent, tree);
+                            ParseClosingTag(token, ref parent);
                             break;
 
                         case TokenCategory.Section:
@@ -145,21 +143,21 @@
             }
 
             // close unclosed tags
-            var wellFormed = tree.Count > 0 && tree.Count == 1;
-            while (tree.Count > 1)
+            var wellFormed = parent.Parent is null;
+            while (parent.Parent is not null)
             {
-                var unclosedTag = tree.Pop();
+                var unclosedTag = parent;
+                parent = parent.Parent;
                 if (!this.lexer.TagIsClosed(span[unclosedTag.Start..unclosedTag.End]))
                 {
-                    var parentTag = tree.Peek();
-                    if (parentTag is DocumentRoot)
-                        continue;
+                    if (parent is DocumentRoot)
+                        break;
 
-                    parentTag.Graft(unclosedTag);
+                    parent.Graft(unclosedTag);
                 }
             }
 
-            var root = (DocumentRoot)tree.Pop();
+            var root = (DocumentRoot)parent;
             root.IsWellFormed = wellFormed;
             return root;
         }
@@ -198,32 +196,34 @@
             parent.Add(CreateContent(token, toString));
         }
 
-        private void ParseOpeningTag(in Token token, ParentTag parent, Stack<ParentTag> tree, bool toString = false)
+        private void ParseOpeningTag(in Token token, ref ParentTag parent, bool toString = false)
         {
             var tag = CreateTag(token, toString);
             parent.Add(tag);
 
             if (tag is ParentTag pairedTag)
-                tree.Push(pairedTag);
+                parent = pairedTag;
         }
 
-        private void ParseClosingTag(in Token token, ParentTag parent, Stack<ParentTag> tree, bool toString = false)
+        private void ParseClosingTag(in Token token, ref ParentTag parent, bool toString = false)
         {
             // close the current tag
             // also special handling for a misplaced closing tag
-            foreach (var unclosedTag in tree)
+            var current = parent;
+            for (var unclosedTag = parent; unclosedTag is not null; unclosedTag = unclosedTag.Parent)
             {
                 if (this.lexer.ClosesTag(token, unclosedTag.Name))
                 {
-                    while (tree.Count > 1)
+                    while (parent.Parent is not null)
                     {
-                        var tag = tree.Pop();
+                        var tag = parent;
+                        parent = parent.Parent;
+
                         if (tag == unclosedTag)
                         {
-                            if (tag != parent)
+                            if (tag != current)
                             {
-                                var parentTag = tree.Peek();
-                                parentTag.Graft(tag, token.End);
+                                parent.Graft(tag, token.End);
                             }
 
                             tag.CloseAt(token.End);
@@ -231,8 +231,7 @@
                         }
                         else
                         {
-                            var parentTag = tree.Peek();
-                            parentTag.Graft(tag, token.End);
+                            parent.Graft(tag, token.End);
                         }
                     }
                 }
