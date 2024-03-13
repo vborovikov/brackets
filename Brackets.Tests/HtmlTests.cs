@@ -277,5 +277,22 @@
             Assert.AreEqual("return overlib('>How is Bartleby like this wise philosopher?', STICKY)",
                 anchor.Attributes["onclick"].ToString());
         }
+
+        [TestMethod]
+        public void HtmlParse_AttrValueAngleBrackets_ParsedFullValue()
+        {
+            var document = Document.Html.Parse(
+                """
+                <figure class="full-width "><img src="https://habrastorage.org/r/w1560/getpro/habr/upload_files/311/fb6/452/311fb64527140d3c49239ee747a37ac0.png" alt="> AND >  =>  range &amp;> range(expr, expr, '[]')" title="> AND >  =>  range &amp;> range(expr, expr, '[]')" width="962" height="194" data-src="https://habrastorage.org/getpro/habr/upload_files/311/fb6/452/311fb64527140d3c49239ee747a37ac0.png"><div><figcaption><code>&gt; AND &gt;  =&gt;  range &amp;&gt; range(expr, expr, '[]')</code></figcaption></div></figure>
+                """);
+
+            var figure = document.First<ParentTag>();
+            Assert.AreEqual(2, figure.Count<Tag>());
+            var img = document.First<Tag>();
+            Assert.IsNotInstanceOfType<ParentTag>(img);
+
+            Assert.AreEqual("> AND >  =>  range &amp;> range(expr, expr, '[]')", img.Attributes["alt"].ToString());
+            Assert.AreEqual("> AND >  =>  range &amp;> range(expr, expr, '[]')", img.Attributes["title"].ToString());
+        }
     }
 }
