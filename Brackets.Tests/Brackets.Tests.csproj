@@ -13,6 +13,7 @@
     <EmbeddedResource Include="Samples\broken.xml" />
     <EmbeddedResource Include="Samples\dotnet8perf.html" />
     <EmbeddedResource Include="Samples\google.html" />
+    <EmbeddedResource Include="Samples\habr.html" />
     <EmbeddedResource Include="Samples\head_script.html" />
     <EmbeddedResource Include="Samples\iab.html" />
     <EmbeddedResource Include="Samples\japantimes.html" />

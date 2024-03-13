@@ -12,6 +12,7 @@ public class ElementCloneTests
     [DataRow("broken.xml")]
     [DataRow("dotnet8perf.html")]
     [DataRow("google.html")]
+    [DataRow("habr.html")]
     [DataRow("head_script.html")]
     [DataRow("japantimes.html")]
     [DataRow("newsde.html")]
