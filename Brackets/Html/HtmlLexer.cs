@@ -231,8 +231,14 @@ public readonly struct HtmlLexer : IMarkupLexer
             var attr = data[(pos + 1)..];
             if (QuotationMarks.Contains(attr[0]))
             {
-                // "value -> invalid attribute value
-                return false;
+                var beforeValuePos = data[..pos].LastIndexOfAnyExcept(Separators);
+                if (beforeValuePos > 0 && data[beforeValuePos] == ValueSeparator)
+                {
+                    // `= "value` -> invalid attribute value
+                    return false;
+                }
+
+                return true;
             }
             pos = attr.IndexOf(ValueSeparator);
             if (pos >= 0)
@@ -240,7 +246,7 @@ public readonly struct HtmlLexer : IMarkupLexer
                 attr = attr[pos..];
                 if (attr[0] == ValueSeparator && QuotationMarks.Contains(attr[1]))
                 {
-                    // ="value -> invalid attribute value
+                    // `="value` -> invalid attribute value
                     return false;
                 }
             }

@@ -116,7 +116,7 @@ public static class ElementExtensions
 
         if (element is ParentTag parent)
         {
-            foreach (var child in parent)
+            foreach (var child in parent.GetEnumerator())
             {
                 if (child is Content childContent && childContent.Contains(text))
                     return true;
