@@ -254,9 +254,11 @@ public readonly struct HtmlLexer : IMarkupLexer
         else if (ValueEndsWithValueSeparator(data))
         {
             // check if the number of quotation marks is even
-            return data.Count(data[^1]) % 2 == 0;
+            var quoteCount = data.Count(data[^1]);
+            return ((quoteCount >> 1) << 1) == quoteCount;
         }
 
+        // all good
         return true;
 
         static bool HasQuoteInsideValue(ReadOnlySpan<char> span)
