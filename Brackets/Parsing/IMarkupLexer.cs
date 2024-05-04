@@ -1,5 +1,7 @@
 ﻿namespace Brackets.Parsing;
 
+using System.Diagnostics;
+
 [Flags]
 public enum TokenCategory
 {
@@ -16,6 +18,7 @@ public enum TokenCategory
     Declaration = 1 << 9, // <!abc ...>
 }
 
+[DebuggerDisplay("{Category,nq}: {Name}")]
 public readonly ref struct Token
 {
     public Token(TokenCategory category, ReadOnlySpan<char> span, int offset)

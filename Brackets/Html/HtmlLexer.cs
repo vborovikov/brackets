@@ -251,6 +251,11 @@ public readonly struct HtmlLexer : IMarkupLexer
                 }
             }
         }
+        else if (ValueEndsWithValueSeparator(data))
+        {
+            // check if the number of quotation marks is even
+            return data.Count(data[^1]) % 2 == 0;
+        }
 
         return true;
 
@@ -262,6 +267,17 @@ public readonly struct HtmlLexer : IMarkupLexer
             {
                 span = span[..(pos + 1)].TrimEnd();
                 return span.Length > 0 && span[^1] == ValueSeparator;
+            }
+
+            return false;
+        }
+
+        static bool ValueEndsWithValueSeparator(ReadOnlySpan<char> span)
+        {
+            var pos = span[..^1].LastIndexOfAnyExcept(Separators);
+            if (pos > 0)
+            {
+                return span[pos] == ValueSeparator;
             }
 
             return false;
