@@ -45,11 +45,11 @@ public readonly ref struct Token
     public int Offset { get; }
     public int NameOffset { get; }
     public int DataOffset { get; }
-    public bool IsEmpty => this.Category == TokenCategory.Content && (this.Span.IsEmpty || this.Span.IsWhiteSpace());
 
     internal int Start => this.Offset;
     internal int End => this.Offset + this.Span.Length;
     internal int Length => this.Span.Length;
+    internal bool IsEmpty => this.Category == TokenCategory.Content && (this.Span.IsEmpty || this.Span.IsWhiteSpace());
 
     public static implicit operator ReadOnlySpan<char>(in Token token) => token.Span;
 }
