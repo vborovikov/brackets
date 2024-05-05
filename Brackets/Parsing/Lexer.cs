@@ -5,24 +5,24 @@ using System;
 static class Lexer
 {
     public static ElementTokenEnumerator<TMarkupLexer> TokenizeElements<TMarkupLexer>(in ReadOnlySpan<char> text, in TMarkupLexer syntax, int globalOffset = 0)
-        where TMarkupLexer : struct, IMarkupLexer => new(text, syntax, globalOffset);
+        where TMarkupLexer : struct, IMarkupLexer => new(syntax, text, globalOffset);
 
     public static AttributeTokenEnumerator<TMarkupLexer> TokenizeAttributes<TMarkupLexer>(in Token token, in TMarkupLexer syntax)
-        where TMarkupLexer : struct, IMarkupLexer => new(token, syntax);
+        where TMarkupLexer : struct, IMarkupLexer => new(syntax, token);
 
     public ref struct ElementTokenEnumerator<TMarkupLexer>
         where TMarkupLexer : struct, IMarkupLexer
     {
-        private readonly ReadOnlySpan<char> text;
         private readonly ref readonly TMarkupLexer lexer;
+        private readonly ReadOnlySpan<char> text;
         private readonly int globalOffset;
         private int offset;
         private Token current;
 
-        public ElementTokenEnumerator(in ReadOnlySpan<char> text, in TMarkupLexer lexer, int globalOffset)
+        public ElementTokenEnumerator(in TMarkupLexer lexer, in ReadOnlySpan<char> text, int globalOffset)
         {
-            this.text = text;
             this.lexer = ref lexer;
+            this.text = text;
             this.globalOffset = globalOffset;
         }
 
@@ -56,14 +56,16 @@ static class Lexer
         where TMarkupLexer : struct, IMarkupLexer
     {
         private readonly ref readonly TMarkupLexer lexer;
-        private readonly Token token;
+        private readonly ReadOnlySpan<char> data;
+        private readonly int dataOffset;
         private int offset;
         private Token current;
 
-        public AttributeTokenEnumerator(in Token token, in TMarkupLexer lexer)
+        public AttributeTokenEnumerator(in TMarkupLexer lexer, in Token token)
         {
             this.lexer = ref lexer;
-            this.token = token;
+            this.data = token.Data;
+            this.dataOffset = token.DataOffset;
         }
 
         public readonly Token Current => this.current;
@@ -77,17 +79,17 @@ static class Lexer
 
         public bool MoveNext()
         {
-            if (this.offset >= this.token.Data.Length)
+            if (this.offset >= this.data.Length)
                 return false;
 
-            this.current = this.lexer.GetAttributeToken(this.token.Data[this.offset..], this.token.DataOffset + this.offset);
+            this.current = this.lexer.GetAttributeToken(this.data[this.offset..], this.dataOffset + this.offset);
             if (this.current.Span.Length == 0)
             {
-                this.offset = this.token.Data.Length;
+                this.offset = this.data.Length;
                 return false;
             }
 
-            this.offset = this.current.Offset + this.current.Span.Length - this.token.DataOffset;
+            this.offset = this.current.Offset + this.current.Span.Length - this.dataOffset;
             return true;
         }
     }
