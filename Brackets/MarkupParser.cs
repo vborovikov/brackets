@@ -1,6 +1,7 @@
 ﻿namespace Brackets
 {
     using System;
+    using System.Buffers;
     using System.Collections.Generic;
     using Collections;
     using Parsing;
@@ -28,6 +29,8 @@
     public abstract partial class MarkupParser<TMarkupLexer> : ISyntaxReference
         where TMarkupLexer : struct, IMarkupLexer
     {
+        private static readonly SearchValues<char> LineSeparators = SearchValues.Create("\r\n");
+
         private readonly TMarkupLexer lexer;
         private readonly IStringSet<TagRef> tagRefs;
         private readonly IStringSet<AttrRef> attrRefs;
@@ -173,10 +176,9 @@
                 return parent.Child is null || parent.Child.Next == parent.Child;
             }
 
-            // skip empty content if the parent doesn't allow phrasing content
-            return 
-                parent.Layout != FlowLayout.Inline &&
-                !parent.PermittedContent.HasFlag(ContentCategory.Phrasing);
+            // don't skip the token,
+            // it will be removed on the parent closing if the whitespace is the last child
+            return token.Span.ContainsAny(LineSeparators);
         }
 
         private static void ParseComment(in Token token, ParentTag parent)

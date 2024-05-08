@@ -145,7 +145,7 @@
             return debug.ToString();
         }
 
-        internal void CloseAt(int end)
+        internal virtual void CloseAt(int end)
         {
             this.end = end;
         }
@@ -374,6 +374,19 @@
                 return String.Empty;
 
             return ToString(this);
+        }
+
+        internal override void CloseAt(int end)
+        {
+            if (this.child is not null &&
+                this.child.Next != this.child.Prev &&
+                this.child.Prev is Content content && 
+                content.Data.IsWhiteSpace())
+            {
+                Remove(content);
+            }
+
+            base.CloseAt(end);
         }
 
         internal void Graft(ParentTag other, int unexpectedEndPos = -1)
