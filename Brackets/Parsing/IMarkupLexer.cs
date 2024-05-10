@@ -32,19 +32,21 @@ public readonly ref struct Token
         ReadOnlySpan<char> name, int nameOffset, ReadOnlySpan<char> data, int dataOffset)
         : this(category, span, offset)
     {
-        this.Name = name;
         this.NameOffset = nameOffset;
-        this.Data = data;
+        this.NameLength = name.Length;
         this.DataOffset = dataOffset;
+        this.DataLength = data.Length;
     }
 
     public TokenCategory Category { get; }
-    public ReadOnlySpan<char> Span { get; }
-    public ReadOnlySpan<char> Name { get; }
-    public ReadOnlySpan<char> Data { get; }
     public int Offset { get; }
     public int NameOffset { get; }
+    public int NameLength { get; }
     public int DataOffset { get; }
+    public int DataLength { get; }
+    public ReadOnlySpan<char> Span { get; }
+    public ReadOnlySpan<char> Name => this.NameLength > 0 ? this.Span.Slice(this.NameOffset - this.Offset, this.NameLength) : [];
+    public ReadOnlySpan<char> Data => this.DataLength > 0 ? this.Span.Slice(this.DataOffset - this.Offset, this.DataLength) : [];
 
     internal int Start => this.Offset;
     internal int End => this.Offset + this.Span.Length;

@@ -12,7 +12,7 @@ public class PerfTests
     [TestMethod]
     public void SizeOf_MostUsedTypes_NotLarge()
     {
-        Assert.AreEqual(40, Marshal.SizeOf(typeof(Token)));
+        Assert.AreEqual(32, Marshal.SizeOf(typeof(Token)));
         Assert.AreEqual(1, Marshal.SizeOf(typeof(XmlLexer)));
         Assert.AreEqual(1, Marshal.SizeOf(typeof(HtmlLexer)));
 

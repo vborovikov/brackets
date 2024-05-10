@@ -4,6 +4,7 @@
     using System.Buffers;
     using Collections;
     using Parsing;
+    using static System.Runtime.InteropServices.JavaScript.JSType;
 
     public enum MarkupLanguage
     {
@@ -57,15 +58,14 @@
         public Tag CreateTag(ReadOnlySpan<char> name)
         {
             return CreateTag(
-                new Token(TokenCategory.OpeningTag, ReadOnlySpan<char>.Empty, 0, name, 0, ReadOnlySpan<char>.Empty, 0),
+                new Token(TokenCategory.OpeningTag, name, 0, name, 0, [], 0),
                 toString: true);
         }
 
         public Attr CreateAttribute(ReadOnlySpan<char> name, ReadOnlySpan<char> value)
         {
-            return CreateAttribute(
-                new Token(TokenCategory.Attribute, ReadOnlySpan<char>.Empty, 0, name, 0, value, 0),
-                toString: true);
+            var reference = CreateOrFindAttrRef(name);
+            return new StringAttr(reference, value, 0, reference.Name.Length + value.Length + 3);
         }
 
         public Content CreateContent(ReadOnlySpan<char> value)
