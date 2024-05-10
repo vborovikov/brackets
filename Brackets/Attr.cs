@@ -8,16 +8,15 @@ namespace Brackets
     public class Attr : Element
     {
         private readonly AttrRef reference;
-        private readonly int length;
 
-        public Attr(AttrRef reference, int start, int length)
-            : base(start)
+        public Attr(AttrRef reference, int offset, int length)
+            : base(offset)
         {
             this.reference = reference;
-            this.length = length;
+            this.Length = length;
         }
 
-        public sealed override int End => this.Start + this.length;
+        public sealed override int Length { get; }
 
         internal AttrRef Reference => this.reference;
 
@@ -34,7 +33,7 @@ namespace Brackets
 
         public new Attr Clone() => (Attr)CloneOverride();
 
-        protected override Element CloneOverride() => new StringAttr(this.reference, null, this.Offset, this.length);
+        protected override Element CloneOverride() => new StringAttr(this.reference, null, this.Offset, this.Length);
 
         public override bool TryGetValue<T>([MaybeNullWhen(false)] out T value)
         {
@@ -161,24 +160,24 @@ namespace Brackets
 
     sealed class ValueAttr : Attr
     {
-        private readonly int valueStart;
+        private readonly int valueOffset;
         private readonly int valueLength;
 
-        public ValueAttr(AttrRef reference, int start, int length, int valueStart, int valueLength)
-            : base(reference, start, length)
+        public ValueAttr(AttrRef reference, int offset, int length, int valueOffset, int valueLength)
+            : base(reference, offset, length)
         {
-            this.valueStart = valueStart;
+            this.valueOffset = valueOffset;
             this.valueLength = valueLength;
         }
 
         public override bool HasValue => true;
 
-        public override ReadOnlySpan<char> Value => TrimValue(this.Source.Slice(this.valueStart, this.valueLength));
+        public override ReadOnlySpan<char> Value => TrimValue(this.Source.Slice(this.valueOffset, this.valueLength));
 
         public override string ToString() => this.Value.ToString();
 
         protected override Element CloneOverride() =>
-            new StringAttr(this.Reference, this.Source.Slice(this.valueStart, this.valueLength), this.Offset, this.Length);
+            new StringAttr(this.Reference, this.Source.Slice(this.valueOffset, this.valueLength), this.Offset, this.Length);
     }
 
     sealed class StringAttr : Attr

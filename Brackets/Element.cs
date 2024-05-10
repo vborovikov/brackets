@@ -21,23 +21,23 @@
         private Element prev;
         private Element next;
 
-        protected Element(int start)
+        protected Element(int offset)
         {
             this.prev = this.next = this;
-            this.Start = start;
+            this.Offset = offset;
         }
 
         public virtual FlowLayout Layout => FlowLayout.Inline;
 
         public virtual ContentCategory Category => ContentCategory.Flow;
 
-        public int Start { get; }
+        public int Offset { get; }
 
-        public abstract int End { get; }
+        public abstract int Length { get; }
 
-        public int Offset => this.Start;
+        internal int Start => this.Offset;
 
-        public int Length => this.End - this.Start;
+        internal int End => this.Offset + this.Length;
 
         public int NestingLevel
         {

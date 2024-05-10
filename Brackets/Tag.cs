@@ -10,13 +10,13 @@
         private readonly TagRef reference;
         private readonly Attr.List attrList;
         private Attr? attribute;
-        private int end;
+        private int length;
 
-        public Tag(TagRef reference, int start, int length) : base(start)
+        public Tag(TagRef reference, int offset, int length) : base(offset)
         {
             this.reference = reference;
             this.attrList = new Attr.List(this);
-            this.end = start + length;
+            this.length = length;
         }
 
         internal TagRef Reference => this.reference;
@@ -41,7 +41,7 @@
 
         public Attr.Enumerator EnumerateAttributes() => new(this.attribute);
 
-        public sealed override int End => this.end;
+        public sealed override int Length => this.length;
 
         public override string ToString() => this.reference.ToString(this);
 
@@ -147,13 +147,13 @@
 
         internal virtual void CloseAt(int end)
         {
-            this.end = end;
+            this.length = end - this.Offset;
         }
     }
 
     public sealed class Instruction : Tag
     {
-        public Instruction(TagRef reference, int start, int length) : base(reference, start, length)
+        public Instruction(TagRef reference, int offset, int length) : base(reference, offset, length)
         {
         }
 
@@ -173,7 +173,7 @@
 
     public sealed class Declaration : Tag
     {
-        public Declaration(TagRef reference, int start, int length) : base(reference, start, length)
+        public Declaration(TagRef reference, int offset, int length) : base(reference, offset, length)
         {
         }
 
@@ -195,7 +195,7 @@
     {
         private Element? child;
 
-        public ParentTag(TagRef reference, int start, int length) : base(reference, start, length)
+        public ParentTag(TagRef reference, int offset, int length) : base(reference, offset, length)
         {
         }
 

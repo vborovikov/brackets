@@ -52,8 +52,8 @@ public enum ContentCategory
 
 public abstract class CharacterData : Element
 {
-    protected CharacterData(int start)
-        : base(start) { }
+    protected CharacterData(int offset)
+        : base(offset) { }
 
     public new ParentTag? Parent => base.Parent as ParentTag;
 
@@ -81,14 +81,14 @@ public abstract class CharacterData : Element
 
 public class Content : CharacterData
 {
-    private int end;
+    private int length;
 
-    public Content(int start, int length) : base(start)
+    public Content(int offset, int length) : base(offset)
     {
-        this.end = start + length;
+        this.length = length;
     }
 
-    public sealed override int End => this.end;
+    public sealed override int Length => this.length;
 
     public new Content Clone() => (Content)CloneOverride();
 
@@ -98,7 +98,7 @@ public class Content : CharacterData
     {
         if (content.Start == this.End)
         {
-            this.end = content.end;
+            this.length += content.length;
             return true;
         }
 
@@ -137,28 +137,28 @@ sealed class StringContent : Content
 
 public class Section : CharacterData
 {
-    private readonly int dataStart;
+    private readonly int dataOffset;
     private readonly int dataLength;
 
-    public Section(int start, int length, int dataStart, int dataLength)
-        : base(start)
+    public Section(int offset, int length, int dataOffset, int dataLength)
+        : base(offset)
     {
-        this.End = start + length;
-        this.dataStart = dataStart;
+        this.Length = length;
+        this.dataOffset = dataOffset;
         this.dataLength = dataLength;
     }
 
-    public override int End { get; }
+    public override int Length { get; }
 
     public virtual ReadOnlySpan<char> Name => this.Parent is ParentTag parent ? parent.Reference.Syntax.TrimName(base.Data) : ReadOnlySpan<char>.Empty;
-    public override ReadOnlySpan<char> Data => this.Source.Slice(this.dataStart, this.dataLength);
+    public override ReadOnlySpan<char> Data => this.Source.Slice(this.dataOffset, this.dataLength);
 
-    protected int DataStart => this.dataStart;
+    protected int DataOffset => this.dataOffset;
 
     public new Section Clone() => (Section)CloneOverride();
 
     protected override Element CloneOverride() => new StringSection(this.Name.ToString(), 
-        this.Offset, this.Length, this.Data.ToString(), this.dataStart);
+        this.Offset, this.Length, this.Data.ToString(), this.dataOffset);
 
     internal override string ToDebugString()
     {
@@ -171,8 +171,8 @@ sealed class StringSection : Section
     private readonly string name;
     private readonly string data;
 
-    public StringSection(string name, int start, int length, string data, int dataStart)
-        : base(start, length, dataStart, data.Length)
+    public StringSection(string name, int offset, int length, string data, int dataOffset)
+        : base(offset, length, dataOffset, data.Length)
     {
         this.name = name;
         this.data = data;
@@ -184,7 +184,7 @@ sealed class StringSection : Section
     public override string ToString() => this.data;
 
     protected override Element CloneOverride() => new StringSection(this.name,
-        this.Offset, this.Length, this.data, this.DataStart);
+        this.Offset, this.Length, this.data, this.DataOffset);
 
     internal override string ToDebugString()
     {
@@ -195,12 +195,12 @@ sealed class StringSection : Section
 
 public class Comment : CharacterData
 {
-    public Comment(int start, int length) : base(start)
+    public Comment(int offset, int length) : base(offset)
     {
-        this.End = start + length;
+        this.Length = length;
     }
 
-    public override int End { get; }
+    public override int Length { get; }
 
     public override ReadOnlySpan<char> Data =>
         this.Source.IsEmpty ? ReadOnlySpan<char>.Empty :
@@ -221,7 +221,7 @@ sealed class StringComment : Comment
 {
     private readonly string data;
 
-    public StringComment(string data, int start, int length) : base(start, length)
+    public StringComment(string data, int offset, int length) : base(offset, length)
     {
         this.data = data;
     }

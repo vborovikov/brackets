@@ -26,13 +26,13 @@ public partial class Document
     private sealed class DataElement : Element
     {
         public DataElement(DataType dataType, object value)
-            : base(-1)
+            : base(default)
         {
             this.DataType = dataType;
             this.Value = value;
         }
 
-        public override int End => -1;
+        public override int Length => default;
 
         public DataType DataType { get; }
 
