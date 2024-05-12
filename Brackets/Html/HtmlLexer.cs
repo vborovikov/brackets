@@ -141,11 +141,13 @@ public readonly struct HtmlLexer : IMarkupLexer
             // <?tag...?> | <!tag ...> | <tag .../> | <tag ...> | </tag>
 
             // token category
-            category = span.StartsWith(DeclOpener, cmp) ? TokenCategory.Declaration :
-                span.StartsWith(InstrOpener, cmp) && span.EndsWith(InstrCloser, cmp) ? TokenCategory.Instruction :
-                span.StartsWith(TermOpener, cmp) ? TokenCategory.ClosingTag :
-                span.EndsWith(TermCloser, cmp) ? TokenCategory.UnpairedTag :
-                TokenCategory.OpeningTag;
+            category = span.Length > 3 ? (
+                    span.StartsWith(DeclOpener, cmp) ? TokenCategory.Declaration :
+                    span.StartsWith(InstrOpener, cmp) && span.EndsWith(InstrCloser, cmp) ? TokenCategory.Instruction :
+                    span.StartsWith(TermOpener, cmp) ? TokenCategory.ClosingTag :
+                    span.EndsWith(TermCloser, cmp) ? TokenCategory.UnpairedTag :
+                    TokenCategory.OpeningTag
+                ) : TokenCategory.OpeningTag;
 
             var tag = category switch
             {

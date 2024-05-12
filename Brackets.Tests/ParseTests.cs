@@ -1,4 +1,6 @@
 ﻿namespace Brackets.Tests;
+
+using Brackets.Tests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 [TestClass]
@@ -28,5 +30,23 @@ public class ParseTests
         Assert.AreEqual(2, figure.Count());
         Assert.IsNotNull(img);
         Assert.IsNotNull(figcaption);
+    }
+
+    [TestMethod]
+    public void HtmlParse_BadInstruction_Content()
+    {
+        var document = Document.Html.Parse("<a><?></a>");
+        var a = document.First<ParentTag>();
+        var badInst = a.First();
+        Assert.IsInstanceOfType<Content>(badInst);
+    }
+
+    [TestMethod]
+    public void XmlParse_BadInstruction_Content()
+    {
+        var document = Document.Xml.Parse("<a><?></a>");
+        var a = document.First<ParentTag>();
+        var badInst = a.First();
+        Assert.IsInstanceOfType<Content>(badInst);
     }
 }
