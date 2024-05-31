@@ -27,8 +27,6 @@
 
         public string Name => this.reference.Name;
 
-        public bool HasRawContent => this.reference.HasRawContent;
-
         public override FlowLayout Layout => this.reference.Layout;
 
         public override ContentCategory Category => this.reference.Category;
@@ -240,7 +238,7 @@
             if (element == this)
                 throw new ArgumentException("Cannot add an element to itself.");
 
-            if (this.HasRawContent && element is Content content && this.child is not null)
+            if (this.Reference.HasRawContent && element is Content content && this.child is not null)
             {
                 var childElement = this.child;
                 do

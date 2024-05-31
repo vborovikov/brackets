@@ -29,7 +29,7 @@ public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : st
             if (CanSkip(token, parent))
                 continue;
 
-            if (parent.HasRawContent)
+            if (parent.Reference.HasRawContent)
             {
                 if (token.Category == TokenCategory.ClosingTag && this.lexer.ClosesTag(token, parent.Name))
                 {
