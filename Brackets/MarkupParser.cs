@@ -4,7 +4,6 @@
     using System.Buffers;
     using Collections;
     using Parsing;
-    using static System.Runtime.InteropServices.JavaScript.JSType;
 
     public enum MarkupLanguage
     {
