@@ -2,6 +2,13 @@
 {
     using System;
 
+    public enum ParsingMode
+    {
+        Default,
+        RawContent,
+        Formatting,
+    }
+
     public class TagRef : SyntaxAware
     {
         public TagRef(string name, ISyntaxReference syntax) : base(syntax)
@@ -16,7 +23,7 @@
 
         public bool IsParent { get; init; }
 
-        public bool HasRawContent { get; init; }
+        public ParsingMode ParsingMode { get; init; }
 
         public FlowLayout Layout { get; init; }
 

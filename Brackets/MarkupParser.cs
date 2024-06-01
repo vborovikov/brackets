@@ -95,7 +95,7 @@
                 if (CanSkip(token, parent))
                     continue;
 
-                if (parent.Reference.HasRawContent)
+                if (parent.HasRawContent)
                 {
                     if (token.Category == TokenCategory.ClosingTag && this.lexer.ClosesTag(token, parent.Name))
                     {
@@ -169,13 +169,16 @@
             if (!token.IsEmpty)
                 return false;
 
-            if (parent.Reference.HasRawContent)
+            if (parent.HasRawContent)
             {
                 // skip empty content before and immediately after a single child (a section)
                 return parent.Child is null || parent.Child.Next == parent.Child;
             }
-
-            //todo: special handling for <pre> and <code> tags
+            else if (parent.PreservesFormatting)
+            {
+                // keep source formatting, special handling for <pre> tag
+                return false;
+            }
 
             // don't skip the token,
             // it will be removed on the parent closing if the whitespace is the last child

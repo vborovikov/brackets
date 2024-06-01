@@ -36,8 +36,9 @@ public class HtmlParser : MarkupParser<HtmlLexer>
         AddReference(new TagRef("track", this) { IsParent = false });
         AddReference(new TagRef("wbr", this) { IsParent = false, Layout = Inline, Category = Flow | Phrasing });
         // raw text elements
-        AddReference(new TagRef("style", this) { HasRawContent = true, Category = Metadata });
-        AddReference(new TagRef("script", this) { HasRawContent = true, Layout = Inline, Category = Metadata | Flow | Phrasing | Script });
+        AddReference(new TagRef("style", this) { ParsingMode = ParsingMode.RawContent, Category = Metadata });
+        AddReference(new TagRef("script", this) { ParsingMode = ParsingMode.RawContent, Layout = Inline, Category = Metadata | Flow | Phrasing | Script });
+        AddReference(new TagRef("pre", this) { ParsingMode = ParsingMode.Formatting, Category = Flow | Phrasing });
         AddReference(new TagRef("code", this) { Layout = Inline, Category = Flow | Phrasing });
         // other inline elements
         AddReference(new TagRef("a", this) { Layout = Inline });

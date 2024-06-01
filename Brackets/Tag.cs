@@ -197,6 +197,10 @@
         {
         }
 
+        internal bool HasRawContent => this.Reference.ParsingMode == ParsingMode.RawContent;
+
+        internal bool PreservesFormatting => this.Reference.ParsingMode == ParsingMode.Formatting || (this.Parent?.PreservesFormatting ?? false);
+
         public bool HasChildren => this.child is not null;
 
         public int ContentStart => this.child?.Start ?? -1;
@@ -238,7 +242,7 @@
             if (element == this)
                 throw new ArgumentException("Cannot add an element to itself.");
 
-            if (this.Reference.HasRawContent && element is Content content && this.child is not null)
+            if (this.HasRawContent && element is Content content && this.child is not null)
             {
                 var childElement = this.child;
                 do

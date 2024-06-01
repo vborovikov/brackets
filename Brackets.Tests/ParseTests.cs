@@ -1,6 +1,5 @@
 ﻿namespace Brackets.Tests;
 
-using Brackets.Tests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 [TestClass]
@@ -48,5 +47,30 @@ public class ParseTests
         var a = document.First<ParentTag>();
         var badInst = a.First();
         Assert.IsInstanceOfType<Content>(badInst);
+    }
+
+    [TestMethod]
+    public void HtmlParse_PreNewLines_FormattingPreserved()
+    {
+        var document = Document.Html.Parse(
+            """
+            <pre class="language-csharp"><code class="language-csharp"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Person</span><span class="token punctuation">(</span><span class="token class-name"><span class="token keyword">string</span></span> firstName<span class="token punctuation">,</span> <span class="token class-name"><span class="token keyword">string</span></span> lastName<span class="token punctuation">)</span>
+            <span class="token punctuation">{</span>
+                <span class="token keyword">private</span> <span class="token keyword">readonly</span> <span class="token class-name"><span class="token keyword">string</span></span> _firstName <span class="token operator">=</span> firstName<span class="token punctuation">;</span>
+                <span class="token keyword">private</span> <span class="token keyword">readonly</span> <span class="token class-name"><span class="token keyword">string</span></span> _lastName <span class="token operator">=</span> lastName<span class="token punctuation">;</span>
+            <span class="token punctuation">}</span></code></pre>
+            """);
+
+        var code = document.Find<ParentTag>(t => t is { Name: "code" });
+
+        Assert.AreEqual(
+            """
+            public class Person(string firstName, string lastName)
+            {
+                private readonly string _firstName = firstName;
+                private readonly string _lastName = lastName;
+            }
+            """, code.ToString());
+
     }
 }
