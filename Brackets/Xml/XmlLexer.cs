@@ -380,6 +380,7 @@ public readonly struct XmlLexer : IMarkupLexer
         return value;
     }
 
+    // https://www.w3.org/TR/xml/#sec-common-syn
     private static bool IsElementName(ReadOnlySpan<char> span)
     {
         var count = span.Length;
@@ -388,7 +389,24 @@ public readonly struct XmlLexer : IMarkupLexer
 
         ref char c = ref MemoryMarshal.GetReference(span);
 
-        if ((uint)((c | 0x20) - 'a') > 'z' - 'a')
+        //note: no check for [#x10000-#xEFFFF]
+
+        if (!(
+            ((uint)((c | 0x20) - 'a') <= 'z' - 'a') ||
+            (c == ':') ||
+            (c == '_') ||
+            (c is >= '\u00C0' and <= '\u00D6') ||
+            (c is >= '\u00D8' and <= '\u00F6') ||
+            (c is >= '\u00F8' and <= '\u02FF') ||
+            (c is >= '\u0370' and <= '\u037D') ||
+            (c is >= '\u037F' and <= '\u1FFF') ||
+            (c is >= '\u200C' and <= '\u200D') ||
+            (c is >= '\u2070' and <= '\u218F') ||
+            (c is >= '\u2C00' and <= '\u2FEF') ||
+            (c is >= '\u3001' and <= '\uD7FF') ||
+            (c is >= '\uF900' and <= '\uFDCF') ||
+            (c is >= '\uFDF0' and <= '\uFFFD')
+            ))
         {
             // c is not an ASCII letter
             return false;
@@ -403,8 +421,23 @@ public readonly struct XmlLexer : IMarkupLexer
                 ((uint)((c | 0x20) - 'a') <= 'z' - 'a') ||
                 ((uint)(c - '0') <= 9u) ||
                 (c == '-') ||
+                (c == '.') ||
+                (c == ':') ||
                 (c == '_') ||
-                (c == ':')
+                (c == '\u00B7') ||
+                (c is >= '\u00C0' and <= '\u00D6') ||
+                (c is >= '\u00D8' and <= '\u00F6') ||
+                (c is >= '\u00F8' and <= '\u02FF') ||
+                (c is >= '\u0300' and <= '\u036F') ||
+                (c is >= '\u0370' and <= '\u037D') ||
+                (c is >= '\u037F' and <= '\u1FFF') ||
+                (c is >= '\u200C' and <= '\u200D') ||
+                (c is >= '\u203F' and <= '\u2040') ||
+                (c is >= '\u2070' and <= '\u218F') ||
+                (c is >= '\u2C00' and <= '\u2FEF') ||
+                (c is >= '\u3001' and <= '\uD7FF') ||
+                (c is >= '\uF900' and <= '\uFDCF') ||
+                (c is >= '\uFDF0' and <= '\uFFFD')
                ))
             {
                 // c is not an ASCII letter or digit or dash or underscrore
