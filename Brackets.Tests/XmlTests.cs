@@ -90,4 +90,18 @@ public class XmlTests
         Assert.IsInstanceOfType(first.Next, typeof(Declaration));
         Assert.IsInstanceOfType(first.Prev, typeof(ParentTag));
     }
+
+    [TestMethod]
+    public void Parse_XmlIntrlName_Recognized()
+    {
+        var document = Document.Xml.Parse("""<руссо-туристо облико="морале">фирштейн?</руссо-туристо>""");
+
+        var tag = document.FirstOrDefault<ParentTag>();
+        Assert.IsNotNull(tag);
+        Assert.AreEqual("руссо-туристо", tag.Name);
+
+        var attr = tag.Attributes.FirstOrDefault();
+        Assert.IsNotNull(attr);
+        Assert.AreEqual("облико", attr.Name);
+    }
 }
