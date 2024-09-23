@@ -1,7 +1,24 @@
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
- <PropertyGroup>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" InitialTargets="GetGitMetadata">
+  <Target Name="GetGitMetadata">
+    <Exec Command="git rev-parse --abbrev-ref HEAD" ConsoleToMSBuild="true"
+          Condition="'$(GitBranchName)' == ''">
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitBranchName" />
+    </Exec>
+    <Exec Command="git rev-list --count HEAD" ConsoleToMSBuild="true"
+          Condition="'$(GitBuildNumber)' == ''">
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitBuildNumber" />
+    </Exec>
+    <PropertyGroup>
+      <GitBranchName Condition="'$(GitBranchName)' == ''"/>
+      <GitBuildNumber Condition="'$(GitBuildNumber)' == ''">0</GitBuildNumber>
+      <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+      <FileVersion>$(VersionPrefix).$(GitBuildNumber)</FileVersion>
+      <InformationalVersion>$(Version) $(GitBranchName)</InformationalVersion>
+    </PropertyGroup>
+  </Target>
+  <PropertyGroup>
     <VersionPrefix>0.6.1</VersionPrefix>
     <VersionSuffix></VersionSuffix>
     <PackageVersion>$(Version)</PackageVersion>
- </PropertyGroup>
+  </PropertyGroup>
 </Project>
