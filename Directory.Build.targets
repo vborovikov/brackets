@@ -13,7 +13,7 @@
       <GitBuildNumber Condition="'$(GitBuildNumber)' == ''">0</GitBuildNumber>
       <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
       <FileVersion>$(VersionPrefix).$(GitBuildNumber)</FileVersion>
-      <InformationalVersion>$(Version) [$(GitBranchName)]</InformationalVersion>
+      <InformationalVersion>$(Version) $(GitBranchName)</InformationalVersion>
     </PropertyGroup>
   </Target>
   <PropertyGroup>
