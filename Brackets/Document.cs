@@ -10,7 +10,7 @@
     using Xml;
     using XPath;
 
-    public partial class Document : IEnumerable<Element>, ICloneable
+    public partial class Document : IDocumentRoot, IEnumerable<Element>, ICloneable
     {
         private static readonly LRUCache<string, PathQuery> pathQueryCache = new(16);
         private readonly DocumentRoot root;
@@ -27,6 +27,8 @@
         public bool IsComplete => this.root.IsWellFormed.HasValue;
 
         public bool IsWellFormed => this.root.IsWellFormed == true;
+
+        public bool IsSerialized => this.root.IsSerialized;
 
         public int Length => this.root.Length;
 

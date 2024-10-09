@@ -2,12 +2,36 @@ namespace Brackets
 {
     using System;
 
-    abstract class DocumentRoot : ParentTag
+    public interface IDocumentRoot : IEnumerable<Element>, ICloneable
+    {
+        int Length { get; }
+
+        bool IsWellFormed { get; }
+
+        /// <summary>
+        /// Indicates whether the document elements are serialized copies of the source data.
+        /// </summary>
+        bool IsSerialized { get; }
+
+        Element? Find(Predicate<Element> match);
+
+        TElement? Find<TElement>(Func<TElement, bool> match) where TElement : Element;
+
+        IEnumerable<Element> FindAll(Predicate<Element> match);
+
+        IEnumerable<TElement> FindAll<TElement>(Func<TElement, bool> match) where TElement : Element;
+    }
+
+    abstract class DocumentRoot : ParentTag, IDocumentRoot
     {
         protected DocumentRoot(RootRef rootReference, int length)
             : base(rootReference, 0, length) { }
 
-        internal bool? IsWellFormed { get; set; }
+        public bool? IsWellFormed { get; set; }
+
+        bool IDocumentRoot.IsWellFormed => this.IsWellFormed == true;
+
+        public abstract bool IsSerialized { get; }
 
         public override string ToString()
         {
@@ -37,6 +61,8 @@ namespace Brackets
         }
 
         protected override ReadOnlySpan<char> Source => this.text.Span;
+
+        public override bool IsSerialized => false;
     }
 
     sealed class EmptyDocumentRoot : DocumentRoot
@@ -45,5 +71,7 @@ namespace Brackets
             : base(rootReference, 0) { }
 
         protected override ReadOnlySpan<char> Source => ReadOnlySpan<char>.Empty;
+
+        public override bool IsSerialized => true;
     }
 }

@@ -186,6 +186,24 @@
             Assert.AreEqual(1, linkTag.Count());
         }
 
+        [TestMethod]
+        public async Task IsSerialized_DocumentFromStream_True()
+        {
+            var sample = Samples.GetStream("google.html");
+            var document = await Document.Html.ParseAsync(sample);
+
+            Assert.IsTrue(document.IsSerialized);
+        }
+
+        [TestMethod]
+        public void IsSerialized_DocumentFromString_False()
+        {
+            var sample = Samples.GetString("google.html");
+            var document = Document.Html.Parse(sample);
+
+            Assert.IsFalse(document.IsSerialized);
+        }
+
         private static void AssertTags(IEnumerable<Element> parent, params string[] tags)
         {
             using var elements = parent.GetEnumerator();

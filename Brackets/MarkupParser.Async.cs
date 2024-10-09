@@ -12,7 +12,7 @@ using Streaming;
 
 public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : struct, IMarkupLexer
 {
-    public Task<Document> ParseAsync(Stream stream, CancellationToken cancellationToken) =>
+    public Task<Document> ParseAsync(Stream stream, CancellationToken cancellationToken = default) =>
         ParseAsync(stream, Encoding.UTF8, cancellationToken);
 
     public async Task<Document> ParseAsync(Stream stream, Encoding encoding, CancellationToken cancellationToken)
