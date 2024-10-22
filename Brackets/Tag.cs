@@ -189,7 +189,7 @@
         internal override string ToDebugString() => $"<!{this.Name}>";
     }
 
-    public class ParentTag : Tag, IEnumerable<Element>
+    public class ParentTag : Tag, IRoot, IEnumerable<Element>
     {
         private Element? child;
 

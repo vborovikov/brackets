@@ -2,34 +2,35 @@ namespace Brackets
 {
     using System;
 
-    public interface IDocumentRoot : IEnumerable<Element>, ICloneable
+    public interface IRoot : IEnumerable<Element>, ICloneable
     {
         int Length { get; }
 
+        Element.Enumerator GetEnumerator();
+        Element? Find(Predicate<Element> match);
+        TElement? Find<TElement>(Func<TElement, bool> match) where TElement : Element;
+        IEnumerable<Element> FindAll(Predicate<Element> match);
+        IEnumerable<TElement> FindAll<TElement>(Func<TElement, bool> match) where TElement : Element;
+    }
+
+    public interface IDocument : IRoot
+    {
         bool IsWellFormed { get; }
 
         /// <summary>
         /// Indicates whether the document elements are serialized copies of the source data.
         /// </summary>
         bool IsSerialized { get; }
-
-        Element? Find(Predicate<Element> match);
-
-        TElement? Find<TElement>(Func<TElement, bool> match) where TElement : Element;
-
-        IEnumerable<Element> FindAll(Predicate<Element> match);
-
-        IEnumerable<TElement> FindAll<TElement>(Func<TElement, bool> match) where TElement : Element;
     }
 
-    abstract class DocumentRoot : ParentTag, IDocumentRoot
+    abstract class DocumentRoot : ParentTag, IDocument
     {
         protected DocumentRoot(RootRef rootReference, int length)
             : base(rootReference, 0, length) { }
 
         public bool? IsWellFormed { get; set; }
 
-        bool IDocumentRoot.IsWellFormed => this.IsWellFormed == true;
+        bool IDocument.IsWellFormed => this.IsWellFormed == true;
 
         public abstract bool IsSerialized { get; }
 

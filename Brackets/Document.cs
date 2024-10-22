@@ -10,7 +10,7 @@
     using Xml;
     using XPath;
 
-    public partial class Document : IDocumentRoot, IEnumerable<Element>, ICloneable
+    public partial class Document : IDocument, IEnumerable<Element>, ICloneable
     {
         private static readonly LRUCache<string, PathQuery> pathQueryCache = new(16);
         private readonly DocumentRoot root;
