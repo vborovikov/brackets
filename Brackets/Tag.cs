@@ -370,6 +370,9 @@
         public IEnumerable<TElement> FindAll<TElement>(Func<TElement, bool> match) where TElement : Element =>
             FindAll(el => el is TElement element && match(element)).Cast<TElement>();
 
+        public IEnumerable<TElement> FindAll<TElement>() where TElement : Element =>
+            FindAll(el => el is TElement element).Cast<TElement>();
+
         public override string ToString()
         {
             if (this.child is null)

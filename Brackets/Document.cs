@@ -10,7 +10,7 @@
     using Xml;
     using XPath;
 
-    public partial class Document : IDocument, IEnumerable<Element>, ICloneable
+    public partial class Document : IDocument
     {
         private static readonly LRUCache<string, PathQuery> pathQueryCache = new(16);
         private readonly DocumentRoot root;
@@ -34,39 +34,26 @@
 
         internal DocumentRoot Root => this.root;
 
-        public override string? ToString()
-        {
-            return this.root.ToString();
-        }
+        public override string? ToString() => this.root.ToString();
 
-        public Document Clone()
-        {
-            return new Document(this.root.Clone());
-        }
+        public Document Clone() => new(this.root.Clone());
 
         object ICloneable.Clone() => Clone();
 
-        public Element? Find(Predicate<Element> match)
-        {
-            return this.root.Find(match);
-        }
+        public Element? Find(Predicate<Element> match) =>
+            this.root.Find(match);
 
-        public TElement? Find<TElement>(Func<TElement, bool> match)
-            where TElement : Element
-        {
-            return this.root.Find(match);
-        }
+        public TElement? Find<TElement>(Func<TElement, bool> match) where TElement : Element =>
+            this.root.Find(match);
 
-        public IEnumerable<Element> FindAll(Predicate<Element> match)
-        {
-            return this.root.FindAll(match);
-        }
+        public IEnumerable<Element> FindAll(Predicate<Element> match) =>
+            this.root.FindAll(match);
 
-        public IEnumerable<TElement> FindAll<TElement>(Func<TElement, bool> match)
-            where TElement : Element
-        {
-            return this.root.FindAll(match);
-        }
+        public IEnumerable<TElement> FindAll<TElement>(Func<TElement, bool> match) where TElement : Element =>
+            this.root.FindAll(match);
+
+        public IEnumerable<TElement> FindAll<TElement>() where TElement : Element =>
+            this.root.FindAll<TElement>();
 
         public IEnumerable<Element> Find(string path)
         {

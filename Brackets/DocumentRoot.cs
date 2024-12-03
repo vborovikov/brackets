@@ -11,6 +11,7 @@ namespace Brackets
         TElement? Find<TElement>(Func<TElement, bool> match) where TElement : Element;
         IEnumerable<Element> FindAll(Predicate<Element> match);
         IEnumerable<TElement> FindAll<TElement>(Func<TElement, bool> match) where TElement : Element;
+        IEnumerable<TElement> FindAll<TElement>() where TElement : Element;
     }
 
     public interface IDocument : IRoot

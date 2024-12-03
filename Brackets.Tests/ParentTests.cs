@@ -1,4 +1,5 @@
 namespace Brackets.Tests;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 [TestClass]
 public class ParentTests
@@ -51,5 +52,23 @@ public class ParentTests
         parent.Replace(oldElement, newElement);
 
         Assert.AreEqual(newElement, parent.First<Tag>());
+    }
+
+    [TestMethod]
+    public void FindAll_OfType_AllEnumerated()
+    {
+        var document = Document.Html.Parse(
+            """
+            <div>
+                <span><i>Value1</i><i>Value2</i><i>Value3</i></span>
+                <div>
+                    <span><i>Value4</i><i>Value5</i><i>Value6</i></span>
+                </div>
+                <span><i>Value7</i><i>Value8</i><i>Value9</i></span>
+            </div>
+            """);
+        var parent = document.First<ParentTag>();
+        var result = parent.FindAll<Content>().ToArray();
+        Assert.AreEqual(9, result.Length);
     }
 }
