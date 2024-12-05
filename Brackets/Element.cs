@@ -15,7 +15,7 @@
     }
 
     [DebuggerDisplay("{" + nameof(ToDebugString) + "(),nq}")]
-    public abstract class Element : ICloneable
+    public abstract class Element : ICloneable //todo: ISpanFormattable
     {
         private Tag? parent;
         private Element prev;

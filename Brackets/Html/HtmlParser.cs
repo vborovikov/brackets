@@ -41,28 +41,28 @@ public class HtmlParser : MarkupParser<HtmlLexer>
         AddReference(new TagRef("pre", this) { ParsingMode = ParsingMode.Formatting, Category = Flow | Phrasing });
         AddReference(new TagRef("code", this) { Layout = Inline, Category = Flow | Phrasing });
         // other inline elements
-        AddReference(new TagRef("a", this) { Layout = Inline });
+        AddReference(new TagRef("a", this) { Layout = Inline, Category = Flow | Phrasing | Interactive });
         AddReference(new TagRef("abbr", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("acronym", this) { Layout = Inline });
+        AddReference(new TagRef("acronym", this) { Layout = Inline, Category = Flow | Phrasing });
         AddReference(new TagRef("audio", this) { Layout = Inline, Category = Flow | Phrasing | Embedded });
         AddReference(new TagRef("b", this) { Layout = Inline, Category = Flow | Phrasing });
         AddReference(new TagRef("bdi", this) { Layout = Inline, Category = Flow | Phrasing });
         AddReference(new TagRef("bdo", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("big", this) { Layout = Inline });
+        AddReference(new TagRef("big", this) { Layout = Inline, Category = Flow | Phrasing });
         AddReference(new TagRef("button", this) { Layout = Inline, Category = Flow | Phrasing | Interactive | Form });
         AddReference(new TagRef("canvas", this) { Layout = Inline, Category = Flow | Phrasing | Embedded });
         AddReference(new TagRef("cite", this) { Layout = Inline, Category = Flow | Phrasing });
         AddReference(new TagRef("data", this) { Layout = Inline, Category = Flow | Phrasing });
         AddReference(new TagRef("datalist", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("del", this) { Layout = Inline });
+        AddReference(new TagRef("del", this) { Layout = Inline, Category = Flow | Phrasing });
         AddReference(new TagRef("dfn", this) { Layout = Inline, Category = Flow | Phrasing });
         AddReference(new TagRef("em", this) { Layout = Inline, Category = Flow | Phrasing });
         AddReference(new TagRef("i", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
         AddReference(new TagRef("iframe", this) { Layout = Inline, Category = Flow | Phrasing | Embedded | Interactive });
-        AddReference(new TagRef("ins", this) { Layout = Inline });
+        AddReference(new TagRef("ins", this) { Layout = Inline, Category = Flow | Phrasing });
         AddReference(new TagRef("kbd", this) { Layout = Inline, Category = Flow | Phrasing });
         AddReference(new TagRef("label", this) { Layout = Inline, Category = Flow | Phrasing | Interactive | Form });
-        AddReference(new TagRef("map", this) { Layout = Inline });
+        AddReference(new TagRef("map", this) { Layout = Inline, Category = Flow | Phrasing });
         AddReference(new TagRef("mark", this) { Layout = Inline, Category = Flow | Phrasing });
         AddReference(new TagRef("meter", this) { Layout = Inline, Category = Flow | Phrasing | Form });
         AddReference(new TagRef("noscript", this) { Layout = Inline, Category = Metadata | Flow | Phrasing });
@@ -86,7 +86,7 @@ public class HtmlParser : MarkupParser<HtmlLexer>
         AddReference(new TagRef("textarea", this) { Layout = Inline, Category = Flow | Phrasing | Interactive | Form });
         AddReference(new TagRef("time", this) { Layout = Inline, Category = Flow | Phrasing });
         AddReference(new TagRef("u", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("tt", this) { Layout = Inline });
+        AddReference(new TagRef("tt", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
         AddReference(new TagRef("var", this) { Layout = Inline, Category = Flow | Phrasing });
         AddReference(new TagRef("video", this) { Layout = Inline, Category = Flow | Phrasing | Embedded });
 
@@ -98,20 +98,21 @@ public class HtmlParser : MarkupParser<HtmlLexer>
         AddReference(new TagRef("nav", this) { Category = Flow | Sectioning });
         AddReference(new TagRef("section", this) { Category = Flow | Sectioning });
         
-        AddReference(new TagRef("h1", this) { Category = Flow | Heading });
-        AddReference(new TagRef("h2", this) { Category = Flow | Heading });
-        AddReference(new TagRef("h3", this) { Category = Flow | Heading });
-        AddReference(new TagRef("h4", this) { Category = Flow | Heading });
-        AddReference(new TagRef("h5", this) { Category = Flow | Heading });
-        AddReference(new TagRef("h6", this) { Category = Flow | Heading });
-        AddReference(new TagRef("hgroup", this) { Category = Flow | Heading });
+        AddReference(new TagRef("h1", this) { Category = Flow | Heading, PermittedContent = Phrasing });
+        AddReference(new TagRef("h2", this) { Category = Flow | Heading, PermittedContent = Phrasing });
+        AddReference(new TagRef("h3", this) { Category = Flow | Heading, PermittedContent = Phrasing });
+        AddReference(new TagRef("h4", this) { Category = Flow | Heading, PermittedContent = Phrasing });
+        AddReference(new TagRef("h5", this) { Category = Flow | Heading, PermittedContent = Phrasing });
+        AddReference(new TagRef("h6", this) { Category = Flow | Heading, PermittedContent = Phrasing });
+        AddReference(new TagRef("hgroup", this) { Category = Flow | Heading, PermittedContent = Phrasing });
 
         AddReference(new TagRef("math", this) { Category = Flow | Phrasing | Embedded });
         AddReference(new TagRef("details", this) { Category = Flow | Interactive });
         AddReference(new TagRef("fieldset", this) { Category = Flow | Form });
 
         // block elements
-        AddReference(new TagRef("p", this) { PermittedContent = Phrasing });
+        AddReference(new TagRef("p", this) { Category = Flow, PermittedContent = Phrasing });
+        AddReference(new TagRef("div", this) { Category = Flow, PermittedContent = Flow });
 
         //
         // attributes
