@@ -1,4 +1,4 @@
-﻿namespace Brackets.Html;
+namespace Brackets.Html;
 
 using System;
 using Collections;
@@ -15,104 +15,157 @@ public class HtmlParser : MarkupParser<HtmlLexer>
     protected HtmlParser(IStringSet<TagRef> tagReferences, IStringSet<AttrRef> attributeReferences)
         : base(MarkupLanguage.Html, tagReferences, attributeReferences)
     {
+        //
         // tags
         //
 
-        // void elements
-        AddReference(new TagRef("xml", this) { IsParent = false, Layout = Inline, IsProcessingInstruction = true });
-        AddReference(new TagRef("doctype", this) { IsParent = false, Layout = Inline, IsProcessingInstruction = true });
-        AddReference(new TagRef("area", this) { IsParent = false });
-        AddReference(new TagRef("base", this) { IsParent = false, Category = Metadata });
+        // structural
+        AddReference(new TagRef("a", this) { Layout = Inline, Category = Flow | Phrasing | Interactive, PermittedContent = Flow | Phrasing });
+        AddReference(new TagRef("article", this) { Category = Flow | Sectioning, PermittedContent = Flow });
+        AddReference(new TagRef("aside", this) { Category = Flow | Sectioning, PermittedContent = Flow });
+        AddReference(new TagRef("body", this) { PermittedContent = Flow });
         AddReference(new BrTagRef(this));
-        AddReference(new TagRef("col", this) { IsParent = false });
-        AddReference(new TagRef("embed", this) { IsParent = false, Layout = Inline, Category = Flow | Phrasing | Embedded | Interactive });
-        AddReference(new HrTagRef(this));
-        AddReference(new TagRef("img", this) { IsParent = false, Layout = Inline, Category = Flow | Phrasing | Embedded });
-        AddReference(new TagRef("input", this) { IsParent = false, Layout = Inline, Category = Flow | Phrasing | Form });
-        AddReference(new TagRef("link", this) { IsParent = false, Category = Metadata });
-        AddReference(new TagRef("meta", this) { IsParent = false, Category = Metadata });
-        AddReference(new TagRef("param", this) { IsParent = false });
-        AddReference(new TagRef("source", this) { IsParent = false });
-        AddReference(new TagRef("track", this) { IsParent = false });
-        AddReference(new TagRef("wbr", this) { IsParent = false, Layout = Inline, Category = Flow | Phrasing });
-        // raw text elements
-        AddReference(new TagRef("style", this) { ParsingMode = ParsingMode.RawContent, Category = Metadata });
-        AddReference(new TagRef("script", this) { ParsingMode = ParsingMode.RawContent, Layout = Inline, Category = Metadata | Flow | Phrasing | Script });
-        AddReference(new TagRef("pre", this) { ParsingMode = ParsingMode.Formatting, Category = Flow | Phrasing });
-        AddReference(new TagRef("code", this) { Layout = Inline, Category = Flow | Phrasing });
-        // other inline elements
-        AddReference(new TagRef("a", this) { Layout = Inline, Category = Flow | Phrasing | Interactive });
-        AddReference(new TagRef("abbr", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("acronym", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("audio", this) { Layout = Inline, Category = Flow | Phrasing | Embedded });
-        AddReference(new TagRef("b", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("bdi", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("bdo", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("big", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("button", this) { Layout = Inline, Category = Flow | Phrasing | Interactive | Form });
-        AddReference(new TagRef("canvas", this) { Layout = Inline, Category = Flow | Phrasing | Embedded });
-        AddReference(new TagRef("cite", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("data", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("datalist", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("del", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("dfn", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("em", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("i", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
-        AddReference(new TagRef("iframe", this) { Layout = Inline, Category = Flow | Phrasing | Embedded | Interactive });
-        AddReference(new TagRef("ins", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("kbd", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("label", this) { Layout = Inline, Category = Flow | Phrasing | Interactive | Form });
-        AddReference(new TagRef("map", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("mark", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("meter", this) { Layout = Inline, Category = Flow | Phrasing | Form });
-        AddReference(new TagRef("noscript", this) { Layout = Inline, Category = Metadata | Flow | Phrasing });
-        AddReference(new TagRef("object", this) { Layout = Inline, Category = Flow | Phrasing | Embedded | Form });
-        AddReference(new TagRef("output", this) { Layout = Inline, Category = Flow | Phrasing | Form });
-        AddReference(new TagRef("picture", this) { Layout = Inline, Category = Flow | Phrasing | Embedded });
-        AddReference(new TagRef("progress", this) { Layout = Inline, Category = Flow | Phrasing | Form });
-        AddReference(new TagRef("q", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("ruby", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("s", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("samp", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("select", this) { Layout = Inline, Category = Flow | Phrasing | Interactive | Form });
-        AddReference(new TagRef("slot", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("small", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
-        AddReference(new TagRef("span", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
-        AddReference(new TagRef("strong", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
-        AddReference(new TagRef("sub", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("sup", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("svg", this) { Layout = Inline, Category = Flow | Phrasing | Embedded });
-        AddReference(new TagRef("template", this) { Layout = Inline, Category = Flow | Phrasing | Script });
-        AddReference(new TagRef("textarea", this) { Layout = Inline, Category = Flow | Phrasing | Interactive | Form });
-        AddReference(new TagRef("time", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("u", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("tt", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
-        AddReference(new TagRef("var", this) { Layout = Inline, Category = Flow | Phrasing });
-        AddReference(new TagRef("video", this) { Layout = Inline, Category = Flow | Phrasing | Embedded });
-
-        // more elements
-        AddReference(new TagRef("title", this) { Category = Metadata });
-        
-        AddReference(new TagRef("article", this) { Category = Flow | Sectioning });
-        AddReference(new TagRef("aside", this) { Category = Flow | Sectioning });
-        AddReference(new TagRef("nav", this) { Category = Flow | Sectioning });
-        AddReference(new TagRef("section", this) { Category = Flow | Sectioning });
-        
+        AddReference(new TagRef("details", this) { Category = Flow | Interactive, PermittedContent = Flow });
+        AddReference(new TagRef("div", this) { Category = Flow, PermittedContent = Flow });
+        AddReference(new TagRef("head", this) { PermittedContent = Metadata });
+        AddReference(new TagRef("header", this) { Category = Flow, PermittedContent = Flow });
+        AddReference(new TagRef("hgroup", this) { Category = Flow | Heading, PermittedContent = Phrasing });
         AddReference(new TagRef("h1", this) { Category = Flow | Heading, PermittedContent = Phrasing });
         AddReference(new TagRef("h2", this) { Category = Flow | Heading, PermittedContent = Phrasing });
         AddReference(new TagRef("h3", this) { Category = Flow | Heading, PermittedContent = Phrasing });
         AddReference(new TagRef("h4", this) { Category = Flow | Heading, PermittedContent = Phrasing });
         AddReference(new TagRef("h5", this) { Category = Flow | Heading, PermittedContent = Phrasing });
         AddReference(new TagRef("h6", this) { Category = Flow | Heading, PermittedContent = Phrasing });
-        AddReference(new TagRef("hgroup", this) { Category = Flow | Heading, PermittedContent = Phrasing });
-
-        AddReference(new TagRef("math", this) { Category = Flow | Phrasing | Embedded });
-        AddReference(new TagRef("details", this) { Category = Flow | Interactive });
-        AddReference(new TagRef("fieldset", this) { Category = Flow | Form });
-
-        // block elements
+        AddReference(new HrTagRef(this));
+        AddReference(new TagRef("html", this));
+        AddReference(new TagRef("footer", this) { Category = Flow, PermittedContent = Flow });
+        AddReference(new TagRef("main", this) { Category = Flow, PermittedContent = Flow });
+        AddReference(new TagRef("nav", this) { Category = Flow | Sectioning, PermittedContent = Flow });
         AddReference(new TagRef("p", this) { Category = Flow, PermittedContent = Phrasing });
-        AddReference(new TagRef("div", this) { Category = Flow, PermittedContent = Flow });
+        AddReference(new TagRef("section", this) { Category = Flow | Sectioning, PermittedContent = Flow });
+        AddReference(new TagRef("span", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("summary", this) { PermittedContent = Phrasing | Heading });
+
+        // metadata
+        AddReference(new TagRef("base", this) { IsParent = false, Category = Metadata });
+        AddReference(new TagRef("doctype", this) { IsParent = false, Layout = Inline, IsProcessingInstruction = true });
+        AddReference(new TagRef("basefont", this) { IsParent = false, Category = Metadata });
+        AddReference(new TagRef("link", this) { IsParent = false, Category = Metadata });
+        AddReference(new TagRef("meta", this) { IsParent = false, Category = Metadata });
+        AddReference(new TagRef("style", this) { ParsingMode = ParsingMode.RawContent, Category = Metadata });
+        AddReference(new TagRef("title", this) { Category = Metadata });
+        AddReference(new TagRef("xml", this) { IsParent = false, Layout = Inline, IsProcessingInstruction = true });
+
+        // form
+        AddReference(new TagRef("button", this) { Layout = Inline, Category = Flow | Phrasing | Interactive | Form, PermittedContent = Phrasing });
+        AddReference(new TagRef("datalist", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("dialog", this) { Layout = Inline, Category = Flow | Form, PermittedContent = Flow });
+        AddReference(new TagRef("fieldset", this) { Category = Flow | Form, PermittedContent = Flow });
+        AddReference(new TagRef("form", this) { Layout = Inline, Category = Flow | Form, PermittedContent = Flow });
+        AddReference(new TagRef("input", this) { IsParent = false, Layout = Inline, Category = Flow | Phrasing | Form });
+        AddReference(new TagRef("keygen", this) { IsParent = false, Layout = Inline, Category = Flow | Form });
+        AddReference(new TagRef("label", this) { Layout = Inline, Category = Flow | Phrasing | Interactive | Form, PermittedContent = Phrasing });
+        AddReference(new TagRef("legend", this) { Layout = Inline, Category = Form, PermittedContent = Phrasing | Heading });
+        AddReference(new TagRef("meter", this) { Layout = Inline, Category = Flow | Phrasing | Form, PermittedContent = Phrasing });
+        AddReference(new TagRef("optgroup", this) { Category = Form, PermittedContent = Form });
+        AddReference(new TagRef("option", this) { Layout = Inline, Category = Form, PermittedContent = Phrasing });
+        AddReference(new TagRef("select", this) { Layout = Inline, Category = Flow | Phrasing | Interactive | Form, PermittedContent = Form });
+        AddReference(new TagRef("textarea", this) { Layout = Inline, Category = Flow | Phrasing | Interactive | Form, PermittedContent = Phrasing });
+
+        // formatting
+        AddReference(new TagRef("abbr", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("acronym", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("address", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Flow });
+        AddReference(new TagRef("b", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("bdi", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("bdo", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("big", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("blockquote", this) { Layout = Block, Category = Flow, PermittedContent = Flow });
+        AddReference(new TagRef("center", this) { Layout = Block, Category = Flow, PermittedContent = Flow });
+        AddReference(new TagRef("cite", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("code", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("data", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("del", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Flow | Phrasing });
+        AddReference(new TagRef("dfn", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("em", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("font", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("i", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("ins", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Flow | Phrasing });
+        AddReference(new TagRef("kbd", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("mark", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("output", this) { Layout = Inline, Category = Flow | Phrasing | Form, PermittedContent = Phrasing });
+        AddReference(new TagRef("pre", this) { ParsingMode = ParsingMode.Formatting, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("progress", this) { Layout = Inline, Category = Flow | Phrasing | Form, PermittedContent = Phrasing });
+        AddReference(new TagRef("q", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("rb", this) { Layout = Inline, Category = Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("rp", this) { Layout = Inline, Category = Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("rt", this) { Layout = Inline, Category = Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("rtc", this) { Layout = Inline, Category = Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("ruby", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("s", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("samp", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("small", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("strike", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("strong", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("sub", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("sup", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("tt", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("u", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("var", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("wbr", this) { IsParent = false, Layout = Inline, Category = Flow | Phrasing });
+
+        // list
+        AddReference(new TagRef("dd", this) { PermittedContent = Flow });
+        AddReference(new TagRef("dir", this) { PermittedContent = Flow });
+        AddReference(new TagRef("dl", this) { PermittedContent = Flow });
+        AddReference(new TagRef("dt", this) { PermittedContent = Flow });
+        AddReference(new TagRef("li", this) { PermittedContent = Flow });
+        AddReference(new TagRef("ol", this) { Category = Flow });
+        AddReference(new TagRef("menu", this) { Category = Flow });
+        AddReference(new TagRef("menuitem", this) { IsParent = false, Layout = Inline, Category = Interactive });
+        AddReference(new TagRef("ul", this) { Category = Flow });
+
+        // table
+        AddReference(new TagRef("caption", this) { PermittedContent = Flow });
+        AddReference(new TagRef("col", this) { IsParent = false });
+        AddReference(new TagRef("colgroup", this) { });
+        AddReference(new TagRef("table", this) { Category = Flow });
+        AddReference(new TagRef("tbody", this) { });
+        AddReference(new TagRef("td", this) { PermittedContent = Flow });
+        AddReference(new TagRef("tfoot", this) { });
+        AddReference(new TagRef("thead", this) { });
+        AddReference(new TagRef("th", this) { PermittedContent = Flow });
+        AddReference(new TagRef("tr", this) { });
+
+        // scripting
+        AddReference(new TagRef("noscript", this) { Layout = Inline, Category = Metadata | Flow | Phrasing | Script });
+        AddReference(new TagRef("script", this) { ParsingMode = ParsingMode.RawContent, Layout = Inline, Category = Metadata | Flow | Phrasing | Script });
+        AddReference(new TagRef("template", this) { Layout = Inline, Category = Metadata | Flow | Phrasing | Script });
+
+        // embedded
+        AddReference(new TagRef("applet", this) { });
+        AddReference(new TagRef("area", this) { IsParent = false, Layout = Inline, Category = Flow | Phrasing });
+        AddReference(new TagRef("audio", this) { Layout = Inline, Category = Flow | Phrasing | Embedded });
+        AddReference(new TagRef("canvas", this) { Layout = Inline, Category = Flow | Phrasing | Embedded, PermittedContent = Interactive });
+        AddReference(new TagRef("embed", this) { IsParent = false, Layout = Inline, Category = Flow | Phrasing | Embedded | Interactive });
+        AddReference(new TagRef("figcaption", this) { PermittedContent = Flow | Phrasing });
+        AddReference(new TagRef("figure", this) { Category = Flow, PermittedContent = Flow | Phrasing });
+        AddReference(new TagRef("frame", this) { IsParent = false, Category = Embedded });
+        AddReference(new TagRef("frameset", this) { Category = Embedded });
+        AddReference(new TagRef("iframe", this) { Layout = Inline, Category = Flow | Phrasing | Embedded | Interactive });
+        AddReference(new TagRef("img", this) { IsParent = false, Layout = Inline, Category = Flow | Phrasing | Embedded });
+        AddReference(new TagRef("map", this) { Layout = Inline, Category = Flow | Phrasing });
+        AddReference(new TagRef("math", this) { Category = Flow | Phrasing | Embedded });
+        AddReference(new TagRef("noframes", this) { Category = Embedded, PermittedContent = Flow });
+        AddReference(new TagRef("object", this) { Layout = Inline, Category = Flow | Phrasing | Embedded | Form, PermittedContent = Flow | Phrasing });
+        AddReference(new TagRef("param", this) { IsParent = false });
+        AddReference(new TagRef("picture", this) { Layout = Inline, Category = Flow | Phrasing | Embedded });
+        AddReference(new TagRef("slot", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Flow | Phrasing });
+        AddReference(new TagRef("source", this) { IsParent = false });
+        AddReference(new TagRef("svg", this) { Layout = Inline, Category = Flow | Phrasing | Embedded });
+        AddReference(new TagRef("time", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("track", this) { IsParent = false });
+        AddReference(new TagRef("video", this) { Layout = Inline, Category = Flow | Phrasing | Embedded });
 
         //
         // attributes
