@@ -58,7 +58,7 @@ public class HtmlParser : MarkupParser<HtmlLexer>
 
         // form
         AddReference(new TagRef("button", this) { Layout = Inline, Category = Flow | Phrasing | Interactive | Form, PermittedContent = Phrasing });
-        AddReference(new TagRef("datalist", this) { Layout = Inline, Category = Flow | Phrasing, PermittedContent = Phrasing });
+        AddReference(new TagRef("datalist", this) { Layout = Inline, Category = Flow | Phrasing | Form, PermittedContent = Form });
         AddReference(new TagRef("dialog", this) { Layout = Inline, Category = Flow | Form, PermittedContent = Flow });
         AddReference(new TagRef("fieldset", this) { Category = Flow | Form, PermittedContent = Flow });
         AddReference(new TagRef("form", this) { Layout = Inline, Category = Flow | Form, PermittedContent = Flow });
