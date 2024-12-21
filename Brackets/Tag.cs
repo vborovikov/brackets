@@ -201,7 +201,15 @@
 
         internal bool PreservesFormatting => this.Reference.ParsingMode == ParsingMode.Formatting || (this.Parent?.PreservesFormatting ?? false);
 
+        /// <summary>
+        /// Indicates whether this parent tag has children.
+        /// </summary>
         public bool HasChildren => this.child is not null;
+
+        /// <summary>
+        /// Indicates whether this parent tag has a single child.
+        /// </summary>
+        public bool HasOneChild => this.child is not null && this.child == this.child.Next;
 
         public int ContentStart => this.child?.Start ?? -1;
 

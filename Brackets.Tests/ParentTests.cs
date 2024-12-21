@@ -71,4 +71,19 @@ public class ParentTests
         var result = parent.FindAll<Content>().ToArray();
         Assert.AreEqual(9, result.Length);
     }
+
+    [DataTestMethod]
+    [DataRow("<div></div>", false)]
+    [DataRow("<div><p>1</p></div>", true)]
+    [DataRow("<div><p><i>1</i></p></div>", true)]
+    [DataRow("<div><p></div>", true)]
+    [DataRow("<div><p>1</p><p>2</p></div>", false)]
+    [DataRow("<div><div>", true)]
+    public void HasOneChild_ZeroOrMoreChildren_Detected(string html, bool expected)
+    {
+        var document = Document.Html.Parse(html);
+        var parent = document.First<ParentTag>();
+
+        Assert.AreEqual(expected, parent.HasOneChild);
+    }
 }
