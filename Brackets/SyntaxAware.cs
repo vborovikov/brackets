@@ -2,9 +2,9 @@
 
 public abstract class SyntaxAware
 {
-    protected SyntaxAware(ISyntaxReference syntax)
+    protected SyntaxAware(IMarkup markup)
     {
-        this.Syntax = syntax;
+        this.Syntax = (ISyntaxReference)markup;
     }
 
     internal ISyntaxReference Syntax { get; }

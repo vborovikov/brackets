@@ -11,7 +11,7 @@
 
     public class TagRef : SyntaxAware
     {
-        public TagRef(string name, ISyntaxReference syntax) : base(syntax)
+        public TagRef(string name, IMarkup markup) : base(markup)
         {
             this.Name = name;
             this.IsParent = true;

@@ -12,17 +12,24 @@
         Xhtml,
     }
 
-    public interface ISyntaxReference
+    public interface IMarkup
+    {
+        MarkupLanguage Language { get; }
+
+        Tag CreateTag(ReadOnlySpan<char> name);
+        Attr CreateAttribute(ReadOnlySpan<char> name, ReadOnlySpan<char> value);
+        Content CreateContent(ReadOnlySpan<char> value);
+
+        //todo: add ChangeName(Tag tag, ReadOnlySpan<char> name)
+    }
+
+    interface ISyntaxReference : IMarkup
     {
         StringComparison Comparison { get; }
 
         ReadOnlySpan<char> TrimName(ReadOnlySpan<char> span);
         ReadOnlySpan<char> TrimData(ReadOnlySpan<char> span);
         ReadOnlySpan<char> TrimValue(ReadOnlySpan<char> span);
-
-        Tag CreateTag(ReadOnlySpan<char> name);
-        Attr CreateAttribute(ReadOnlySpan<char> name, ReadOnlySpan<char> value);
-        Content CreateContent(ReadOnlySpan<char> value);
     }
 
     public abstract partial class MarkupParser<TMarkupLexer> : ISyntaxReference
