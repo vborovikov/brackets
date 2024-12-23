@@ -2,25 +2,49 @@
 {
     using System;
     using System.Buffers;
+    using System.Runtime.CompilerServices;
     using Collections;
     using Parsing;
 
+    /// <summary>
+    /// Identifies the markup language.
+    /// </summary>
     public enum MarkupLanguage
     {
+        /// <summary>
+        /// HTML
+        /// </summary>
         Html,
+        /// <summary>
+        /// XML
+        /// </summary>
         Xml,
+        /// <summary>
+        /// XHTML
+        /// </summary>
         Xhtml,
     }
 
+    /// <summary>
+    /// Represents the markup capabilities.
+    /// </summary>
     public interface IMarkup
     {
+        /// <summary>
+        /// Gets the supported markup language.
+        /// </summary>
         MarkupLanguage Language { get; }
 
         Tag CreateTag(ReadOnlySpan<char> name);
         Attr CreateAttribute(ReadOnlySpan<char> name, ReadOnlySpan<char> value);
         Content CreateContent(ReadOnlySpan<char> value);
 
-        //todo: add ChangeName(Tag tag, ReadOnlySpan<char> name)
+        /// <summary>
+        /// Changes the name of the tag.
+        /// </summary>
+        /// <param name="tag">The tag.</param>
+        /// <param name="name">A new tag name.</param>
+        void ChangeName(Tag tag, ReadOnlySpan<char> name);
     }
 
     interface ISyntaxReference : IMarkup
@@ -30,6 +54,12 @@
         ReadOnlySpan<char> TrimName(ReadOnlySpan<char> span);
         ReadOnlySpan<char> TrimData(ReadOnlySpan<char> span);
         ReadOnlySpan<char> TrimValue(ReadOnlySpan<char> span);
+    }
+
+    static class UnsafeAccessors
+    {
+        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "reference")]
+        public extern static ref TagRef TagRef(Tag tag);
     }
 
     public abstract partial class MarkupParser<TMarkupLexer> : ISyntaxReference
@@ -79,6 +109,20 @@
             return CreateContent(
                 new Token(TokenCategory.Content, value, 0),
                 toString: true);
+        }
+
+        public void ChangeName(Tag tag, ReadOnlySpan<char> name)
+        {
+            if (tag.Reference.Syntax.Language != this.Language)
+                throw new ArgumentOutOfRangeException(nameof(tag));
+
+            if (name.IsEmpty || name.IsWhiteSpace())
+                throw new ArgumentOutOfRangeException(nameof(name));
+
+            if (name.Equals(tag.Name, this.Comparison))
+                return;
+
+            UnsafeAccessors.TagRef(tag) = CreateOrFindTagRef(name);
         }
 
         protected void AddReference(TagRef reference)

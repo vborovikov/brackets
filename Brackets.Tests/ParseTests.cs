@@ -73,4 +73,34 @@ public class ParseTests
             """, code.ToString());
 
     }
+
+    [TestMethod]
+    public void ChangeName_DivToSection_Renamed()
+    {
+        var document = Document.Html.Parse("<div><p>test</p></div>");
+        var root = document.First<ParentTag>();
+
+        Assert.AreEqual("div", root.Name);
+        Document.Html.ChangeName(root, "section");
+        Assert.AreEqual("section", root.Name);
+    }
+
+    [DataTestMethod]
+    [DataRow(""), DataRow(" ")]
+    public void ChangeName_WrongName_Throws(string wrongName)
+    {
+        var document = Document.Html.Parse("<div><p>test</p></div>");
+        var root = document.First<ParentTag>();
+
+        Assert.ThrowsException<ArgumentOutOfRangeException>(() => Document.Html.ChangeName(root, wrongName));
+    }
+
+    [TestMethod]
+    public void ChangeName_WrongTag_Throws()
+    {
+        var document = Document.Xml.Parse("<div><p>test</p></div>");
+        var root = document.First<ParentTag>();
+
+        Assert.ThrowsException<ArgumentOutOfRangeException>(() => Document.Html.ChangeName(root, "section"));
+    }
 }
