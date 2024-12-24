@@ -7,8 +7,8 @@ using Xml;
 public class XhtmlParser : MarkupParser<XmlLexer>
 {
     public XhtmlParser() : this(
-        new StringSet<TagRef>(HtmlLexer.Comparison),
-        new StringSet<AttrRef>(HtmlLexer.Comparison))
+        new StringSet<TagRef>(XmlLexer.Comparison),
+        new StringSet<AttrRef>(XmlLexer.Comparison))
     { }
 
     protected XhtmlParser(IStringSet<TagRef> tagReferences, IStringSet<AttrRef> attributeReferences)
