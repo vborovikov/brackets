@@ -144,7 +144,7 @@ public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : st
             if (this.encodingParsed)
                 return;
 
-            if (this.contentLength == 0 && this.parser.Language == MarkupLanguage.Xml)
+            if (this.contentLength == 0 && this.parser.Language is MarkupLanguage.Xml or MarkupLanguage.Xhtml)
             {
                 if (this.Document.FirstOrDefault<Instruction>() is { Name: "xml", HasAttributes: true } xmlInstruction &&
                     xmlInstruction.Attributes["encoding"] is { Length: > 0 } encoding)
@@ -152,7 +152,8 @@ public abstract partial class MarkupParser<TMarkupLexer> where TMarkupLexer : st
                     SetEncoding(encoding.ToString());
                 }
             }
-            else if (this.contentLength < RecordBuffer.DefaultBufferLength && this.parser.Language == MarkupLanguage.Html)
+            else if (this.contentLength < RecordBuffer.DefaultBufferLength &&
+                this.parser.Language is MarkupLanguage.Html or MarkupLanguage.Xhtml)
             {
                 if (this.Document.Find<ParentTag>(t => t.Name.Equals("head", StringComparison.OrdinalIgnoreCase)) is ParentTag head)
                 {

@@ -21,6 +21,9 @@ public class XmlParser : MarkupParser<XmlLexer>
         parser.AddTagRef(new("xml", parser) { IsParent = false, Layout = FlowLayout.Inline, IsProcessingInstruction = true });
         parser.AddTagRef(new("doctype", parser) { IsParent = false, Layout = FlowLayout.Inline, IsProcessingInstruction = true });
         parser.AddTagRef(new("xml-stylesheet", parser) { IsParent = false, Layout = FlowLayout.Inline, IsProcessingInstruction = true });
+
+        // attributes
+        parser.AddAttrRef(new("xmlns", parser));
     }
 
     internal static XmlParser CreateConcurrent() =>

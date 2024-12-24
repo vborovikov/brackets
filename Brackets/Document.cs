@@ -24,6 +24,8 @@
 
         public static readonly XmlParser Xml = XmlParser.CreateConcurrent();
 
+        public static readonly XhtmlParser Xhtml = XhtmlParser.CreateConcurrent();
+
         public bool IsComplete => this.root.IsWellFormed.HasValue;
 
         public bool IsWellFormed => this.root.IsWellFormed == true;
