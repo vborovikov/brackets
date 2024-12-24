@@ -56,13 +56,19 @@
         ReadOnlySpan<char> TrimValue(ReadOnlySpan<char> span);
     }
 
+    interface IMarkupParser : IMarkup
+    {
+        void AddTagRef(TagRef reference);
+        void AddAttrRef(AttrRef reference);
+    }
+
     static class UnsafeAccessors
     {
         [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "reference")]
         public extern static ref TagRef TagRef(Tag tag);
     }
 
-    public abstract partial class MarkupParser<TMarkupLexer> : ISyntaxReference
+    public abstract partial class MarkupParser<TMarkupLexer> : IMarkup, IMarkupParser, ISyntaxReference
         where TMarkupLexer : struct, IMarkupLexer
     {
         private static readonly SearchValues<char> LineSeparators = SearchValues.Create("\r\n");
@@ -84,6 +90,8 @@
         internal ref readonly TMarkupLexer Syntax => ref this.lexer;
 
         public MarkupLanguage Language { get; }
+
+        public abstract StringComparison Comparison { get; }
 
         public Document Parse(string text)
         {
@@ -125,12 +133,12 @@
             UnsafeAccessors.TagRef(tag) = CreateOrFindTagRef(name);
         }
 
-        protected void AddReference(TagRef reference)
+        protected void AddTagRef(TagRef reference)
         {
             this.tagRefs.Add(reference.Name, reference);
         }
 
-        protected void AddReference(AttrRef reference)
+        protected void AddAttrRef(AttrRef reference)
         {
             this.attrRefs.Add(reference.Name, reference);
         }
@@ -348,7 +356,7 @@
             if (!this.tagRefs.TryGetValue(tagName, out var reference))
             {
                 reference = new TagRef(tagName.ToString(), this);
-                AddReference(reference);
+                AddTagRef(reference);
             }
 
             return reference;
@@ -359,16 +367,18 @@
             if (!this.attrRefs.TryGetValue(attributeName, out var reference))
             {
                 reference = new AttrRef(attributeName.ToString(), this);
-                AddReference(reference);
+                AddAttrRef(reference);
             }
 
             return reference;
         }
 
-        public abstract StringComparison Comparison { get; }
         StringComparison ISyntaxReference.Comparison => this.Comparison;
         ReadOnlySpan<char> ISyntaxReference.TrimName(ReadOnlySpan<char> span) => this.lexer.TrimName(span);
         ReadOnlySpan<char> ISyntaxReference.TrimData(ReadOnlySpan<char> span) => this.lexer.TrimData(span);
         ReadOnlySpan<char> ISyntaxReference.TrimValue(ReadOnlySpan<char> span) => this.lexer.TrimValue(span);
+
+        void IMarkupParser.AddTagRef(TagRef reference) => AddTagRef(reference);
+        void IMarkupParser.AddAttrRef(AttrRef reference) => AddAttrRef(reference);
     }
 }

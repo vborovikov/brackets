@@ -12,10 +12,15 @@ public class XmlParser : MarkupParser<XmlLexer>
     protected XmlParser(IStringSet<TagRef> tagReferences, IStringSet<AttrRef> attributeReferences)
         : base(MarkupLanguage.Xml, tagReferences, attributeReferences)
     {
+        AddKnownRefs(this);
+    }
+
+    internal static void AddKnownRefs(IMarkupParser parser)
+    {
         // void elements
-        AddReference(new TagRef("xml", this) { IsParent = false, Layout = FlowLayout.Inline, IsProcessingInstruction = true });
-        AddReference(new TagRef("doctype", this) { IsParent = false, Layout = FlowLayout.Inline, IsProcessingInstruction = true });
-        AddReference(new TagRef("xml-stylesheet", this) { IsParent = false, Layout = FlowLayout.Inline, IsProcessingInstruction = true });
+        parser.AddTagRef(new("xml", parser) { IsParent = false, Layout = FlowLayout.Inline, IsProcessingInstruction = true });
+        parser.AddTagRef(new("doctype", parser) { IsParent = false, Layout = FlowLayout.Inline, IsProcessingInstruction = true });
+        parser.AddTagRef(new("xml-stylesheet", parser) { IsParent = false, Layout = FlowLayout.Inline, IsProcessingInstruction = true });
     }
 
     internal static XmlParser CreateConcurrent() =>

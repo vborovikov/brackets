@@ -2,7 +2,7 @@ namespace Brackets.Html
 {
     sealed class HrTagRef : TagRef
     {
-        public HrTagRef(ISyntaxReference syntax) : base("hr", syntax)
+        public HrTagRef(IMarkup markup) : base("hr", markup)
         {
             this.IsParent = false;
         }

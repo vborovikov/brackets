@@ -4,7 +4,7 @@ namespace Brackets.Html
 
     sealed class BrTagRef : TagRef
     {
-        public BrTagRef(ISyntaxReference syntax) : base("br", syntax)
+        public BrTagRef(IMarkup markup) : base("br", markup)
         {
             this.IsParent = false;
             this.Layout = FlowLayout.Inline;
