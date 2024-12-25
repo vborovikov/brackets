@@ -9,7 +9,7 @@ public class XhtmlParser : MarkupParser<XmlLexer>
 
     protected XhtmlParser(bool isThreadSafe) : base(MarkupLanguage.Xhtml, isThreadSafe)
     {
-        AddKnownRefs(this);
+        InitKnownRefs(this);
     }
 
     /// <inheritdoc/>
@@ -17,11 +17,11 @@ public class XhtmlParser : MarkupParser<XmlLexer>
 
     internal static XhtmlParser CreateConcurrent() => new(isThreadSafe: true);
 
-    internal static void AddKnownRefs(IMarkupParser parser)
+    internal static void InitKnownRefs(IMarkupParser parser)
     {
-        XmlParser.AddKnownRefs(parser);
-        HtmlParser.AddKnownRefs(parser);
+        XmlParser.InitKnownRefs(parser);
+        HtmlParser.InitKnownRefs(parser);
 
-        parser.AddAttrRef(new("xml:lang", parser));
+        parser.InitAttrRef(new("xml:lang", parser));
     }
 }

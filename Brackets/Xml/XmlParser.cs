@@ -6,7 +6,7 @@ public class XmlParser : MarkupParser<XmlLexer>
 
     protected XmlParser(bool isThreadSafe) : base(MarkupLanguage.Xml, isThreadSafe)
     {
-        AddKnownRefs(this);
+        InitKnownRefs(this);
     }
 
     /// <inheritdoc/>
@@ -14,14 +14,14 @@ public class XmlParser : MarkupParser<XmlLexer>
 
     internal static XmlParser CreateConcurrent() => new(isThreadSafe: true);
 
-    internal static void AddKnownRefs(IMarkupParser parser)
+    internal static void InitKnownRefs(IMarkupParser parser)
     {
         // void elements
-        parser.AddTagRef(new("xml", parser) { IsParent = false, Layout = FlowLayout.Inline, IsProcessingInstruction = true });
-        parser.AddTagRef(new("doctype", parser) { IsParent = false, Layout = FlowLayout.Inline, IsProcessingInstruction = true });
-        parser.AddTagRef(new("xml-stylesheet", parser) { IsParent = false, Layout = FlowLayout.Inline, IsProcessingInstruction = true });
+        parser.InitTagRef(new("xml", parser) { IsParent = false, Layout = FlowLayout.Inline, IsProcessingInstruction = true });
+        parser.InitTagRef(new("doctype", parser) { IsParent = false, Layout = FlowLayout.Inline, IsProcessingInstruction = true });
+        parser.InitTagRef(new("xml-stylesheet", parser) { IsParent = false, Layout = FlowLayout.Inline, IsProcessingInstruction = true });
 
         // attributes
-        parser.AddAttrRef(new("xmlns", parser));
+        parser.InitAttrRef(new("xmlns", parser));
     }
 }

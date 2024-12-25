@@ -58,8 +58,8 @@
 
     interface IMarkupParser : IMarkup
     {
-        void AddTagRef(TagRef reference);
-        void AddAttrRef(AttrRef reference);
+        void InitTagRef(TagRef reference);
+        void InitAttrRef(AttrRef reference);
     }
 
     static class UnsafeAccessors
@@ -131,16 +131,6 @@
                 return;
 
             UnsafeAccessors.TagRef(tag) = CreateOrFindTagRef(name);
-        }
-
-        protected void AddTagRef(TagRef reference)
-        {
-            this.tagRefs.Add(reference.Name, reference);
-        }
-
-        protected void AddAttrRef(AttrRef reference)
-        {
-            this.attrRefs.Add(reference.Name, reference);
         }
 
         private DocumentRoot Parse(ReadOnlyMemory<char> text)
@@ -356,7 +346,7 @@
             if (!this.tagRefs.TryGetValue(tagName, out var reference))
             {
                 reference = new TagRef(tagName.ToString(), this);
-                AddTagRef(reference);
+                this.tagRefs.Add(reference.Name, reference);
             }
 
             return reference;
@@ -367,7 +357,7 @@
             if (!this.attrRefs.TryGetValue(attributeName, out var reference))
             {
                 reference = new AttrRef(attributeName.ToString(), this);
-                AddAttrRef(reference);
+                this.attrRefs.Add(reference.Name, reference);
             }
 
             return reference;
@@ -378,7 +368,19 @@
         ReadOnlySpan<char> ISyntaxReference.TrimData(ReadOnlySpan<char> span) => this.lexer.TrimData(span);
         ReadOnlySpan<char> ISyntaxReference.TrimValue(ReadOnlySpan<char> span) => this.lexer.TrimValue(span);
 
-        void IMarkupParser.AddTagRef(TagRef reference) => AddTagRef(reference);
-        void IMarkupParser.AddAttrRef(AttrRef reference) => AddAttrRef(reference);
+        void IMarkupParser.InitTagRef(TagRef reference) => InitTagRef(reference);
+        void IMarkupParser.InitAttrRef(AttrRef reference) => InitAttrRef(reference);
+
+        protected void InitTagRef(TagRef reference)
+        {
+            this.tagRefs.TryRemove(reference.Name);
+            this.tagRefs.Add(reference.Name, reference);
+        }
+
+        protected void InitAttrRef(AttrRef reference)
+        {
+            this.attrRefs.TryRemove(reference.Name);
+            this.attrRefs.Add(reference.Name, reference);
+        }
     }
 }
