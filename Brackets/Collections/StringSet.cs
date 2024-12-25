@@ -66,6 +66,8 @@ sealed class StringSet<T> : IStringSet<T> where T : notnull
 
     public bool Add(string key, T value) => AddIfNotPresent(key, value, out _);
 
+    public bool TryRemove(string key) => Remove(key.AsSpan());
+
     public bool Contains(string key) => FindItemIndex(key) >= 0;
 
     public bool Contains(ReadOnlySpan<char> key) => FindItemIndex(key) >= 0;

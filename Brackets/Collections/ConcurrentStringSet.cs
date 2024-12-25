@@ -245,6 +245,8 @@ sealed class ConcurrentStringSet<T> : IStringSet<T>
     public bool Add(string key, T value) =>
         AddInternal(key, value, true);
 
+    public bool TryRemove(string key) => TryRemove(key.AsSpan());
+
     /// <summary>
     /// Removes all items from the <see cref="ConcurrentStringSet{T}"/>.
     /// </summary>
