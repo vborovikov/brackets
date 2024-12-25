@@ -1,23 +1,21 @@
 ﻿namespace Brackets.Html;
 
 using System;
-using Collections;
 using Xml;
 
 public class XhtmlParser : MarkupParser<XmlLexer>
 {
-    public XhtmlParser() : this(
-        new StringSet<TagRef>(XmlLexer.Comparison),
-        new StringSet<AttrRef>(XmlLexer.Comparison))
-    { }
+    public XhtmlParser() : this(isThreadSafe: false) { }
 
-    protected XhtmlParser(IStringSet<TagRef> tagReferences, IStringSet<AttrRef> attributeReferences)
-        : base(MarkupLanguage.Xhtml, tagReferences, attributeReferences)
+    protected XhtmlParser(bool isThreadSafe) : base(MarkupLanguage.Xhtml, isThreadSafe)
     {
         AddKnownRefs(this);
     }
 
+    /// <inheritdoc/>
     public override StringComparison Comparison => XmlLexer.Comparison;
+
+    internal static XhtmlParser CreateConcurrent() => new(isThreadSafe: true);
 
     internal static void AddKnownRefs(IMarkupParser parser)
     {
@@ -26,8 +24,4 @@ public class XhtmlParser : MarkupParser<XmlLexer>
 
         parser.AddAttrRef(new("xml:lang", parser));
     }
-
-    internal static XhtmlParser CreateConcurrent() =>
-        new(new ConcurrentStringSet<TagRef>(XmlLexer.Comparison),
-            new ConcurrentStringSet<AttrRef>(XmlLexer.Comparison));
 }

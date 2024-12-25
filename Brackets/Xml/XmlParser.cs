@@ -1,19 +1,18 @@
 ﻿namespace Brackets.Xml;
 
-using Collections;
-
 public class XmlParser : MarkupParser<XmlLexer>
 {
-    public XmlParser() : this(
-        new StringSet<TagRef>(XmlLexer.Comparison),
-        new StringSet<AttrRef>(XmlLexer.Comparison))
-    { }
+    public XmlParser() : this(isThreadSafe: false) { }
 
-    protected XmlParser(IStringSet<TagRef> tagReferences, IStringSet<AttrRef> attributeReferences)
-        : base(MarkupLanguage.Xml, tagReferences, attributeReferences)
+    protected XmlParser(bool isThreadSafe) : base(MarkupLanguage.Xml, isThreadSafe)
     {
         AddKnownRefs(this);
     }
+
+    /// <inheritdoc/>
+    public override StringComparison Comparison => XmlLexer.Comparison;
+
+    internal static XmlParser CreateConcurrent() => new(isThreadSafe: true);
 
     internal static void AddKnownRefs(IMarkupParser parser)
     {
@@ -25,10 +24,4 @@ public class XmlParser : MarkupParser<XmlLexer>
         // attributes
         parser.AddAttrRef(new("xmlns", parser));
     }
-
-    internal static XmlParser CreateConcurrent() =>
-        new(new ConcurrentStringSet<TagRef>(XmlLexer.Comparison), 
-            new ConcurrentStringSet<AttrRef>(XmlLexer.Comparison));
-
-    public override StringComparison Comparison => XmlLexer.Comparison;
 }

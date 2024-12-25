@@ -78,11 +78,11 @@
         private readonly IStringSet<AttrRef> attrRefs;
         private readonly RootRef rootRef;
 
-        protected MarkupParser(MarkupLanguage language, IStringSet<TagRef> tagRefs, IStringSet<AttrRef> attrRefs)
+        protected MarkupParser(MarkupLanguage language, bool isThreadSafe)
         {
             this.lexer = new();
-            this.tagRefs = tagRefs;
-            this.attrRefs = attrRefs;
+            this.tagRefs = isThreadSafe ? new ConcurrentStringSet<TagRef>(this.Comparison) : new StringSet<TagRef>(this.Comparison);
+            this.attrRefs = isThreadSafe ? new ConcurrentStringSet<AttrRef>(this.Comparison) : new StringSet<AttrRef>(this.Comparison);
             this.rootRef = new RootRef(this);
             this.Language = language;
         }

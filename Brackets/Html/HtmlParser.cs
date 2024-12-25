@@ -1,22 +1,21 @@
 namespace Brackets.Html;
 
-using System;
-using Collections;
-using static FlowLayout;
 using static ContentCategory;
+using static FlowLayout;
 
 public class HtmlParser : MarkupParser<HtmlLexer>
 {
-    public HtmlParser() : this(
-        new StringSet<TagRef>(HtmlLexer.Comparison),
-        new StringSet<AttrRef>(HtmlLexer.Comparison))
-    { }
+    public HtmlParser() : this(isThreadSafe: false) { }
 
-    protected HtmlParser(IStringSet<TagRef> tagReferences, IStringSet<AttrRef> attributeReferences)
-        : base(MarkupLanguage.Html, tagReferences, attributeReferences)
+    protected HtmlParser(bool isThreadSafe) : base(MarkupLanguage.Html, isThreadSafe)
     {
         AddKnownRefs(this);
     }
+
+    /// <inheritdoc/>
+    public override StringComparison Comparison => HtmlLexer.Comparison;
+
+    internal static HtmlParser CreateConcurrent() => new(isThreadSafe: true);
 
     internal static void AddKnownRefs(IMarkupParser parser)
     {
@@ -301,10 +300,4 @@ public class HtmlParser : MarkupParser<HtmlLexer>
         parser.AddAttrRef(new("width", parser));
         parser.AddAttrRef(new("wrap", parser));
     }
-
-    internal static HtmlParser CreateConcurrent() =>
-        new(new ConcurrentStringSet<TagRef>(HtmlLexer.Comparison),
-            new ConcurrentStringSet<AttrRef>(HtmlLexer.Comparison));
-
-    public override StringComparison Comparison => HtmlLexer.Comparison;
 }
