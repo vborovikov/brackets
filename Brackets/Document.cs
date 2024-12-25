@@ -48,13 +48,13 @@
         public TElement? Find<TElement>(Func<TElement, bool> match) where TElement : Element =>
             this.root.Find(match);
 
-        public IEnumerable<Element> FindAll(Predicate<Element> match) =>
+        public ParentTag.DescendantEnumerator<Element> FindAll(Predicate<Element> match) =>
             this.root.FindAll(match);
 
-        public IEnumerable<TElement> FindAll<TElement>(Func<TElement, bool> match) where TElement : Element =>
+        public ParentTag.DescendantEnumerator<TElement> FindAll<TElement>(Func<TElement, bool> match) where TElement : Element =>
             this.root.FindAll(match);
 
-        public IEnumerable<TElement> FindAll<TElement>() where TElement : Element =>
+        public ParentTag.DescendantEnumerator<TElement> FindAll<TElement>() where TElement : Element =>
             this.root.FindAll<TElement>();
 
         public IEnumerable<Element> Find(string path)

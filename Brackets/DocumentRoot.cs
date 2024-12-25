@@ -9,9 +9,9 @@ namespace Brackets
         Element.Enumerator GetEnumerator();
         Element? Find(Predicate<Element> match);
         TElement? Find<TElement>(Func<TElement, bool> match) where TElement : Element;
-        IEnumerable<Element> FindAll(Predicate<Element> match);
-        IEnumerable<TElement> FindAll<TElement>(Func<TElement, bool> match) where TElement : Element;
-        IEnumerable<TElement> FindAll<TElement>() where TElement : Element;
+        ParentTag.DescendantEnumerator<Element> FindAll(Predicate<Element> match);
+        ParentTag.DescendantEnumerator<TElement> FindAll<TElement>(Func<TElement, bool> match) where TElement : Element;
+        ParentTag.DescendantEnumerator<TElement> FindAll<TElement>() where TElement : Element;
     }
 
     public interface IDocument : IRoot
