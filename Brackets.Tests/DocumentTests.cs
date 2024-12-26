@@ -204,6 +204,20 @@
             Assert.IsFalse(document.IsSerialized);
         }
 
+        [TestMethod]
+        public void ToText_NoFormat_Content()
+        {
+            var document = Document.Xhtml.Parse("<span><i>test</i></span>").Clone();
+            Assert.AreEqual("test", document.ToString());
+        }
+
+        [TestMethod]
+        public void ToText_SimpleMarkup_Reconstructed()
+        {
+            var document = Document.Xhtml.Parse("<div><p>test</p></div>").Clone();
+            Assert.AreEqual("<div><p>test</p></div>", document.ToString("X"));
+        }
+
         private static void AssertTags(IEnumerable<Element> parent, params string[] tags)
         {
             using var elements = parent.GetEnumerator();

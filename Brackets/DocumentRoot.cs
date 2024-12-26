@@ -1,8 +1,9 @@
 namespace Brackets
 {
     using System;
+    using System.Text;
 
-    public interface IRoot : IEnumerable<Element>, ICloneable
+    public interface IRoot : IEnumerable<Element>, ICloneable, IFormattable
     {
         int Length { get; }
 
@@ -12,6 +13,8 @@ namespace Brackets
         IEnumerable<Element> FindAll(Predicate<Element> match);
         IEnumerable<TElement> FindAll<TElement>(Func<TElement, bool> match) where TElement : Element;
         IEnumerable<TElement> FindAll<TElement>() where TElement : Element;
+
+        string ToString(string? format);
     }
 
     public interface IDocument : IRoot
@@ -49,6 +52,95 @@ namespace Brackets
             CloneElements(root);
 
             return root;
+        }
+
+        internal static string ToText(IRoot root)
+        {
+            var text = new StringBuilder(root.Length);
+
+            switch (root)
+            {
+                case DocumentRoot:
+                    goto default;
+                case ParentTag parent:
+                    Append(text, parent);
+                    break;
+                default:
+                    Append(text, root.GetEnumerator());
+                    break;
+            }
+
+            return text.ToString();
+        }
+
+        private static void Append(StringBuilder text, ParentTag parent)
+        {
+            text.Append('<').Append(parent.Name);
+            if (parent.HasAttributes)
+            {
+                text.Append(' ');
+                Append(text, parent.EnumerateAttributes());
+            }
+            text.Append('>');
+
+            Append(text, parent.GetEnumerator());
+
+            text.Append("</").Append(parent.Name).Append('>');
+        }
+
+        private static void Append(StringBuilder text, Enumerator elements)
+        {
+            foreach (var element in elements)
+            {
+                Append(text, element);
+            }
+        }
+
+        private static void Append(StringBuilder text, Element element)
+        {
+            switch (element)
+            {
+                case ParentTag parent:
+                    Append(text, parent);
+                    break;
+                case Tag tag:
+                    text.Append('<').Append(tag.Name);
+                    if (tag.HasAttributes)
+                    {
+                        text.Append(' ');
+                        Append(text, tag.EnumerateAttributes());
+                    }
+                    text.Append("/>");
+                    break;
+                case Comment comment:
+                    text.Append("<!--").Append(comment.Data).Append("-->");
+                    break;
+                case Section section:
+                    text.Append("<[CDATA[").Append(section.Data).Append("]]>");
+                    break;
+                case Content content:
+                    text.Append(content.Data);
+                    break;
+                default:
+                    text.Append(element.ToString());
+                    break;
+            }
+        }
+
+        private static void Append(StringBuilder text, Attr.Enumerator attributes)
+        {
+            foreach (var attribute in attributes)
+            {
+                if (text.Length > 0 && text[^1] != ' ')
+                {
+                    text.Append(' ');
+                }
+                text.Append(attribute.Name);
+                if (attribute.HasValue)
+                {
+                    text.Append('=').Append('"').Append(attribute.Value).Append('"');
+                }
+            }
         }
     }
 

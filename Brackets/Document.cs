@@ -36,7 +36,11 @@
 
         internal DocumentRoot Root => this.root;
 
-        public override string? ToString() => this.root.ToString();
+        public override string ToString() => this.root.ToString();
+
+        public string ToString(string? format) => this.root.ToString(format);
+
+        public string ToString(string? format, IFormatProvider? formatProvider) => this.root.ToString(format, formatProvider);
 
         public Document Clone() => new(this.root.Clone());
 
