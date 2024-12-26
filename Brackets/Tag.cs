@@ -378,10 +378,26 @@ public class ParentTag : Tag, IRoot, IEnumerable<Element>
     public override string ToString()
     {
         if (this.child is null)
-            return String.Empty;
+            return string.Empty;
 
         return ToString(this);
     }
+
+    public string ToString(string? format)
+    {
+        if (string.IsNullOrWhiteSpace(format))
+            return ToString();
+
+        // any format different from the default is compact markup
+
+        //todo: implement these
+        // X, x - XML, XHTML
+        // H, h - HTML
+
+        return DocumentRoot.ToText(this);
+    }
+
+    public string ToString(string? format, IFormatProvider? formatProvider) => ToString(format);
 
     internal override void CloseAt(int end)
     {
