@@ -471,20 +471,20 @@ public class ParentTag : Tag, IRoot, IEnumerable<Element>
     public struct DescendantEnumerator<TElement> : IEnumerable<TElement>, IEnumerator<TElement>
         where TElement : Element
     {
-        private static readonly Func<TElement, bool> all = _ => true;
-
         private readonly ParentTag root;
-        private readonly Func<TElement, bool> match;
+        private readonly Func<TElement, bool>? match;
         private ParentTag? parent;
         private Element? child;
         private TElement? current;
+        private bool firstTraverse;
 
-        internal DescendantEnumerator(ParentTag root, Func<TElement, bool>? match)
+        internal DescendantEnumerator(ParentTag root, Func<TElement, bool>? match = default)
         {
             this.root = root;
-            this.match = match ?? all;
+            this.match = match;
             this.parent = root;
             this.child = root.child;
+            this.firstTraverse = true;
         }
 
         public readonly TElement Current => this.current!;
@@ -495,15 +495,17 @@ public class ParentTag : Tag, IRoot, IEnumerable<Element>
             if (this.child is null)
                 return false;
 
-            do
+            while (this.firstTraverse || this.parent != this.root || this.child != this.root.child)
             {
+                this.firstTraverse = false;
+
                 // go down
                 while (this.child is ParentTag { child: not null } childAsParent)
                 {
                     this.parent = childAsParent;
                     this.child = childAsParent.child;
 
-                    if (childAsParent is TElement matchedChildAsParent && match(matchedChildAsParent))
+                    if (childAsParent is TElement matchedChildAsParent && Match(matchedChildAsParent))
                     {
                         this.current = matchedChildAsParent;
                         return true;
@@ -514,19 +516,19 @@ public class ParentTag : Tag, IRoot, IEnumerable<Element>
 
                 // go next or up
                 for (this.child = this.child.Next;
-                     this.parent != root && this.child == this.parent?.child;
+                     this.parent != this.root && this.child == this.parent?.child;
                      this.child = this.child.Next)
                 {
                     this.child = this.parent;
                     this.parent = (ParentTag?)this.child.Parent;
                 }
 
-                if (matchedChild is not null && match(matchedChild))
+                if (matchedChild is not null && Match(matchedChild))
                 {
                     this.current = matchedChild;
                     return true;
                 }
-            } while (this.parent != this.root || this.child != this.root.child);
+            }
 
             this.child = null;
             return false;
@@ -534,13 +536,17 @@ public class ParentTag : Tag, IRoot, IEnumerable<Element>
 
         public void Reset()
         {
-            this.parent = root;
-            this.child = root.child;
+            this.parent = this.root;
+            this.child = this.root.child;
+            this.current = null;
+            this.firstTraverse = true;
         }
 
         public readonly void Dispose() { }
         readonly object IEnumerator.Current => this.Current;
         readonly IEnumerator<TElement> IEnumerable<TElement>.GetEnumerator() => GetEnumerator();
         readonly IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        private readonly bool Match(TElement element) => this.match?.Invoke(element) ?? true;
     }
 }
