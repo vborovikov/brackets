@@ -72,6 +72,24 @@ public class ParentTests
         Assert.AreEqual(9, result.Length);
     }
 
+    [TestMethod]
+    public void FindAll_NonExistent_NotFound()
+    {
+        var document = Document.Html.Parse(
+            """
+            <div>
+                <span><i>Value1</i><i>Value2</i><i>Value3</i></span>
+                <div>
+                    <span><i>Value4</i><i>Value5</i><i>Value6</i></span>
+                </div>
+                <span><i>Value7</i><i>Value8</i><i>Value9</i></span>
+            </div>
+            """);
+
+        var keys = document.FindAll<ParentTag>(p => p.Name == "key").ToArray();
+        Assert.AreEqual(0, keys.Length);
+    }
+
     [DataTestMethod]
     [DataRow("<div></div>", false)]
     [DataRow("<div><p>1</p></div>", true)]
