@@ -18,7 +18,7 @@
       <GitCommitHash Condition="'$(GitCommitHash)' == ''"/>
       <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
       <FileVersion>$(VersionPrefix).$(GitBuildNumber)</FileVersion>
-      <InformationalVersion>$(Version) $(GitBranchName)#$(GitCommitHash)</InformationalVersion>
+      <InformationalVersion>$(Version)+$(GitBranchName).$(GitCommitHash)</InformationalVersion>
     </PropertyGroup>
   </Target>
   <PropertyGroup>
