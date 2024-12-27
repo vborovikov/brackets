@@ -473,7 +473,7 @@ public class ParentTag : Tag, IRoot, IEnumerable<Element>
         public readonly TElement Current => this.current!;
         public readonly DescendantEnumerator<TElement> GetEnumerator() => this;
 
-        [MemberNotNullWhen(true, nameof(Current))]
+        [MemberNotNullWhen(true, nameof(current))]
         public bool MoveNext()
         {
             while (this.child is not null)
