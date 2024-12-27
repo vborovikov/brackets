@@ -492,7 +492,6 @@ public class ParentTag : Tag, IRoot, IEnumerable<Element>
         private ParentTag? parent;
         private Element? child;
         private TElement? current;
-        private bool firstTraverse;
 
         internal DescendantEnumerator(ParentTag root, Func<TElement, bool>? match = default)
         {
@@ -500,7 +499,6 @@ public class ParentTag : Tag, IRoot, IEnumerable<Element>
             this.match = match;
             this.parent = root;
             this.child = root.child;
-            this.firstTraverse = true;
         }
 
         public readonly TElement Current => this.current!;
@@ -508,14 +506,9 @@ public class ParentTag : Tag, IRoot, IEnumerable<Element>
 
         public bool MoveNext()
         {
-            if (this.child is null)
-                return false;
-
-            while (this.firstTraverse || this.parent != this.root || this.child != this.root.child)
+            while (this.child is not null)
             {
-                this.firstTraverse = false;
-
-                // go down
+                // visit descendants
                 while (this.child is ParentTag { child: not null } childAsParent)
                 {
                     this.parent = childAsParent;
@@ -530,13 +523,19 @@ public class ParentTag : Tag, IRoot, IEnumerable<Element>
 
                 var matchedChild = this.child as TElement;
 
-                // go next or up
+                // visit siblings and ancestors
                 for (this.child = this.child.Next;
                      this.parent != this.root && this.child == this.parent?.child;
                      this.child = this.child.Next)
                 {
                     this.child = this.parent;
                     this.parent = (ParentTag?)this.child.Parent;
+                }
+
+                // check if traversal completed
+                if (this.parent == this.root && this.child == this.root.child)
+                {
+                    this.child = null;
                 }
 
                 if (matchedChild is not null && Match(matchedChild))
@@ -546,7 +545,6 @@ public class ParentTag : Tag, IRoot, IEnumerable<Element>
                 }
             }
 
-            this.child = null;
             return false;
         }
 
@@ -555,7 +553,6 @@ public class ParentTag : Tag, IRoot, IEnumerable<Element>
             this.parent = this.root;
             this.child = this.root.child;
             this.current = null;
-            this.firstTraverse = true;
         }
 
         public readonly void Dispose() { }
