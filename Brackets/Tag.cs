@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 public class Tag : Element
@@ -328,46 +329,14 @@ public class ParentTag : Tag, IRoot, IEnumerable<Element>
     public TElement? Find<TElement>(Func<TElement, bool> match)
         where TElement : Element
     {
-        return Find(el => el is TElement element && match(element)) as TElement;
-    }
-
-    public Element? Find(Predicate<Element> match)
-    {
-        if (this.child is null)
-            return null;
-
-        var elementParent = this;
-        var element = this.child;
-        do
-        {
-            // go down
-            while (element is ParentTag elementAsParent)
-            {
-                if (elementAsParent.child is null)
-                    break;
-
-                if (match(elementAsParent))
-                    return elementAsParent;
-
-                elementParent = elementAsParent;
-                element = elementAsParent.child;
-            }
-
-            if (match(element))
-                return element;
-
-            // go next or up
-            for (element = element.Next;
-                 elementParent != this && element == elementParent?.child;
-                 element = element.Next)
-            {
-                element = elementParent;
-                elementParent = (ParentTag?)element.Parent;
-            }
-        } while (elementParent != this || element != this.child);
+        var elements = new DescendantEnumerator<TElement>(this, match);
+        if (elements.MoveNext())
+            return elements.Current;
 
         return null;
     }
+
+    public Element? Find(Predicate<Element> match) => Find<Element>(el => match(el));
 
     public DescendantEnumerator<Element> FindAll(Predicate<Element> match) => new(this, el => match(el));
 
@@ -504,6 +473,7 @@ public class ParentTag : Tag, IRoot, IEnumerable<Element>
         public readonly TElement Current => this.current!;
         public readonly DescendantEnumerator<TElement> GetEnumerator() => this;
 
+        [MemberNotNullWhen(true, nameof(Current))]
         public bool MoveNext()
         {
             while (this.child is not null)

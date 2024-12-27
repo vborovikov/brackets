@@ -451,7 +451,7 @@ public partial class Document
                 yield return element;
 
             if (element is ParentTag parent)
-                foreach (var descendant in parent.FindAll(_ => true))
+                foreach (var descendant in parent.FindAll<Element>())
                     yield return descendant;
         }
 

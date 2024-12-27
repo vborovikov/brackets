@@ -273,6 +273,7 @@
             {
             }
 
+            [MemberNotNullWhen(true, nameof(Current))]
             public bool MoveNext()
             {
                 if (this.sibling is null)

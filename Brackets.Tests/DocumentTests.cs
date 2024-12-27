@@ -38,11 +38,11 @@
         {
             using var stream = Samples.GetStream(fileName);
             var asyncDoc = await Document.Html.ParseAsync(stream, default);
-            var asyncElements = asyncDoc.FindAll(_ => true).GetEnumerator();
+            var asyncElements = asyncDoc.FindAll<Element>().GetEnumerator();
 
             var sample = Samples.GetString(fileName);
             var syncDoc = Document.Html.Parse(sample);
-            var syncElements = syncDoc.FindAll(_ => true).GetEnumerator();
+            var syncElements = syncDoc.FindAll<Element>().GetEnumerator();
 
             while (syncElements.MoveNext() && asyncElements.MoveNext())
             {
@@ -67,11 +67,11 @@
         {
             using var stream = Samples.GetStream(fileName);
             var asyncDoc = await Document.Xml.ParseAsync(stream, default);
-            var asyncElements = asyncDoc.FindAll(_ => true).GetEnumerator();
+            var asyncElements = asyncDoc.FindAll<Element>().GetEnumerator();
 
             var sample = Samples.GetString(fileName);
             var syncDoc = Document.Xml.Parse(sample);
-            var syncElements = syncDoc.FindAll(_ => true).GetEnumerator();
+            var syncElements = syncDoc.FindAll<Element>().GetEnumerator();
 
             while (syncElements.MoveNext() && asyncElements.MoveNext())
             {

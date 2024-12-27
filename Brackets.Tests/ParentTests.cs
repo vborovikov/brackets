@@ -90,6 +90,24 @@ public class ParentTests
         Assert.AreEqual(0, keys.Length);
     }
 
+    [TestMethod]
+    public void FindAll_OnlyChildren_Found()
+    {
+        var document = Document.Xml.Parse("<root><a/><b/><c/></root>");
+        var found = document.FindAll<Tag>(t => t.Name == "b").ToArray();
+
+        Assert.AreEqual(1, found.Length);
+    }
+
+    [TestMethod]
+    public void FindAll_OnlyChildren_NotFound()
+    {
+        var document = Document.Xml.Parse("<root><a/><b/><c/></root>");
+        var found = document.FindAll<Tag>(t => t.Name == "x").ToArray();
+
+        Assert.AreEqual(0, found.Length);
+    }
+
     [DataTestMethod]
     [DataRow("<div></div>", false)]
     [DataRow("<div><p>1</p></div>", true)]
