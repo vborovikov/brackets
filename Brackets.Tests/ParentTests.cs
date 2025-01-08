@@ -122,4 +122,30 @@ public class ParentTests
 
         Assert.AreEqual(expected, parent.HasOneChild);
     }
+
+    //todo:[TestMethod]
+    public void FindAll_RemoveOnEachIteration_ElementsEnumerated()
+    {
+        // it would be nice to be able to modify the element tree
+        // as we enumerating/searching the elements
+
+        var document = Document.Html.Parse(
+            """
+            <div>
+                <span id='1'><i>test</i></span>
+                <span id='2'></span>
+                <span id='3'><i>test</i></span>
+            </div>
+            """);
+        var root = document.FirstOrDefault<ParentTag>();
+        Assert.IsNotNull(root);
+        Assert.AreEqual("div", root.Name);
+
+        foreach (var item in root.FindAll<ParentTag>())
+        {
+            item.Parent?.Remove(item);
+        }
+
+        Assert.AreEqual(0, root.Count());
+    }
 }
