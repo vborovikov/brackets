@@ -27,6 +27,11 @@ namespace Brackets
         bool IsSerialized { get; }
     }
 
+    interface IParent : IRoot
+    {
+        Element? Child { get; }
+    }
+
     abstract class DocumentRoot : ParentTag, IDocument
     {
         protected DocumentRoot(RootRef rootReference, int length)

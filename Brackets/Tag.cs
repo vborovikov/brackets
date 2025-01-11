@@ -190,7 +190,7 @@ public sealed class Declaration : Tag
     internal override string ToDebugString() => $"<!{this.Name}>";
 }
 
-public class ParentTag : Tag, IRoot, IEnumerable<Element>
+public class ParentTag : Tag, IRoot, IParent, IEnumerable<Element>
 {
     private Element? child;
 
@@ -217,6 +217,8 @@ public class ParentTag : Tag, IRoot, IEnumerable<Element>
     public int ContentEnd => this.child?.Prev?.End ?? -1;
 
     protected internal Element? Child => this.child;
+
+    Element? IParent.Child => this.child;
 
     public new ParentTag Clone() => (ParentTag)CloneOverride();
 

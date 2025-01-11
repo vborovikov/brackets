@@ -10,7 +10,7 @@
     using Xml;
     using XPath;
 
-    public partial class Document : IDocument
+    public partial class Document : IDocument, IParent
     {
         private static readonly LRUCache<string, PathQuery> pathQueryCache = new(16);
         private readonly DocumentRoot root;
@@ -35,6 +35,8 @@
         public int Length => this.root.Length;
 
         internal DocumentRoot Root => this.root;
+
+        Element? IParent.Child => this.root.Child;
 
         public override string ToString() => this.root.ToString();
 

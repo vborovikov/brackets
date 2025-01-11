@@ -128,22 +128,22 @@ public static class ElementExtensions
 
     public static Element First(this Document document) => document.Root.First();
 
-    public static Element First(this ParentTag root)
-    {
-        return root.Child ?? throw new InvalidOperationException("Sequence contains no elements.");
-    }
+    public static Element First(this ParentTag parent) => parent.Child ?? throw new InvalidOperationException("Sequence contains no elements.");
+
+    internal static Element? Child(this IRoot root) => (root as IParent)?.Child;
+
+    public static Element First(this IRoot root) => root.Child() ?? throw new InvalidOperationException("Sequence contains no elements.");
 
     public static Attr First(this in Attr.List attributes)
     {
-        if (attributes.First is null)
-            throw new InvalidOperationException("Sequence contains no elements.");
-
-        return attributes.First;
+        return attributes.First ?? throw new InvalidOperationException("Sequence contains no elements.");
     }
 
     public static Element First(this Document document, Func<Element, bool> predicate) => document.Root.First(predicate);
 
-    public static Element First(this ParentTag root, Func<Element, bool> predicate) => First(root.Child, predicate);
+    public static Element First(this ParentTag parent, Func<Element, bool> predicate) => First(parent.Child, predicate);
+
+    public static Element First(this IRoot root, Func<Element, bool> predicate) => First(root.Child(), predicate);
 
     public static Attr First(this in Attr.List attributes, Func<Attr, bool> predicate) =>
         (Attr)First(attributes.First, el => predicate((Attr)el));
@@ -170,11 +170,11 @@ public static class ElementExtensions
     /// <summary>
     /// Returns the last element in the parent-child relationship of elements, or a default value if the sequence is empty.
     /// </summary>
-    /// <param name="root">The root element.</param>
+    /// <param name="parent">The root element.</param>
     /// <returns>The last child element of the root element, or null if the root has no children.</returns>
-    public static Element Last(this ParentTag root)
+    public static Element Last(this ParentTag parent)
     {
-        var first = root.Child ?? throw new InvalidOperationException("Sequence contains no elements.");
+        var first = parent.Child ?? throw new InvalidOperationException("Sequence contains no elements.");
         return first.Prev;
     }
 
@@ -188,7 +188,7 @@ public static class ElementExtensions
 
     public static Element Last(this Document document, Func<Element, bool> predicate) => document.Root.Last(predicate);
 
-    public static Element Last(this ParentTag root, Func<Element, bool> predicate) => Last(root.Child?.Prev, predicate);
+    public static Element Last(this ParentTag parent, Func<Element, bool> predicate) => Last(parent.Child?.Prev, predicate);
 
     public static Attr Last(this in Attr.List attributes, Func<Attr, bool> predicate) =>
         (Attr)Last(attributes.First?.Prev, el => predicate((Attr)el));
@@ -212,14 +212,14 @@ public static class ElementExtensions
 
     public static Element? FirstOrDefault(this Document document) => document.Root.FirstOrDefault();
 
-    public static Element? FirstOrDefault(this ParentTag root) => root.Child;
+    public static Element? FirstOrDefault(this ParentTag parent) => parent.Child;
 
     public static Attr? FirstOrDefault(this in Attr.List attributes) => attributes.First;
 
     public static Element? FirstOrDefault(this Document document, Func<Element, bool> predicate) => document.Root.FirstOrDefault(predicate);
 
-    public static Element? FirstOrDefault(this ParentTag root, Func<Element, bool> predicate) =>
-        FirstOrDefault(root.Child, predicate);
+    public static Element? FirstOrDefault(this ParentTag parent, Func<Element, bool> predicate) =>
+        FirstOrDefault(parent.Child, predicate);
 
     public static Attr? FirstOrDefault(this in Attr.List attributes, Func<Attr, bool> predicate) =>
         (Attr?)FirstOrDefault(attributes.First, el => predicate((Attr)el));
@@ -243,11 +243,11 @@ public static class ElementExtensions
 
     public static Element? LastOrDefault(this Document document) => document.Root.LastOrDefault();
 
-    public static Element? LastOrDefault(this ParentTag root) => root.Child?.Prev;
+    public static Element? LastOrDefault(this ParentTag parent) => parent.Child?.Prev;
 
     public static Element? LastOrDefault(this Document document, Func<Element, bool> predicate) => document.Root.LastOrDefault(predicate);
 
-    public static Element? LastOrDefault(this ParentTag root, Func<Element, bool> predicate) => LastOrDefault(root.Child?.Prev, predicate);
+    public static Element? LastOrDefault(this ParentTag parent, Func<Element, bool> predicate) => LastOrDefault(parent.Child?.Prev, predicate);
 
     public static Attr? LastOrDefault(this in Attr.List attributes, Func<Attr, bool> predicate) =>
         (Attr?)LastOrDefault(attributes.First?.Prev, el => predicate((Attr)el));
@@ -271,9 +271,9 @@ public static class ElementExtensions
 
     public static Element Single(this Document document) => document.Root.Single();
 
-    public static Element Single(this ParentTag root)
+    public static Element Single(this ParentTag parent)
     {
-        var single = root.Child ?? throw new InvalidOperationException("Sequence contains no elements.");
+        var single = parent.Child ?? throw new InvalidOperationException("Sequence contains no elements.");
         if (single.Next != single)
             throw new InvalidOperationException("Sequence contains more than one element.");
 
@@ -292,7 +292,7 @@ public static class ElementExtensions
 
     public static Element Single(this Document document, Func<Element, bool> predicate) => document.Root.Single(predicate);
 
-    public static Element Single(this ParentTag root, Func<Element, bool> predicate) => Single(root.Child, predicate);
+    public static Element Single(this ParentTag parent, Func<Element, bool> predicate) => Single(parent.Child, predicate);
 
     public static Attr Single(this in Attr.List attributes, Func<Attr, bool> predicate) =>
         (Attr)Single(attributes.First, el => predicate((Attr)el));
@@ -324,7 +324,7 @@ public static class ElementExtensions
 
     public static Element? SingleOrDefault(this Document document) => document.Root.SingleOrDefault();
 
-    public static Element? SingleOrDefault(this ParentTag root) => SingleOrDefault(root.Child);
+    public static Element? SingleOrDefault(this ParentTag parent) => SingleOrDefault(parent.Child);
 
     public static Attr? SingleOrDefault(this in Attr.List attributes) => (Attr?)SingleOrDefault(attributes.First);
 
@@ -349,7 +349,7 @@ public static class ElementExtensions
 
     public static Element? SingleOrDefault(this Document document, Func<Element, bool> predicate) => document.Root.SingleOrDefault(predicate);
 
-    public static Element? SingleOrDefault(this ParentTag root, Func<Element, bool> predicate) => SingleOrDefault(root.Child, predicate);
+    public static Element? SingleOrDefault(this ParentTag parent, Func<Element, bool> predicate) => SingleOrDefault(parent.Child, predicate);
 
     public static Attr? SingleOrDefault(this in Attr.List attributes, Func<Attr, bool> predicate) =>
         (Attr?)SingleOrDefault(attributes.First, el => predicate((Attr)el));
@@ -430,7 +430,7 @@ public static class ElementExtensions
 
     public static bool All(this Document document, Func<Element, bool> predicate) => document.Root.All(predicate);
 
-    public static bool All(this ParentTag root, Func<Element, bool> predicate) => All(root.Child, predicate);
+    public static bool All(this ParentTag parent, Func<Element, bool> predicate) => All(parent.Child, predicate);
 
     public static bool All(this in Attr.List attributes, Func<Attr, bool> predicate) =>
         All(attributes.First, el => predicate((Attr)el));
@@ -454,7 +454,7 @@ public static class ElementExtensions
 
     public static bool Any(this Document document, Func<Element, bool> predicate) => document.Root.Any(predicate);
 
-    public static bool Any(this ParentTag root, Func<Element, bool> predicate) => Any(root.Child, predicate);
+    public static bool Any(this ParentTag parent, Func<Element, bool> predicate) => Any(parent.Child, predicate);
 
     public static bool Any(this in Attr.List attributes, Func<Attr, bool> predicate) =>
         Any(attributes.First, el => predicate((Attr)el));
@@ -478,13 +478,13 @@ public static class ElementExtensions
 
     public static bool Any(this Document document) => document.Root.Any();
 
-    public static bool Any(this ParentTag root) => root.Child is not null;
+    public static bool Any(this ParentTag parent) => parent.Child is not null;
 
     public static bool Any(this in Attr.List attributes) => attributes.First is not null;
 
     public static int Count(this Document document, Func<Element, bool> predicate) => document.Root.Count(predicate);
 
-    public static int Count(this ParentTag root, Func<Element, bool> predicate) => Count(root.Child, predicate);
+    public static int Count(this ParentTag parent, Func<Element, bool> predicate) => Count(parent.Child, predicate);
 
     public static int Count(this in Attr.List attributes, Func<Attr, bool> predicate) =>
         Count(attributes.First, el => predicate((Attr)el));
@@ -509,7 +509,7 @@ public static class ElementExtensions
 
     public static int Count(this Document document) => document.Root.Count();
 
-    public static int Count(this ParentTag root) => Count(root.Child);
+    public static int Count(this ParentTag parent) => Count(parent.Child);
 
     public static int Count(this in Attr.List attributes) => Count(attributes.First);
 
@@ -534,24 +534,24 @@ public static class ElementExtensions
         document.All(e => e is TElement);
     public static bool All<TElement>(this Document document, Func<TElement, bool> predicate) where TElement : Element =>
         document.All(e => e is TElement element && predicate(element));
-    public static bool All<TElement>(this ParentTag root) where TElement : Element =>
-        root.All(e => e is TElement);
-    public static bool All<TElement>(this ParentTag root, Func<TElement, bool> predicate) where TElement : Element =>
-        root.All(e => e is TElement element && predicate(element));
+    public static bool All<TElement>(this ParentTag parent) where TElement : Element =>
+        parent.All(e => e is TElement);
+    public static bool All<TElement>(this ParentTag parent, Func<TElement, bool> predicate) where TElement : Element =>
+        parent.All(e => e is TElement element && predicate(element));
     public static bool Any<TElement>(this Document document) where TElement : Element =>
         document.Any(e => e is TElement);
     public static bool Any<TElement>(this Document document, Func<TElement, bool> predicate) where TElement : Element =>
         document.Any(e => e is TElement element && predicate(element));
-    public static bool Any<TElement>(this ParentTag root) where TElement : Element =>
-        root.Any(e => e is TElement);
-    public static bool Any<TElement>(this ParentTag root, Func<TElement, bool> predicate) where TElement : Element =>
-        root.Any(e => e is TElement element && predicate(element));
+    public static bool Any<TElement>(this ParentTag parent) where TElement : Element =>
+        parent.Any(e => e is TElement);
+    public static bool Any<TElement>(this ParentTag parent, Func<TElement, bool> predicate) where TElement : Element =>
+        parent.Any(e => e is TElement element && predicate(element));
     public static int Count<TElement>(this Document document) where TElement : Element =>
         document.Count(e => e is TElement);
     public static int Count<TElement>(this Document document, Func<TElement, bool> predicate) where TElement : Element =>
         document.Count(e => e is TElement element && predicate(element));
-    public static int Count<TElement>(this ParentTag root) where TElement : Element =>
-        root.Count(e => e is TElement);
-    public static int Count<TElement>(this ParentTag root, Func<TElement, bool> predicate) where TElement : Element =>
-        root.Count(e => e is TElement element && predicate(element));
+    public static int Count<TElement>(this ParentTag parent) where TElement : Element =>
+        parent.Count(e => e is TElement);
+    public static int Count<TElement>(this ParentTag parent, Func<TElement, bool> predicate) where TElement : Element =>
+        parent.Count(e => e is TElement element && predicate(element));
 }
