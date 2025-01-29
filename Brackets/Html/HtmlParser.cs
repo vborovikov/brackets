@@ -152,8 +152,8 @@ public class HtmlParser : MarkupParser<HtmlLexer>
         parser.InitTagRef(new("audio", parser) { Layout = Inline, Category = Flow | Phrasing | Embedded });
         parser.InitTagRef(new("canvas", parser) { Layout = Inline, Category = Flow | Phrasing | Embedded, PermittedContent = Interactive });
         parser.InitTagRef(new("embed", parser) { IsParent = false, Layout = Inline, Category = Flow | Phrasing | Embedded | Interactive });
-        parser.InitTagRef(new("figcaption", parser) { PermittedContent = Flow | Phrasing });
-        parser.InitTagRef(new("figure", parser) { Category = Flow, PermittedContent = Flow | Phrasing });
+        parser.InitTagRef(new("figcaption", parser) { Category = Embedded, PermittedContent = Flow | Phrasing });
+        parser.InitTagRef(new("figure", parser) { Category = Flow | Embedded, PermittedContent = Flow | Phrasing });
         parser.InitTagRef(new("frame", parser) { IsParent = false, Category = Embedded });
         parser.InitTagRef(new("frameset", parser) { Category = Embedded });
         parser.InitTagRef(new("iframe", parser) { Layout = Inline, Category = Flow | Phrasing | Embedded | Interactive });
