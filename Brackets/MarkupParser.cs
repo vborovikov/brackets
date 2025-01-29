@@ -35,8 +35,26 @@
         /// </summary>
         MarkupLanguage Language { get; }
 
+        /// <summary>
+        /// Creates a new tag.
+        /// </summary>
+        /// <param name="name">A tag name.</param>
+        /// <returns>A new tag.</returns>
         Tag CreateTag(ReadOnlySpan<char> name);
+
+        /// <summary>
+        /// Creates a new attribute.
+        /// </summary>
+        /// <param name="name">An attribute name.</param>
+        /// <param name="value">An attribute value.</param>
+        /// <returns>A new attribute.</returns>
         Attr CreateAttribute(ReadOnlySpan<char> name, ReadOnlySpan<char> value);
+
+        /// <summary>
+        /// Creates a new content.
+        /// </summary>
+        /// <param name="value">A content value.</param>
+        /// <returns>A new content.</returns>
         Content CreateContent(ReadOnlySpan<char> value);
 
         /// <summary>
