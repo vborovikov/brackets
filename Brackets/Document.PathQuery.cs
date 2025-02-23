@@ -2,6 +2,7 @@ namespace Brackets;
 
 using System;
 using System.Collections;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -739,38 +740,40 @@ public partial class Document
 
     private class PathFunction : PathQuery
     {
-        private static readonly Dictionary<string, Func<PathQueryContext, IEnumerable<PathQuery>, PathQueryContext>> knownQueryFunctions =
-            new(StringComparer.OrdinalIgnoreCase)
-            {
-            };
+        private static readonly FrozenDictionary<string, Func<PathQueryContext, IEnumerable<PathQuery>, PathQueryContext>> knownQueryFunctions =
+            Array.Empty<KeyValuePair<string, Func<PathQueryContext, IEnumerable<PathQuery>, PathQueryContext>>>()
+                .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
-        private static readonly Dictionary<string, Func<PathQueryContext, IEnumerable<PathQuery>, int>> knownNumberFunctions =
-            new(StringComparer.OrdinalIgnoreCase)
+        private static readonly FrozenDictionary<string, Func<PathQueryContext, IEnumerable<PathQuery>, int>> knownNumberFunctions =
+            (new KeyValuePair<string, Func<PathQueryContext, IEnumerable<PathQuery>, int>>[]
             {
-                { nameof(XPathFunctions.Count), XPathFunctions.Count },
-                { nameof(XPathFunctions.Last), XPathFunctions.Last },
-                { nameof(XPathFunctions.Position), XPathFunctions.Position },
-            };
+                new(nameof(XPathFunctions.Count), XPathFunctions.Count),
+                new(nameof(XPathFunctions.Last), XPathFunctions.Last),
+                new(nameof(XPathFunctions.Position), XPathFunctions.Position),
+            })
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
-        private static readonly Dictionary<string, Func<PathQueryContext, IEnumerable<PathQuery>, bool>> knownBooleanFunctions =
-            new(StringComparer.OrdinalIgnoreCase)
+        private static readonly FrozenDictionary<string, Func<PathQueryContext, IEnumerable<PathQuery>, bool>> knownBooleanFunctions =
+            (new KeyValuePair<string, Func<PathQueryContext, IEnumerable<PathQuery>, bool>>[]
             {
-                { nameof(XPathFunctions.Contains), XPathFunctions.Contains },
-                { nameof(XPathFunctions.IsNumber), XPathFunctions.IsNumber },
-            };
+                new(nameof(XPathFunctions.Contains), XPathFunctions.Contains),
+                new(nameof(XPathFunctions.IsNumber), XPathFunctions.IsNumber),
+            })
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
-        private static readonly Dictionary<string, Func<PathQueryContext, IEnumerable<PathQuery>, string>> knownStringFunctions =
-            new(StringComparer.OrdinalIgnoreCase)
+        private static readonly FrozenDictionary<string, Func<PathQueryContext, IEnumerable<PathQuery>, string>> knownStringFunctions =
+            (new KeyValuePair<string, Func<PathQueryContext, IEnumerable<PathQuery>, string>>[]
             {
-                { nameof(XPathFunctions.Name), XPathFunctions.Name },
-                { nameof(XPathFunctions.Trim), XPathFunctions.Trim },
-                { nameof(XPathFunctions.NormalizeSpace), XPathFunctions.NormalizeSpace },
-                { "normalize-space", XPathFunctions.NormalizeSpace },
-                { "string", XPathFunctions.Text },
-                { nameof(XPathFunctions.Unescape), XPathFunctions.Unescape },
-                { nameof(XPathFunctions.Json), XPathFunctions.Json },
-                { nameof(XPathFunctions.Replace), XPathFunctions.Replace },
-            };
+                new(nameof(XPathFunctions.Name), XPathFunctions.Name),
+                new(nameof(XPathFunctions.Trim), XPathFunctions.Trim),
+                new(nameof(XPathFunctions.NormalizeSpace), XPathFunctions.NormalizeSpace),
+                new("normalize-space", XPathFunctions.NormalizeSpace),
+                new("string", XPathFunctions.Text),
+                new(nameof(XPathFunctions.Unescape), XPathFunctions.Unescape),
+                new(nameof(XPathFunctions.Json), XPathFunctions.Json),
+                new(nameof(XPathFunctions.Replace), XPathFunctions.Replace),
+            })
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
         public PathFunction(string? prefix, string name, IEnumerable<PathQuery> arguments)
         {

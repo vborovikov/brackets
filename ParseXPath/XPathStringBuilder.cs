@@ -1,6 +1,7 @@
 ﻿namespace ParseXPath
 {
     using System;
+    using System.Collections.Frozen;
     using System.Collections.Generic;
     using System.Diagnostics;
     using Brackets.XPath;
@@ -8,41 +9,45 @@
 
     public class XPathStringBuilder : IXPathBuilder<string>
     {
-        private static readonly Dictionary<XPathOperator, string> opStrings = new Dictionary<XPathOperator, string>
-        {
-            { XPathOperator.Unknown    , " Unknown " },
-            { XPathOperator.Or         , " or "      },
-            { XPathOperator.And        , " and "     },
-            { XPathOperator.Eq         , "="         },
-            { XPathOperator.Ne         , "!="        },
-            { XPathOperator.Lt         , "<"         },
-            { XPathOperator.Le         , "<="        },
-            { XPathOperator.Gt         , ">"         },
-            { XPathOperator.Ge         , ">="        },
-            { XPathOperator.Plus       , "+"         },
-            { XPathOperator.Minus      , "-"         },
-            { XPathOperator.Multiply   , "*"         },
-            { XPathOperator.Divide     , " div "     },
-            { XPathOperator.Modulo     , " mod "     },
-            { XPathOperator.UnaryMinus , "-"         },
-        };
+        private static readonly FrozenDictionary<XPathOperator, string> opStrings =
+            (new Dictionary<XPathOperator, string>
+            {
+                { XPathOperator.Unknown    , " Unknown " },
+                { XPathOperator.Or         , " or "      },
+                { XPathOperator.And        , " and "     },
+                { XPathOperator.Eq         , "="         },
+                { XPathOperator.Ne         , "!="        },
+                { XPathOperator.Lt         , "<"         },
+                { XPathOperator.Le         , "<="        },
+                { XPathOperator.Gt         , ">"         },
+                { XPathOperator.Ge         , ">="        },
+                { XPathOperator.Plus       , "+"         },
+                { XPathOperator.Minus      , "-"         },
+                { XPathOperator.Multiply   , "*"         },
+                { XPathOperator.Divide     , " div "     },
+                { XPathOperator.Modulo     , " mod "     },
+                { XPathOperator.UnaryMinus , "-"         },
+            })
+            .ToFrozenDictionary();
 
-        private static readonly Dictionary<XPathAxis, string> axisStrings = new Dictionary<XPathAxis, string>
-        {
-            { XPathAxis.Ancestor         , "ancestor::"          },
-            { XPathAxis.AncestorOrSelf   , "ancestor-or-self::"  },
-            { XPathAxis.Attribute        , "attribute::"         },
-            { XPathAxis.Child            , "child::"             },
-            { XPathAxis.Descendant       , "descendant::"        },
-            { XPathAxis.DescendantOrSelf , "descendant-or-self::"},
-            { XPathAxis.Following        , "following::"         },
-            { XPathAxis.FollowingSibling , "following-sibling::" },
-            { XPathAxis.Namespace        , "namespace::"         },
-            { XPathAxis.Parent           , "parent::"            },
-            { XPathAxis.Preceding        , "preceding::"         },
-            { XPathAxis.PrecedingSibling , "preceding-sibling::" },
-            { XPathAxis.Self             , "self::"              },
-        };
+        private static readonly FrozenDictionary<XPathAxis, string> axisStrings = 
+            (new Dictionary<XPathAxis, string>
+            {
+                { XPathAxis.Ancestor         , "ancestor::"          },
+                { XPathAxis.AncestorOrSelf   , "ancestor-or-self::"  },
+                { XPathAxis.Attribute        , "attribute::"         },
+                { XPathAxis.Child            , "child::"             },
+                { XPathAxis.Descendant       , "descendant::"        },
+                { XPathAxis.DescendantOrSelf , "descendant-or-self::"},
+                { XPathAxis.Following        , "following::"         },
+                { XPathAxis.FollowingSibling , "following-sibling::" },
+                { XPathAxis.Namespace        , "namespace::"         },
+                { XPathAxis.Parent           , "parent::"            },
+                { XPathAxis.Preceding        , "preceding::"         },
+                { XPathAxis.PrecedingSibling , "preceding-sibling::" },
+                { XPathAxis.Self             , "self::"              },
+            })
+            .ToFrozenDictionary();
 
         public void Begin()
         {
