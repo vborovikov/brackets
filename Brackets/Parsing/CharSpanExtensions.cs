@@ -134,7 +134,7 @@ static class CharSpanExtensions
     }
 
 
-    public static string Normalize(this string input, ReadOnlySpan<char> trimChars)
+    public static string Normalize(this string input, SearchValues<char> trimChars)
     {
         if (string.IsNullOrEmpty(input))
             return string.Empty;
@@ -142,15 +142,15 @@ static class CharSpanExtensions
         return new string(Normalize(input.ToCharArray(), trimChars, []));
     }
 
-    public static string Normalize(this string input, ReadOnlySpan<char> trimChars, ReadOnlySpan<char> fillChars)
+    public static string Normalize(this string input, SearchValues<char> trimChars, ReadOnlySpan<char> fillSpan)
     {
         if (string.IsNullOrEmpty(input))
             return string.Empty;
 
-        return new string(Normalize(input.ToCharArray(), trimChars, fillChars));
+        return new string(Normalize(input.ToCharArray(), trimChars, fillSpan));
     }
 
-    private static ReadOnlySpan<char> Normalize(Span<char> span, ReadOnlySpan<char> trimChars, ReadOnlySpan<char> fillChars)
+    private static ReadOnlySpan<char> Normalize(Span<char> span, SearchValues<char> trimChars, ReadOnlySpan<char> fillSpan)
     {
         var len = span.Length;
         if (len == 0) return [];
@@ -169,10 +169,10 @@ static class CharSpanExtensions
             {
                 if (trimmed > 0 && pos > 0)
                 {
-                    if (fillChars.Length > 0)
+                    if (fillSpan.Length > 0)
                     {
-                        ref char cur = ref MemoryMarshal.GetReference(fillChars);
-                        ref char end = ref Unsafe.Add(ref cur, fillChars.Length);
+                        ref char cur = ref MemoryMarshal.GetReference(fillSpan);
+                        ref char end = ref Unsafe.Add(ref cur, fillSpan.Length);
                         while (Unsafe.IsAddressLessThan(ref cur, ref end) && trimmed > 0)
                         {
                             dst = cur;

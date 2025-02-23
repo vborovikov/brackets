@@ -1,6 +1,7 @@
 namespace Brackets;
 
 using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Frozen;
 using System.Collections.Generic;
@@ -868,6 +869,9 @@ public partial class Document
 
     private static class XPathFunctions
     {
+        private static readonly SearchValues<char> WhiteSpaceChars = SearchValues.Create(" \t\xA0");
+        private static readonly SearchValues<char> NewLineChars = SearchValues.Create("\r\n");
+
         public static string Name(PathQueryContext context, IEnumerable<PathQuery> args)
         {
             var ctx = args.FirstOrDefault()?.Run(context) ?? context;
@@ -975,12 +979,12 @@ public partial class Document
                 // replace html entities
                 WebUtility.HtmlDecode(text)
                 // normalize multiple whitespaces
-                .Normalize(" \t\xA0")
+                .Normalize(WhiteSpaceChars)
                 // remove single whitespace lines
                 .Replace(" \r\n", string.Empty, StringComparison.Ordinal)
                 .Replace(" \n", string.Empty, StringComparison.Ordinal)
                 // normalize multiple empty lines
-                .Normalize("\r\n", Environment.NewLine)
+                .Normalize(NewLineChars, Environment.NewLine)
                 // remove all leading and trailing whitespace
                 .Trim();
         }
