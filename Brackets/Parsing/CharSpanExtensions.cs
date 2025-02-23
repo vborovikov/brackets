@@ -14,12 +14,12 @@ static class CharSpanExtensions
     /// <param name="stopChars">The stop characters to search for.</param>
     /// <param name="quoteChars">The quotation mark characters to consider.</param>
     /// <returns>The index of the first occurrence of any of the stop characters outside a quote, or -1 if not found.</returns>
-    public static int IndexOfAnyOutsideQuotes(this ReadOnlySpan<char> span, SearchValues<char> stopChars, ReadOnlySpan<char> quoteChars)
+    public static int IndexOfAnyUnquoted(this ReadOnlySpan<char> span, SearchValues<char> stopChars, ReadOnlySpan<char> quoteChars)
     {
         if (span.Length == 0) return -1;
 
         var quoteChar = quoteChars.Contains(span[0]) ? span[0] : quoteChars[0];
-        return span.IndexOfAnyOutsideQuotes(stopChars, quoteChar);
+        return span.IndexOfAnyUnquoted(stopChars, quoteChar);
     }
 
     /// <summary>
@@ -30,7 +30,7 @@ static class CharSpanExtensions
     /// <param name="quoteChar">The quotation mark character.</param>
     /// <param name="insideQuotes">true if the search starts inside the quotes; otherwise, false.</param>
     /// <returns>The index of the first occurrence of any of the stop characters outside a quote, or -1 if not found.</returns>
-    public static int IndexOfAnyOutsideQuotes(this ReadOnlySpan<char> span, SearchValues<char> stopChars, char quoteChar, bool insideQuotes = false)
+    public static int IndexOfAnyUnquoted(this ReadOnlySpan<char> span, SearchValues<char> stopChars, char quoteChar, bool insideQuotes = false)
     {
         var len = span.Length;
         if (len == 0) return -1;
@@ -59,7 +59,7 @@ static class CharSpanExtensions
     /// <param name="quoteChars">The quotation mark characters to consider.</param>
     /// <param name="insideQuotes">true if the search starts inside the quotes; otherwise, false.</param>
     /// <returns>The index of the last occurrence of any of the stop characters ouside a quote, or -1 if not found.</returns>
-    public static int LastIndexOfAnyOutsideQuotes(this ReadOnlySpan<char> span, SearchValues<char> stopChars, ReadOnlySpan<char> quoteChars, bool insideQuotes = false)
+    public static int LastIndexOfAnyUnquoted(this ReadOnlySpan<char> span, SearchValues<char> stopChars, ReadOnlySpan<char> quoteChars, bool insideQuotes = false)
     {
         if (span.Length == 0) return -1;
 
@@ -71,7 +71,7 @@ static class CharSpanExtensions
             quoteChar = quoteChar == quoteChars[0] ? quoteChars[1] : quoteChars[0];
         }
 
-        return span.LastIndexOfAnyOutsideQuotes(stopChars, quoteChar, insideQuotes);
+        return span.LastIndexOfAnyUnquoted(stopChars, quoteChar, insideQuotes);
     }
 
     /// <summary>
@@ -82,7 +82,7 @@ static class CharSpanExtensions
     /// <param name="quoteChar">The quotation mark character.</param>
     /// <param name="insideQuotes">true if the search starts inside the quotes; otherwise, false.</param>
     /// <returns>The index of the last occurrence of any of the stop characters ouside a quote, or -1 if not found.</returns>
-    public static int LastIndexOfAnyOutsideQuotes(this ReadOnlySpan<char> span, SearchValues<char> stopChars, char quoteChar, bool insideQuotes = false)
+    public static int LastIndexOfAnyUnquoted(this ReadOnlySpan<char> span, SearchValues<char> stopChars, char quoteChar, bool insideQuotes = false)
     {
         var len = span.Length;
         if (len == 0) return -1;
@@ -111,7 +111,7 @@ static class CharSpanExtensions
     /// <param name="quoteChar">The quotation mark character.</param>
     /// <param name="insideQuotes">true if the search starts inside the quotes; otherwise, false.</param>
     /// <returns>The index of the last occurrence of any of the stop characters ouside a quote, or -1 if not found.</returns>
-    public static int LastIndexOutsideQuotes(this ReadOnlySpan<char> span, char quoteChar, bool insideQuotes = false)
+    public static int LastIndexOfAnyUnquoted(this ReadOnlySpan<char> span, char quoteChar, bool insideQuotes = false)
     {
         var len = span.Length;
         if (len == 0) return -1;

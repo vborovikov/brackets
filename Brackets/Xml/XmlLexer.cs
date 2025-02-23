@@ -257,7 +257,7 @@ public readonly struct XmlLexer : IMarkupLexer
         if (valueStart >= 0)
         {
             span = span[valueStart..];
-            var valueEnd = span.IndexOfAnyOutsideQuotes(Separators, QuotationMarks);
+            var valueEnd = span.IndexOfAnyUnquoted(Separators, QuotationMarks);
             if (valueEnd < 0)
             {
                 valueEnd = span.Length;
