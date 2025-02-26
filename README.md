@@ -1,11 +1,11 @@
 # Brackets
 Resilient markup parser library
 
-[![Downloads](https://img.shields.io/nuget/dt/Brackets.svg)](https://www.nuget.org/packages/Brackets)
+[![Downloads](https://img.shields.io/nuget/dt/Brackets.svg)](https://www.nuget.org/packages/Brackets#versions-body-tab)
 [![NuGet](https://img.shields.io/nuget/v/Brackets.svg)](https://www.nuget.org/packages/Brackets)
 [![BSD-3-Clause](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](https://github.com/vborovikov/brackets/blob/main/LICENSE)
 
-The library is used to parse XML and HTML files. The parser produces a tree of nodes that represent the structure of the document. The parse tree is very simple by design and doesn't try to replicate the document object model (DOM) in any way.
+The library is used to parse HTML, XML, and XHTML documents and streams. The parser produces a tree of nodes that represent the structure of the document. The parse tree is very simple by design and doesn't try to replicate the document object model (DOM) in any significant way.
 
 Ill-structured documents will be parsed without errors. The parser will try to detect and correct stray tags, broken tags, etc.
 
