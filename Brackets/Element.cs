@@ -253,44 +253,60 @@
 
         protected internal Element Prev => this.prev;
 
+        /// <summary>
+        /// Enumerates the elements of a <see cref="ParentTag">parent tag</see>.
+        /// </summary>
         public struct Enumerator : IEnumerable<Element>, IEnumerator<Element>
         {
             private readonly Element? last;
-            private Element? sibling;
             private Element? current;
 
             internal Enumerator(Element? first)
             {
                 this.last = first?.prev;
-                this.sibling = first;
             }
 
+            /// <summary>
+            /// Gets the current element.
+            /// </summary>
             public readonly Element Current => this.current!;
+
+            /// <summary>
+            /// Returns this instance as an enumerator.
+            /// </summary>
             public readonly Enumerator GetEnumerator() => this;
-            readonly object IEnumerator.Current => this.current!;
 
-            public readonly void Dispose()
-            {
-            }
-
+            /// <inheritdoc/>
             [MemberNotNullWhen(true, nameof(current))]
             public bool MoveNext()
             {
-                if (this.sibling is null)
+                if (this.current == this.last)
                     return false;
 
-                this.current = this.sibling;
-                this.sibling = this.sibling == this.last ? null : this.sibling.next;
+                if (this.current is null || this.current.parent is null)
+                {
+                    // the enumeration has been reset or the element has been removed,
+                    // in both cases we have to start from the beginning
+                    this.current = this.last?.next;
+                }
+                else
+                {
+                    // move to the next element
+                    this.current = this.current.next;
+                }
 
-                return true;
+                return this.current is not null;
             }
 
+            /// <inheritdoc/>
             public void Reset()
             {
-                this.sibling = this.last?.next;
                 this.current = null;
             }
 
+            /// <inheritdoc/>
+            public readonly void Dispose() { }
+            readonly object IEnumerator.Current => this.current!;
             readonly IEnumerator<Element> IEnumerable<Element>.GetEnumerator() => GetEnumerator();
             readonly IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }

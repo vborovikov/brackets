@@ -58,44 +58,60 @@ namespace Brackets
         /// <returns>The trimmed attribute value.</returns>
         protected ReadOnlySpan<char> TrimValue(ReadOnlySpan<char> value) => this.reference.Syntax.TrimValue(value).Trim();
 
+        /// <summary>
+        /// Enumerates the attributes of a <see cref="Tag">tag</see>.
+        /// </summary>
         public new struct Enumerator : IEnumerable<Attr>, IEnumerator<Attr>
         {
             private readonly Attr? last;
-            private Attr? sibling;
             private Attr? current;
 
             internal Enumerator(Attr? first)
             {
                 this.last = (Attr?)first?.Prev;
-                this.sibling = first;
             }
 
+            /// <summary>
+            /// Gets the current attribute.
+            /// </summary>
             public readonly Attr Current => this.current!;
+
+            /// <summary>
+            /// Returns this instance as an enumerator.
+            /// </summary>
             public readonly Enumerator GetEnumerator() => this;
-            readonly object IEnumerator.Current => this.current!;
 
-            public readonly void Dispose()
-            {
-            }
-
+            /// <inheritdoc/>
             [MemberNotNullWhen(true, nameof(current))]
             public bool MoveNext()
             {
-                if (this.sibling is null)
+                if (this.current == this.last)
                     return false;
 
-                this.current = this.sibling;
-                this.sibling = this.sibling == this.last ? null : (Attr)this.sibling.Next;
+                if (this.current is null || this.current.Parent is null)
+                {
+                    // the enumeration has been reset or the attribute has been removed,
+                    // in both cases we have to start from the beginning
+                    this.current = (Attr?)this.last?.Next;
+                }
+                else
+                {
+                    // move to the next attribute
+                    this.current = (Attr?)this.current.Next;
+                }
 
-                return true;
+                return this.current is not null;
             }
 
+            /// <inheritdoc/>
             public void Reset()
             {
-                this.sibling = (Attr?)this.last?.Next;
                 this.current = null;
             }
 
+            /// <inheritdoc/>
+            public readonly void Dispose() { }
+            readonly object IEnumerator.Current => this.current!;
             readonly IEnumerator<Attr> IEnumerable<Attr>.GetEnumerator() => GetEnumerator();
             readonly IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
