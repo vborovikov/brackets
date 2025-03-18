@@ -3,27 +3,87 @@ namespace Brackets
     using System;
     using System.Text;
 
+    /// <summary>
+    /// Represents the root of a document structure, providing methods to interact with its elements.
+    /// </summary>
     public interface IRoot : IEnumerable<Element>, ICloneable, IFormattable
     {
+        /// <summary>
+        /// Gets the total length of the underlying data represented by this root.
+        /// </summary>
         int Length { get; }
 
-        Element.Enumerator GetEnumerator();
+        /// <summary>
+        /// Returns an enumerator that iterates through the elements in the root.
+        /// </summary>
+        /// <returns>An <see cref="Element.Enumerator"/> that can be used to iterate through the elements.</returns>
+        new Element.Enumerator GetEnumerator();
+
+        /// <summary>
+        /// Finds the first element that matches the specified predicate.
+        /// </summary>
+        /// <param name="match">The predicate that defines the conditions of the element to search for.</param>
+        /// <returns>The first <see cref="Element"/> that matches the predicate, or <c>null</c> if no match is found.</returns>
         Element? Find(Predicate<Element> match);
+
+        /// <summary>
+        /// Finds the first element of the specified type that matches the given predicate.
+        /// </summary>
+        /// <typeparam name="TElement">The type of element to search for.</typeparam>
+        /// <param name="match">The predicate that defines the conditions of the element to search for.</param>
+        /// <returns>The first element of type <typeparamref name="TElement"/> that matches the predicate, or <c>null</c> if no match is found.</returns>
         TElement? Find<TElement>(Func<TElement, bool> match) where TElement : Element;
+
+        /// <summary>
+        /// Finds all elements that match the specified predicate.
+        /// </summary>
+        /// <param name="match">The predicate that defines the conditions of the elements to search for.</param>
+        /// <returns>A <see cref="ParentTag.DescendantEnumerator{Element}"/> that can be used to iterate through the matching elements.</returns>
         ParentTag.DescendantEnumerator<Element> FindAll(Predicate<Element> match);
+
+        /// <summary>
+        /// Finds all elements of the specified type that match the given predicate.
+        /// </summary>
+        /// <typeparam name="TElement">The type of elements to search for.</typeparam>
+        /// <param name="match">The predicate that defines the conditions of the elements to search for.</param>
+        /// <returns>A <see cref="ParentTag.DescendantEnumerator{TElement}"/> that can be used to iterate through the matching elements.</returns>
         ParentTag.DescendantEnumerator<TElement> FindAll<TElement>(Func<TElement, bool> match) where TElement : Element;
+
+        /// <summary>
+        /// Finds all elements of the specified type.
+        /// </summary>
+        /// <typeparam name="TElement">The type of elements to search for.</typeparam>
+        /// <returns>A <see cref="ParentTag.DescendantEnumerator{TElement}"/> that can be used to iterate through the matching elements.</returns>
         ParentTag.DescendantEnumerator<TElement> FindAll<TElement>() where TElement : Element;
 
+        /// <summary>
+        /// Converts the root and its elements to a formatted string.
+        /// </summary>
+        /// <param name="format">A format string.</param>
+        /// <returns>A string representation of the root and its elements.</returns>
         string ToString(string? format);
     }
 
+    /// <summary>
+    /// Represents a document, which is a specialized type of root.
+    /// </summary>
     public interface IDocument : IRoot
     {
+        /// <summary>
+        /// Gets a value indicating whether the document is well-formed.
+        /// </summary>
+        /// <remarks>
+        /// A well-formed document adheres to the structural rules of its document type (e.g., XML).
+        /// </remarks>
         bool IsWellFormed { get; }
 
         /// <summary>
         /// Indicates whether the document elements are serialized copies of the source data.
         /// </summary>
+        /// <remarks>
+        /// If <c>true</c>, the elements represent copies of the original data.
+        /// If <c>false</c>, the elements are directly linked to the original source data.
+        /// </remarks>
         bool IsSerialized { get; }
     }
 
