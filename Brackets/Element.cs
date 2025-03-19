@@ -310,5 +310,72 @@
             readonly IEnumerator<Element> IEnumerable<Element>.GetEnumerator() => GetEnumerator();
             readonly IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
+
+        /// <summary>
+        /// Enumerates the elements of a <see cref="ParentTag">parent tag</see> that match the given predicate.
+        /// </summary>
+        /// <typeparam name="TElement">The type of the elements to enumerate.</typeparam>
+        public struct Enumerator<TElement> : IEnumerable<TElement>, IEnumerator<TElement>
+            where TElement : Element
+        {
+            private readonly Element? last;
+            private readonly Func<TElement, bool>? match;
+            private Element? current;
+
+            internal Enumerator(Element? first, Func<TElement, bool>? match = default)
+            {
+                this.last = first?.prev;
+                this.match = match;
+            }
+
+            /// <summary>
+            /// Gets the current element.
+            /// </summary>
+            public readonly TElement Current => (TElement)this.current!;
+
+            /// <summary>
+            /// Returns this instance as an enumerator.
+            /// </summary>
+            public readonly Enumerator<TElement> GetEnumerator() => this;
+
+            /// <inheritdoc/>
+            [MemberNotNullWhen(true, nameof(current))]
+            public bool MoveNext()
+            {
+                do
+                {
+                    if (this.current == this.last)
+                        return false;
+
+                    if (this.current is null || this.current.parent is null)
+                    {
+                        // the enumeration has been reset or the element has been removed,
+                        // in both cases we have to start from the beginning
+                        this.current = this.last?.next;
+                    }
+                    else
+                    {
+                        // move to the next element
+                        this.current = this.current.next;
+                    }
+                } while (this.current is not TElement element || !Match(element));
+
+                return this.current is not null;
+            }
+
+            /// <inheritdoc/>
+            public void Reset()
+            {
+                this.current = null;
+            }
+
+            /// <inheritdoc/>
+            public readonly void Dispose() { }
+            readonly object IEnumerator.Current => this.current!;
+            readonly IEnumerator<TElement> IEnumerable<TElement>.GetEnumerator() => GetEnumerator();
+            readonly IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+            private readonly bool Match(TElement element) => this.match?.Invoke(element) ?? true;
+        }
     }
 }

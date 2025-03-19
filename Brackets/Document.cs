@@ -32,6 +32,7 @@
 
         public bool IsSerialized => this.root.IsSerialized;
 
+        /// <inheritdoc/>
         public int Length => this.root.Length;
 
         internal DocumentRoot Root => this.root;
@@ -48,18 +49,39 @@
 
         object ICloneable.Clone() => Clone();
 
+        /// <inheritdoc/>
+        public Element.Enumerator EnumerateChildren() =>
+            this.root.EnumerateChildren();
+
+        /// <inheritdoc/>
+        public Element.Enumerator<Element> EnumerateChildren(Predicate<Element> match) =>
+            this.root.EnumerateChildren(match);
+
+        /// <inheritdoc/>
+        public Element.Enumerator<TElement> EnumerateChildren<TElement>() where TElement : Element =>
+            this.root.EnumerateChildren<TElement>();
+
+        /// <inheritdoc/>
+        public Element.Enumerator<TElement> EnumerateChildren<TElement>(Func<TElement, bool> match) where TElement : Element =>
+            this.root.EnumerateChildren(match);
+
+        /// <inheritdoc/>
         public Element? Find(Predicate<Element> match) =>
             this.root.Find(match);
 
+        /// <inheritdoc/>
         public TElement? Find<TElement>(Func<TElement, bool> match) where TElement : Element =>
             this.root.Find(match);
 
+        /// <inheritdoc/>
         public ParentTag.DescendantEnumerator<Element> FindAll(Predicate<Element> match) =>
             this.root.FindAll(match);
 
+        /// <inheritdoc/>
         public ParentTag.DescendantEnumerator<TElement> FindAll<TElement>(Func<TElement, bool> match) where TElement : Element =>
             this.root.FindAll(match);
 
+        /// <inheritdoc/>
         public ParentTag.DescendantEnumerator<TElement> FindAll<TElement>() where TElement : Element =>
             this.root.FindAll<TElement>();
 

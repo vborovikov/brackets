@@ -320,6 +320,7 @@ public class ParentTag : Tag, IRoot, IParent, IEnumerable<Element>
         }
     }
 
+    /// <inheritdoc/>
     public Enumerator GetEnumerator() => new(this.child);
 
     IEnumerator<Element> IEnumerable<Element>.GetEnumerator() =>
@@ -328,6 +329,19 @@ public class ParentTag : Tag, IRoot, IParent, IEnumerable<Element>
     IEnumerator IEnumerable.GetEnumerator() =>
         ((IEnumerable<Element>)this).GetEnumerator();
 
+    /// <inheritdoc/>
+    public Enumerator EnumerateChildren() => new(this.child);
+
+    /// <inheritdoc/>
+    public Enumerator<Element> EnumerateChildren(Predicate<Element> match) => new(this.child, el => match(el));
+
+    /// <inheritdoc/>
+    public Enumerator<TElement> EnumerateChildren<TElement>() where TElement : Element => new(this.child);
+
+    /// <inheritdoc/>
+    public Enumerator<TElement> EnumerateChildren<TElement>(Func<TElement, bool> match) where TElement : Element => new(this.child, match);
+
+    /// <inheritdoc/>
     public TElement? Find<TElement>(Func<TElement, bool> match)
         where TElement : Element
     {
@@ -338,14 +352,19 @@ public class ParentTag : Tag, IRoot, IParent, IEnumerable<Element>
         return null;
     }
 
+    /// <inheritdoc/>
     public Element? Find(Predicate<Element> match) => Find<Element>(el => match(el));
 
+    /// <inheritdoc/>
     public DescendantEnumerator<Element> FindAll(Predicate<Element> match) => new(this, el => match(el));
 
+    /// <inheritdoc/>
     public DescendantEnumerator<TElement> FindAll<TElement>(Func<TElement, bool> match) where TElement : Element => new(this, match);
 
+    /// <inheritdoc/>
     public DescendantEnumerator<TElement> FindAll<TElement>() where TElement : Element => new(this, default);
 
+    /// <inheritdoc/>
     public override string ToString()
     {
         if (this.child is null)
@@ -354,6 +373,7 @@ public class ParentTag : Tag, IRoot, IParent, IEnumerable<Element>
         return ToString(this);
     }
 
+    /// <inheritdoc/>
     public string ToString(string? format)
     {
         if (string.IsNullOrWhiteSpace(format))
