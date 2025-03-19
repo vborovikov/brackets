@@ -106,7 +106,7 @@ public class RootTests
     {
         var document = Document.Xml.Parse(XmlDocument);
         var children = new List<Element>();
-        var enumerator = document.EnumerateChildren();
+        var enumerator = document.Enumerate();
         while (enumerator.MoveNext())
         {
             children.Add(enumerator.Current);
@@ -120,7 +120,7 @@ public class RootTests
     {
         var document = Document.Html.Parse(HtmlDocument);
         var children = new List<Element>();
-        var enumerator = document.EnumerateChildren();
+        var enumerator = document.Enumerate();
         while (enumerator.MoveNext())
         {
             children.Add(enumerator.Current);
@@ -134,7 +134,7 @@ public class RootTests
     {
         var document = Document.Html.Parse(string.Empty);
         var children = new List<Element>();
-        var enumerator = document.EnumerateChildren();
+        var enumerator = document.Enumerate();
         while (enumerator.MoveNext())
         {
             children.Add(enumerator.Current);
@@ -150,7 +150,7 @@ public class RootTests
         Assert.IsNotNull(root);
 
         var children = new List<Element>();
-        var enumerator = root.EnumerateChildren(e => e is Tag { Name: "child2" });
+        var enumerator = root.Enumerate(e => e is Tag { Name: "child2" });
         while (enumerator.MoveNext())
         {
             children.Add(enumerator.Current);
@@ -167,7 +167,7 @@ public class RootTests
         Assert.IsNotNull(root);
 
         var children = new List<Element>();
-        var enumerator = root.EnumerateChildren(e => e is Tag { Name: "body" });
+        var enumerator = root.Enumerate(e => e is Tag { Name: "body" });
         while (enumerator.MoveNext())
         {
             children.Add(enumerator.Current);
@@ -181,7 +181,7 @@ public class RootTests
     {
         var document = Document.Xml.Parse(XmlDocument);
         var children = new List<Element>();
-        var enumerator = document.EnumerateChildren(e => e is Tag { Name: "nonexistent" });
+        var enumerator = document.Enumerate(e => e is Tag { Name: "nonexistent" });
         while (enumerator.MoveNext())
         {
             children.Add(enumerator.Current);
@@ -197,7 +197,7 @@ public class RootTests
         Assert.IsNotNull(root);
 
         var children = new List<Element>();
-        var enumerator = root.EnumerateChildren<Tag>();
+        var enumerator = root.Enumerate<Tag>();
         while (enumerator.MoveNext())
         {
             children.Add(enumerator.Current);
@@ -211,7 +211,7 @@ public class RootTests
     {
         var document = Document.Html.Parse(HtmlDocument);
         var children = new List<Element>();
-        var enumerator = document.EnumerateChildren<Tag>();
+        var enumerator = document.Enumerate<Tag>();
         while (enumerator.MoveNext())
         {
             children.Add(enumerator.Current);
@@ -225,7 +225,7 @@ public class RootTests
     {
         var document = Document.Xml.Parse(XmlDocument);
         var children = new List<Element>();
-        var enumerator = document.EnumerateChildren<Comment>();
+        var enumerator = document.Enumerate<Comment>();
         while (enumerator.MoveNext())
         {
             children.Add(enumerator.Current);
@@ -241,7 +241,7 @@ public class RootTests
         Assert.IsNotNull(root);
 
         var children = new List<Tag>();
-        var enumerator = root.EnumerateChildren<Tag>(e => e.Name == "child2");
+        var enumerator = root.Enumerate<Tag>(e => e.Name == "child2");
         while (enumerator.MoveNext())
         {
             children.Add(enumerator.Current);
@@ -258,7 +258,7 @@ public class RootTests
         Assert.IsNotNull(parent);
 
         var children = new List<Tag>();
-        var enumerator = parent.EnumerateChildren<Tag>(e => e.Name == "body");
+        var enumerator = parent.Enumerate<Tag>(e => e.Name == "body");
         while (enumerator.MoveNext())
         {
             children.Add(enumerator.Current);
@@ -272,7 +272,7 @@ public class RootTests
     {
         var document = Document.Xml.Parse(XmlDocument);
         var children = new List<Element>();
-        var enumerator = document.EnumerateChildren<Tag>(e => e.Name == "nonexistent");
+        var enumerator = document.Enumerate<Tag>(e => e.Name == "nonexistent");
         while (enumerator.MoveNext())
         {
             children.Add(enumerator.Current);

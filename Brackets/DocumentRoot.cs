@@ -20,32 +20,32 @@ namespace Brackets
         new Element.Enumerator GetEnumerator();
 
         /// <summary>
-        /// Returns an enumerator that iterates through the children elements in the root.
+        /// Returns an enumerator that iterates through the child elements in the root.
         /// </summary>
-        /// <returns>An <see cref="Element.Enumerator"/> that can be used to iterate through the children elements.</returns>
-        Element.Enumerator EnumerateChildren();
+        /// <returns>An <see cref="Element.Enumerator"/> that can be used to iterate through the child elements.</returns>
+        Element.Enumerator Enumerate();
 
         /// <summary>
-        /// Returns an enumerator that iterates through the children elements in the root that match the specified predicate.
+        /// Returns an enumerator that iterates through the child elements in the root that match the specified predicate.
         /// </summary>
         /// <param name="match">The predicate that defines the conditions of the child elements to include.</param>
         /// <returns>An <see cref="Element.Enumerator{TElement}"/> that can be used to iterate through the matching child elements.</returns>
-        Element.Enumerator<Element> EnumerateChildren(Predicate<Element> match);
+        Element.Enumerator<Element> Enumerate(Predicate<Element> match);
 
         /// <summary>
-        /// Returns an enumerator that iterates through the children elements of the specified type.
+        /// Returns an enumerator that iterates through the child elements of the specified type.
         /// </summary>
         /// <typeparam name="TElement">The type of child elements to include.</typeparam>
         /// <returns>An <see cref="Element.Enumerator{TElement}"/> that can be used to iterate through the matching child elements.</returns>
-        Element.Enumerator<TElement> EnumerateChildren<TElement>() where TElement : Element;
+        Element.Enumerator<TElement> Enumerate<TElement>() where TElement : Element;
 
         /// <summary>
-        /// Returns an enumerator that iterates through the children elements of the specified type that match the given predicate.
+        /// Returns an enumerator that iterates through the child elements of the specified type that match the given predicate.
         /// </summary>
         /// <typeparam name="TElement">The type of child elements to include.</typeparam>
         /// <param name="match">The predicate that defines the conditions of the child elements to include.</param>
         /// <returns>An <see cref="Element.Enumerator{TElement}"/> that can be used to iterate through the matching child elements.</returns>
-        Element.Enumerator<TElement> EnumerateChildren<TElement>(Func<TElement, bool> match) where TElement : Element;
+        Element.Enumerator<TElement> Enumerate<TElement>(Func<TElement, bool> match) where TElement : Element;
 
         /// <summary>
         /// Finds the first element that matches the specified predicate.

@@ -50,20 +50,20 @@
         object ICloneable.Clone() => Clone();
 
         /// <inheritdoc/>
-        public Element.Enumerator EnumerateChildren() =>
-            this.root.EnumerateChildren();
+        public Element.Enumerator Enumerate() =>
+            this.root.Enumerate();
 
         /// <inheritdoc/>
-        public Element.Enumerator<Element> EnumerateChildren(Predicate<Element> match) =>
-            this.root.EnumerateChildren(match);
+        public Element.Enumerator<Element> Enumerate(Predicate<Element> match) =>
+            this.root.Enumerate(match);
 
         /// <inheritdoc/>
-        public Element.Enumerator<TElement> EnumerateChildren<TElement>() where TElement : Element =>
-            this.root.EnumerateChildren<TElement>();
+        public Element.Enumerator<TElement> Enumerate<TElement>() where TElement : Element =>
+            this.root.Enumerate<TElement>();
 
         /// <inheritdoc/>
-        public Element.Enumerator<TElement> EnumerateChildren<TElement>(Func<TElement, bool> match) where TElement : Element =>
-            this.root.EnumerateChildren(match);
+        public Element.Enumerator<TElement> Enumerate<TElement>(Func<TElement, bool> match) where TElement : Element =>
+            this.root.Enumerate(match);
 
         /// <inheritdoc/>
         public Element? Find(Predicate<Element> match) =>

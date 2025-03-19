@@ -330,16 +330,16 @@ public class ParentTag : Tag, IRoot, IParent, IEnumerable<Element>
         ((IEnumerable<Element>)this).GetEnumerator();
 
     /// <inheritdoc/>
-    public Enumerator EnumerateChildren() => new(this.child);
+    public Enumerator Enumerate() => new(this.child);
 
     /// <inheritdoc/>
-    public Enumerator<Element> EnumerateChildren(Predicate<Element> match) => new(this.child, el => match(el));
+    public Enumerator<Element> Enumerate(Predicate<Element> match) => new(this.child, el => match(el));
 
     /// <inheritdoc/>
-    public Enumerator<TElement> EnumerateChildren<TElement>() where TElement : Element => new(this.child);
+    public Enumerator<TElement> Enumerate<TElement>() where TElement : Element => new(this.child);
 
     /// <inheritdoc/>
-    public Enumerator<TElement> EnumerateChildren<TElement>(Func<TElement, bool> match) where TElement : Element => new(this.child, match);
+    public Enumerator<TElement> Enumerate<TElement>(Func<TElement, bool> match) where TElement : Element => new(this.child, match);
 
     /// <inheritdoc/>
     public TElement? Find<TElement>(Func<TElement, bool> match)
