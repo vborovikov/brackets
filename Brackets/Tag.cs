@@ -44,6 +44,18 @@ public class Tag : Element
 
     public override string ToString() => this.reference.ToString(this);
 
+    /// <summary>
+    /// Determines whether the current tag is an ancestor of the specified element.
+    /// </summary>
+    /// <param name="element">The element to check for ancestry.</param>
+    /// <returns><c>true</c> if the current tag is an ancestor of the specified element; otherwise, <c>false</c>.</returns>
+    public bool IsAncestorOf(Element element)
+    {
+        ArgumentNullException.ThrowIfNull(element);
+
+        return element != this && element.IsDescendantOf(this);
+    }
+
     public new Tag Clone() => (Tag)CloneOverride();
 
     protected override Element CloneOverride()

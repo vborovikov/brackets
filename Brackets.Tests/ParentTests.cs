@@ -148,4 +148,105 @@ public class ParentTests
 
         Assert.AreEqual(0, root.Count());
     }
+
+    [TestMethod]
+    public void IsDescendantOf_DirectChild_ReturnsTrue()
+    {
+        var document = Document.Html.Parse("<div><p>Hello</p></div>"); // Placeholder - replace with your parsing method
+
+        var div = document.First<ParentTag>();
+        var p = div.First<ParentTag>();
+
+        Assert.IsTrue(p.IsDescendantOf(div));
+    }
+
+    [TestMethod]
+    public void IsDescendantOf_Grandchild_ReturnsTrue()
+    {
+        var document = Document.Html.Parse("<div><section><p>Hello</p></section></div>");
+
+        var div = document.First<ParentTag>();
+        var p = div.Find<ParentTag>(t => t.Name == "p");
+
+        Assert.IsNotNull(p);
+        Assert.IsTrue(p.IsDescendantOf(div));
+    }
+
+    [TestMethod]
+    public void IsDescendantOf_NotDescendant_ReturnsFalse()
+    {
+        var document = Document.Html.Parse("<div><p>Hello</p></div><span>World</span>");
+
+        var div = document.First<ParentTag>(t => t.Name == "div");
+        var span = document.First<ParentTag>(t => t.Name == "span");
+
+        Assert.IsFalse(span.IsDescendantOf(div));
+    }
+
+    [TestMethod]
+    public void IsDescendantOf_NullTag_ThrowsException()
+    {
+        var document = Document.Html.Parse("<p></p>");
+        var p = document.First<ParentTag>();
+        Assert.ThrowsException<ArgumentNullException>(() => p.IsDescendantOf(default));
+    }
+
+    [TestMethod]
+    public void IsDescendantOf_Self_ReturnsFalse()
+    {
+        var document = Document.Html.Parse("<p></p>");
+        var p = document.First<ParentTag>();
+        Assert.IsFalse(p.IsDescendantOf(p));
+    }
+
+    [TestMethod]
+    public void IsAncestorOf_DirectChild_ReturnsTrue()
+    {
+        var document = Document.Html.Parse("<div><p>Hello</p></div>");
+
+        var div = document.First<ParentTag>();
+        var p = div.First<ParentTag>();
+
+        Assert.IsTrue(div.IsAncestorOf(p));
+    }
+
+    [TestMethod]
+    public void IsAncestorOf_Grandchild_ReturnsTrue()
+    {
+        var document = Document.Html.Parse("<div><section><p>Hello</p></section></div>");
+
+        var div = document.First<ParentTag>();
+        var p = div.Find<ParentTag>(t => t.Name == "p");
+
+        Assert.IsTrue(div.IsAncestorOf(p));
+    }
+
+    [TestMethod]
+    public void IsAncestorOf_NotAncestor_ReturnsFalse()
+    {
+        var document = Document.Html.Parse("<div><p>Hello</p></div><span>World</span>");
+
+        var div = document.First<ParentTag>(t => t.Name == "div");
+        var span = document.First<ParentTag>(t => t.Name == "span");
+
+        Assert.IsFalse(div.IsAncestorOf(span));
+    }
+
+    [TestMethod]
+    public void IsAncestorOf_NullElement_ThrowsException()
+    {
+        var document = Document.Html.Parse("<div></div>");
+        var div = document.First<ParentTag>();
+
+        Assert.ThrowsException<ArgumentNullException>(() => div.IsAncestorOf(default));
+    }
+
+    [TestMethod]
+    public void IsAncestorOf_Self_ReturnsFalse()
+    {
+        var document = Document.Html.Parse("<div></div>");
+        var div = document.First<ParentTag>();
+
+        Assert.IsFalse(div.IsAncestorOf(div));
+    }
 }

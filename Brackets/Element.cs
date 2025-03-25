@@ -58,6 +58,26 @@
 
         public override string ToString() => string.Empty;
 
+        /// <summary>
+        /// Determines whether the current element is a descendant of the specified tag.
+        /// </summary>
+        /// <param name="tag">The tag to check for ancestry.</param>
+        /// <returns><c>true</c> if the current element is a descendant of the specified tag; otherwise, <c>false</c>.</returns>
+        public bool IsDescendantOf(Tag tag)
+        {
+            ArgumentNullException.ThrowIfNull(tag);
+
+            if (tag == this) return false;
+
+            for (var ancestor = this.parent; ancestor is not null; ancestor = ancestor.parent)
+            {
+                if (ancestor == tag)
+                    return true;
+            }
+
+            return false;
+        }
+
         public Element Clone() => CloneOverride();
 
         protected abstract Element CloneOverride();
