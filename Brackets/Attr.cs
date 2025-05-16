@@ -88,7 +88,7 @@ namespace Brackets
                 if (this.current == this.last)
                     return false;
 
-                if (this.current is null || this.current.Parent is null)
+                if (this.current is null || this.current.Parent is null || this.current.Parent != this.last?.Parent)
                 {
                     // the enumeration has been reset or the attribute has been removed,
                     // in both cases we have to start from the beginning

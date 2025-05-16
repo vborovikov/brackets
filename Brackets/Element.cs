@@ -303,7 +303,7 @@
                 if (this.current == this.last)
                     return false;
 
-                if (this.current is null || this.current.parent is null)
+                if (this.current is null || this.current.parent is null || this.current.parent != this.last?.parent)
                 {
                     // the enumeration has been reset or the element has been removed,
                     // in both cases we have to start from the beginning
@@ -367,7 +367,7 @@
                     if (this.current == this.last)
                         return false;
 
-                    if (this.current is null || this.current.parent is null)
+                    if (this.current is null || this.current.parent is null || this.current.parent != this.last?.parent)
                     {
                         // the enumeration has been reset or the element has been removed,
                         // in both cases we have to start from the beginning

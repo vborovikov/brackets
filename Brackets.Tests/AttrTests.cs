@@ -1,5 +1,7 @@
 ﻿namespace Brackets.Tests;
 
+using System;
+
 [TestClass]
 public class AttrTests
 {
@@ -80,6 +82,20 @@ public class AttrTests
         foreach (var item in element.EnumerateAttributes())
         {
             element.RemoveAttribute(item);
+        }
+        Assert.AreEqual(0, element.Attributes.Count());
+    }
+
+    [TestMethod]
+    public void EnumerateAttributes_RemoveAndAddOnEachIteration_AttributesEnumerated()
+    {
+        var document = Document.Html.Parse("<div data-name1='value1' data-name2='value2' data-name3='value3'></div>");
+        var newTag = (ParentTag)Document.Html.CreateTag("div");
+        var element = document.First() as ParentTag;
+        foreach (var attribute in element.EnumerateAttributes())
+        {
+            element.RemoveAttribute(attribute);
+            newTag.AddAttribute(attribute);
         }
         Assert.AreEqual(0, element.Attributes.Count());
     }
